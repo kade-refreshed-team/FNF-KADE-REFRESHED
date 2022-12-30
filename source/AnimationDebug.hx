@@ -1,5 +1,7 @@
 package;
 
+import flixel.addons.ui.FlxUIInputText;
+import flixel.ui.FlxButton;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -36,8 +38,24 @@ class AnimationDebug extends FlxState
 		FlxG.sound.music.stop();
 
 		var gridBG:FlxSprite = FlxGridOverlay.create(10, 10);
-		gridBG.scrollFactor.set(0.5, 0.5);
+		gridBG.scrollFactor.set(0, 0);
 		add(gridBG);
+
+		var addanimtext = new FlxUIInputText(10, 10, 70, 'idle', 8);
+		add(addanimtext);
+
+		var addanimbutton:FlxButton = new FlxButton(addanimtext.x, 20, "Reload Audio", function()
+		{
+			animList.push(addanimtext.text);
+			updateTexts();
+			dad.animation.add(addanimtext.text, null);
+		});
+		add(addanimbutton);
+
+		var shadow:Character = new Character(0, 0, daAnim);
+		shadow.screenCenter();
+		shadow.debugMode = true;
+		add(shadow);
 
 		if (daAnim == 'bf')
 			isDad = false;

@@ -538,6 +538,30 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				hpcolor = 0xFFAF66CE;
+
+			case 'RG':
+				// DAD ANIMATION LOADING CODE
+				tex = Paths.getSparrowAtlas('characters/RG', 'shared');
+				frames = tex;
+				animation.addByPrefix('idle', 'RG idle', 24);
+				animation.addByPrefix('singUP', 'RG up', 24);
+				animation.addByPrefix('singRIGHT', 'RG right', 24);
+				animation.addByPrefix('singDOWN', 'RG down', 24);
+				animation.addByPrefix('singLEFT', 'RG left', 24);
+
+				addOffset('idle');
+				addOffset("singUP", -6, 54);
+				addOffset("singRIGHT", 0, -53);
+				addOffset("singLEFT", 186, 20);
+				addOffset("singDOWN", 30, -249);
+
+				playAnim('idle');
+
+				scale.set(0.4, 0.4);
+
+				setPosition(-187.6, 32);
+
+				hpcolor = 0xFF990000;
 		}
 
 		dance();
@@ -580,7 +604,6 @@ class Character extends FlxSprite
 				dadVar = 6.1;
 			if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
 			{
-				trace('dance');
 				dance();
 				holdTimer = 0;
 			}
