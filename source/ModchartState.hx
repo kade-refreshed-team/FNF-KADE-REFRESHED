@@ -129,7 +129,7 @@ class ModchartState
 
 
 	private function convert(v : Any, type : String) : Dynamic { // I didn't write this lol
-		if( Std.is(v, String) && type != null ) {
+		if(type != null ) {
 		var v : String = v;
 		if( type.substr(0, 4) == 'array' ) {
 			if( type.substr(4) == 'float' ) {

@@ -23,7 +23,6 @@
 	 - `haxelib install flixel-addons`
 	 - `haxelib install flixel-ui`
 	 - `haxelib install hscript`
-	 - `haxelib install newgrounds`
 	 - `haxelib install linc_luajit`
 	 - `haxelib git faxe https://github.com/uhrobots/faxe`
 	 - `haxelib git polymod https://github.com/larsiusprime/polymod.git`
