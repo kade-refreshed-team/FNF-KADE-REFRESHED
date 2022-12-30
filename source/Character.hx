@@ -16,6 +16,7 @@ class Character extends FlxSprite
 	public var curCharacter:String = 'bf';
 
 	public var holdTimer:Float = 0;
+	public var hpcolor:FlxColor;
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
@@ -62,6 +63,8 @@ class Character extends FlxSprite
 
 				playAnim('danceRight');
 
+				hpcolor = 0xFFA5004D;
+
 			case 'gf-christmas':
 				tex = Paths.getSparrowAtlas('characters/gfChristmas');
 				frames = tex;
@@ -93,6 +96,8 @@ class Character extends FlxSprite
 
 				playAnim('danceRight');
 
+				hpcolor = 0xFFA5004D;
+
 			case 'gf-car':
 				tex = Paths.getSparrowAtlas('characters/gfCar');
 				frames = tex;
@@ -105,6 +110,8 @@ class Character extends FlxSprite
 				addOffset('danceRight', 0);
 
 				playAnim('danceRight');
+
+				hpcolor = 0xFFA5004D;
 
 			case 'gf-pixel':
 				tex = Paths.getSparrowAtlas('characters/gfPixel');
@@ -121,6 +128,8 @@ class Character extends FlxSprite
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
 				antialiasing = false;
+
+				hpcolor = 0xFFA5004D;
 
 			case 'dad':
 				// DAD ANIMATION LOADING CODE
@@ -139,6 +148,8 @@ class Character extends FlxSprite
 				addOffset("singDOWN", 0, -30);
 
 				playAnim('idle');
+
+				hpcolor = 0xFFAF66CE;
 			case 'spooky':
 				tex = Paths.getSparrowAtlas('characters/spooky_kids_assets');
 				frames = tex;
@@ -158,6 +169,8 @@ class Character extends FlxSprite
 				addOffset("singDOWN", -50, -130);
 
 				playAnim('danceRight');
+
+				hpcolor = 0xFFD57E00;
 			case 'mom':
 				tex = Paths.getSparrowAtlas('characters/Mom_Assets');
 				frames = tex;
@@ -178,6 +191,8 @@ class Character extends FlxSprite
 
 				playAnim('idle');
 
+				hpcolor = 0xFFD8558E;
+
 			case 'mom-car':
 				tex = Paths.getSparrowAtlas('characters/momCar');
 				frames = tex;
@@ -197,6 +212,8 @@ class Character extends FlxSprite
 				addOffset("singDOWN", 20, -160);
 
 				playAnim('idle');
+
+				hpcolor = 0xFFD8558E;
 			case 'monster':
 				tex = Paths.getSparrowAtlas('characters/Monster_Assets');
 				frames = tex;
@@ -212,6 +229,8 @@ class Character extends FlxSprite
 				addOffset("singLEFT", -30);
 				addOffset("singDOWN", -30, -40);
 				playAnim('idle');
+
+				hpcolor = 0xFFF3FF6E;
 			case 'monster-christmas':
 				tex = Paths.getSparrowAtlas('characters/monsterChristmas');
 				frames = tex;
@@ -227,6 +246,8 @@ class Character extends FlxSprite
 				addOffset("singLEFT", -30);
 				addOffset("singDOWN", -40, -94);
 				playAnim('idle');
+
+				hpcolor = 0xFFF3FF6E;
 			case 'pico':
 				tex = Paths.getSparrowAtlas('characters/Pico_FNF_assetss');
 				frames = tex;
@@ -265,6 +286,8 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				flipX = true;
+
+				hpcolor = 0xFFB7D855;
 
 			case 'bf':
 				var tex = Paths.getSparrowAtlas('characters/BOYFRIEND', 'shared');
@@ -308,6 +331,8 @@ class Character extends FlxSprite
 
 				flipX = true;
 
+				hpcolor = 0xFF31B0D1;
+
 			case 'bf-christmas':
 				var tex = Paths.getSparrowAtlas('characters/bfChristmas');
 				frames = tex;
@@ -336,6 +361,8 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				flipX = true;
+
+				hpcolor = 0xFF31B0D1;
 			case 'bf-car':
 				var tex = Paths.getSparrowAtlas('characters/bfCar');
 				frames = tex;
@@ -361,6 +388,8 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				flipX = true;
+
+				hpcolor = 0xFF31B0D1;
 			case 'bf-pixel':
 				frames = Paths.getSparrowAtlas('characters/bfPixel');
 				animation.addByPrefix('idle', 'BF IDLE', 24, false);
@@ -394,6 +423,8 @@ class Character extends FlxSprite
 				antialiasing = false;
 
 				flipX = true;
+
+				hpcolor = 0xFF7BD6F6;
 			case 'bf-pixel-dead':
 				frames = Paths.getSparrowAtlas('characters/bfPixelsDEAD');
 				animation.addByPrefix('singUP', "BF Dies pixel", 24, false);
@@ -432,6 +463,8 @@ class Character extends FlxSprite
 				updateHitbox();
 
 				antialiasing = false;
+
+				hpcolor = 0xFFFFAA6F;
 			case 'senpai-angry':
 				frames = Paths.getSparrowAtlas('characters/senpai');
 				animation.addByPrefix('idle', 'Angry Senpai Idle', 24, false);
@@ -451,6 +484,8 @@ class Character extends FlxSprite
 				updateHitbox();
 
 				antialiasing = false;
+
+				hpcolor = 0xFFFFAA6F;
 
 			case 'spirit':
 				frames = Paths.getPackerAtlas('characters/spirit');
@@ -472,6 +507,8 @@ class Character extends FlxSprite
 				playAnim('idle');
 
 				antialiasing = false;
+
+				hpcolor = 0xFFFF3C6E;
 
 			case 'parents-christmas':
 				frames = Paths.getSparrowAtlas('characters/mom_dad_christmas_assets');
@@ -498,6 +535,8 @@ class Character extends FlxSprite
 				addOffset("singDOWN-alt", -30, -27);
 
 				playAnim('idle');
+
+				hpcolor = 0xFFAF66CE;
 		}
 
 		dance();
@@ -623,7 +662,7 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	public static function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		animation.play(AnimName, Force, Reversed, Frame);
 
