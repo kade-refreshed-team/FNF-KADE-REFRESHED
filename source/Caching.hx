@@ -12,8 +12,10 @@ class Caching extends MusicBeatState
 {
     var toBeDone = 0;
     var done = 0;
+    var lines:Int = 1;
 
     var text:FlxText;
+    var cacheList:FlxText;
     var kadeLogo:FlxSprite;
 
 	override function create()
@@ -35,6 +37,10 @@ class Caching extends MusicBeatState
         text.alignment = FlxTextAlign.CENTER;
         text.alpha = 0;
 
+        cacheList =  new FlxText(FlxG.width - 425, 5, 420, "Starting Cache...\n");
+        cacheList.size = 12;
+        cacheList.alignment = "right";
+
         kadeLogo = new FlxSprite(FlxG.width / 2, FlxG.height / 2).loadGraphic(Paths.image('KadeEngineLogo'));
         kadeLogo.x -= kadeLogo.width / 2;
         kadeLogo.y -= kadeLogo.height / 2 + 100;
@@ -46,13 +52,9 @@ class Caching extends MusicBeatState
 
         add(kadeLogo);
         add(text);
-
-        trace('starting caching..');
+        add(cacheList);
         
-        sys.thread.Thread.create(() -> {
-            cache();
-        });
-
+        sys.thread.Thread.create(cache);
 
         super.create();
     }
@@ -61,7 +63,6 @@ class Caching extends MusicBeatState
 
     override function update(elapsed) 
     {
-
         if (toBeDone != 0 && done != toBeDone)
         {
             var alpha = HelperFunctions.truncateFloat(done / toBeDone * 100,2) / 100;
@@ -80,45 +81,43 @@ class Caching extends MusicBeatState
         var images = [];
         var music = [];
 
-        trace("caching images...");
-
-        for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/shared/images/characters")))
-        {
-            if (!i.endsWith(".png"))
-                continue;
-            images.push(i);
-        }
-
-        trace("caching music...");
-
-        for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs")))
-        {
-            music.push(i);
-        }
+        images = [for (i in FileSystem.readDirectory(FileSystem.absolutePath("assets/shared/images/characters")))
+            if (i.endsWith(".png"))
+                i
+        ];
+        music = FileSystem.readDirectory(FileSystem.absolutePath("assets/songs"));
 
         toBeDone = Lambda.count(images) + Lambda.count(music);
 
-        trace("LOADING: " + toBeDone + " OBJECTS.");
-
-        for (i in images)
-        {
-            var replaced = i.replace(".png","");
+        for (i in images) {
+            var replaced:String = i.substr(0, i.length - 4);
             FlxG.bitmap.add(Paths.image("characters/" + replaced,"shared"));
-            trace("cached " + replaced);
+            addLine(replaced);
             done++;
         }
 
-        for (i in music)
-        {
+        for (i in music) {
             FlxG.sound.cache(Paths.inst(i));
             FlxG.sound.cache(Paths.voices(i));
-            trace("cached " + i);
+            addLine(i);
             done++;
         }
 
-        trace("Finished caching...");
+        cacheList.text = "Finished Caching. Enjoy!";
 
         FlxG.switchState(new TitleState());
+    }
+
+    function addLine(name:String) {
+        cacheList.text += 'Cached File: $name\n';
+        lines++;
+        done++;
+        if (lines > 30) {
+            var splitList = cacheList.text.split("\n");
+            var toSplice = lines - 30;
+            splitList = splitList.splice(0, toSplice);
+            cacheList.text = splitList.join("\n");
+        }
     }
 
 }
