@@ -3,33 +3,24 @@ package;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 
-class CharacterSetting
-{
-	public var x(default, null):Int;
-	public var y(default, null):Int;
-	public var scale(default, null):Float;
-	public var flipped(default, null):Bool;
-
-	public function new(x:Int = 0, y:Int = 0, scale:Float = 1.0, flipped:Bool = false)
-	{
-		this.x = x;
-		this.y = y;
-		this.scale = scale;
-		this.flipped = flipped;
-	}
+typedef CharacterSetting = {
+	var x:Int;
+	var y:Int;
+	var scale:Float;
+	var flipped:Bool;
 }
 
 class MenuCharacter extends FlxSprite
 {
 	private static var settings:Map<String, CharacterSetting> = [
-		'bf' => new CharacterSetting(0, -20, 1.0, true),
-		'gf' => new CharacterSetting(50, 80, 1.5, true),
-		'dad' => new CharacterSetting(-15, 130),
-		'spooky' => new CharacterSetting(20, 30),
-		'pico' => new CharacterSetting(0, 0, 1.0, true),
-		'mom' => new CharacterSetting(-30, 140, 0.85),
-		'parents-christmas' => new CharacterSetting(100, 130, 1.8),
-		'senpai' => new CharacterSetting(-40, -45, 1.4)
+		'bf' =>     {x: 0, y: -20, scale: 1, flipped: true},
+		'gf' =>     {x: 50, y: 80, scale: 1.5, flipped: true},
+		'dad' =>    {x: -15, y: 130, scale: 1, flipped: false},
+		'spooky' => {x: 20, y: 30, scale: 1, flipped: false},
+		'pico' =>   {x: 0, y: 0, scale: 1, flipped: true},
+		'mom' =>    {x: -30, y: 140, scale: 0.85, flipped: false},
+		'parents-christmas' => {x: 100, y: 130, scale: 1, flipped: false},
+		'senpai' => {x: 40, y: -45, scale: 1.4, flipped: false},
 	];
 
 	private var flipped:Bool = false;
@@ -41,7 +32,7 @@ class MenuCharacter extends FlxSprite
 
 		antialiasing = true;
 
-		frames = Paths.getSparrowAtlas('campaign_menu_UI_characters');
+		frames = Paths.getSparrowAtlas('menu-side/storymenu/campaign_menu_UI_characters');
 
 		animation.addByPrefix('bf', "BF idle dance white", 24);
 		animation.addByPrefix('bfConfirm', 'BF HEY!!', 24, false);

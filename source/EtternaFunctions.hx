@@ -1,3 +1,5 @@
+import funkin.PlayState;
+
 class EtternaFunctions
 {
     // erf constants
@@ -43,11 +45,9 @@ class EtternaFunctions
             var notes:Int = 0;
             for (i in 0...PlayState.SONG.notes.length) 
             {
-                trace(PlayState.SONG.notes[i]);
                 for (ii in 0...PlayState.SONG.notes[i].sectionNotes.length)
                 {
                     var n = PlayState.SONG.notes[i].sectionNotes[ii];
-                    trace(n);
                     if (n[1] > 0)
                         notes++;
                 }
@@ -71,14 +71,19 @@ class EtternaFunctions
         var power = 2.5;
         var dev = 22.7 * (Math.pow(ts,ts_pow));
     
-        if (maxms <= ridic) // anything below this (judge scaled) threshold is counted as full pts
-            return max_points;
-        else if (maxms <= zero) // ma/pa region, exponential
-                return max_points * erf((zero - maxms) / dev);
-        else if (maxms <= max_boo_weight)// cb region, linear
-            return (maxms - zero) * miss_weight / (max_boo_weight - zero);
-        else
-            return miss_weight;
+        var boolIndex:Int = [
+            (maxms <= ridic), // anything below this (judge scaled) threshold is counted as full pts
+            (maxms <= zero), // ma/pa region, exponential
+            (maxms <= max_boo_weight), // cb region, linear
+            true,
+        ].indexOf(true);
+        var results = [
+            max_points,
+            (max_points * erf((zero - maxms) / dev)),
+            ((maxms - zero) * miss_weight / (max_boo_weight - zero)),
+            miss_weight
+        ];
+        return results[boolIndex];
     }
 
 }

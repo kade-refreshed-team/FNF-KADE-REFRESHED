@@ -1,3 +1,5 @@
+package;
+
 // this file is for modchart things, this is to declutter playstate.hx
 
 // Lua
@@ -20,6 +22,11 @@ import llua.LuaL;
 import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
+
+import base.Conductor;
+import funkin.PlayState;
+import funkin.Character;
+import funkin.Boyfriend;
 
 class ModchartState 
 {
@@ -47,7 +54,7 @@ class ModchartState
 				{
 					Application.current.window.alert("LUA ERROR:\n" + p + "\nhaxe things: " + e,"Kade Engine Modcharts");
 					lua = null;
-					LoadingState.loadAndSwitchState(new MainMenuState());
+					menus.LoadingState.loadAndSwitchState(new menus.MainMenuState());
 				}
 			// trace('err: ' + e);
 		}
@@ -223,7 +230,7 @@ class ModchartState
 		{
 			if (Std.parseInt(id) == null)
 				return Reflect.getProperty(PlayState.instance,id);
-			return PlayState.PlayState.strumLineNotes.members[Std.parseInt(id)];
+			return PlayState.strumLineNotes.members[Std.parseInt(id)];
 		}
 		return luaSprites.get(id);
 	}
@@ -367,13 +374,13 @@ class ModchartState
 					case 'philly-nice': songLowercase = 'philly';
 				}
 
-				var result = LuaL.dofile(lua, Paths.lua(songLowercase + "/modchart")); // execute le file
+				var result = LuaL.dofile(lua, Paths.songFile("modchart.lua", songLowercase)); // execute le file
 	
 				if (result != 0)
 				{
 					Application.current.window.alert("LUA COMPILE ERROR:\n" + Lua.tostring(lua,result),"Kade Engine Modcharts");
 					lua = null;
-					LoadingState.loadAndSwitchState(new MainMenuState());
+					menus.LoadingState.loadAndSwitchState(new menus.MainMenuState());
 				}
 
 				// get some fukin globals up in here bois

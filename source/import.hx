@@ -1,1 +1,1 @@
-import Paths;
+import utils.Paths;
