@@ -22,7 +22,6 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: script run line haha
         run: |
-          mkdir "%HAXELIB_ROOT%"
           haxelib setup "%HAXELIB_ROOT%"
           haxelib install lime 7.9.0
           haxelib install openfl
@@ -42,7 +41,7 @@ jobs:
           haxelib git linc_luajit https://github.com/nebulazorua/linc_luajit.git
           haxelib install actuate 
           haxelib list
-          
+
       - name: complie game for twenty fucking minutes
         run: |
           haxelib run lime build windows

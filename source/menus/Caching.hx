@@ -27,6 +27,7 @@ class Caching extends base.MusicBeatState
         #if polymod
         polymod.Polymod.init({
             modRoot: "./mods/",
+            dirs: []
            });
 
         polymod.Polymod.scan('./mods/');
