@@ -109,8 +109,6 @@ class PlayState extends MusicBeatState
 
 	private var vocals:FlxSound;
 
-	public var originalX:Float;
-
 	public static var dad:Character;
 	public static var gf:Character;
 	public static var boyfriend:Boyfriend;
@@ -178,7 +176,6 @@ class PlayState extends MusicBeatState
 	var limo:FlxSprite;
 	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
 	var fastCar:FlxSprite;
-	var songName:FlxText;
 	var upperBoppers:FlxSprite;
 	var bottomBoppers:FlxSprite;
 	var santa:FlxSprite;
@@ -276,15 +273,7 @@ class PlayState extends MusicBeatState
 		executeModchart = false; // FORCE disable for non cpp targets
 		#end
 
-		switch (storyDifficulty)
-		{
-			case 0:
-				storyDifficultyText = "Easy";
-			case 1:
-				storyDifficultyText = "Normal";
-			case 2:
-				storyDifficultyText = "Hard";
-		}
+		storyDifficultyText = Highscore.diffArray[storyDifficulty].toUpperCase();
 
 		iconRPC = SONG.player2;
 
@@ -358,7 +347,7 @@ class PlayState extends MusicBeatState
 					"Only then I will even CONSIDER letting you\ndate my daughter!"
 				];
 			case 'senpai' | 'roses' | 'thorns':
-				dialogue = CoolUtil.coolTextFile(Paths.songFile('${songLowercase}Dialogue', songLowercase));
+				dialogue = CoolUtil.coolTextFile(Paths.songFile('${songLowercase}Dialogue.txt', songLowercase));
 		}
 
 		//defaults if no stage was found in chart
@@ -787,70 +776,40 @@ class PlayState extends MusicBeatState
 
 		var camPos:FlxPoint = new FlxPoint(dad.getGraphicMidpoint().x, dad.getGraphicMidpoint().y);
 
-		switch (SONG.player2)
-		{
-			case 'gf':
-				dad.setPosition(gf.x, gf.y);
-				gf.visible = false;
-				if (isStoryMode)
-				{
-					camPos.x += 600;
-					tweenCamIn();
-				}
-
-			case "spooky":
-				dad.y += 200;
-			case "monster":
-				dad.y += 100;
-			case 'monster-christmas':
-				dad.y += 130;
-			case 'dad':
-				camPos.x += 400;
-			case 'pico':
+		if (dad.data.commonSide == "gf") {
+			dad.regX = gf.regX;
+			dad.regY = gf.regY;
+			gf.visible = false;
+			if (isStoryMode)
+			{
 				camPos.x += 600;
-				dad.y += 300;
-			case 'parents-christmas':
-				dad.x -= 500;
-			case 'senpai':
-				dad.x += 150;
-				dad.y += 360;
-				camPos.set(dad.getGraphicMidpoint().x + 300, dad.getGraphicMidpoint().y);
-			case 'senpai-angry':
-				dad.x += 150;
-				dad.y += 360;
-				camPos.set(dad.getGraphicMidpoint().x + 300, dad.getGraphicMidpoint().y);
-			case 'spirit':
-				dad.x -= 150;
-				dad.y += 100;
-				camPos.set(dad.getGraphicMidpoint().x + 300, dad.getGraphicMidpoint().y);
+				tweenCamIn();
+			}
 		}
-
-
-		
-		boyfriend = new Boyfriend(770, 450, SONG.player1);
+		boyfriend = new Boyfriend(770, 100, SONG.player1);
 
 		// REPOSITIONING PER STAGE
 		switch (curStage)
 		{
 			case 'limo':
-				boyfriend.y -= 220;
-				boyfriend.x += 260;
+				boyfriend.regY -= 220;
+				boyfriend.regX += 260;
 				if(FlxG.save.data.distractions){
 					resetFastCar();
 					add(fastCar);
 				}
 
 			case 'mall':
-				boyfriend.x += 200;
+				boyfriend.regX += 200;
 
 			case 'mallEvil':
-				boyfriend.x += 320;
-				dad.y -= 80;
+				boyfriend.regX += 320;
+				dad.regY -= 80;
 			case 'school':
-				boyfriend.x += 200;
-				boyfriend.y += 220;
-				gf.x += 180;
-				gf.y += 300;
+				boyfriend.regX += 200;
+				boyfriend.regY += 220;
+				gf.regX += 180;
+				gf.regY += 300;
 			case 'schoolEvil':
 				if(FlxG.save.data.distractions){
 				// trailArea.scrollFactor.set();
@@ -862,10 +821,10 @@ class PlayState extends MusicBeatState
 				}
 
 
-				boyfriend.x += 200;
-				boyfriend.y += 220;
-				gf.x += 180;
-				gf.y += 300;
+				boyfriend.regX += 200;
+				boyfriend.regY += 220;
+				gf.regX += 180;
+				gf.regY += 300;
 		}
 
 		add(gf);
@@ -956,12 +915,11 @@ class PlayState extends MusicBeatState
 				songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
 				add(songPosBar);
 	
-				var songName = new FlxText(songPosBG.x + (songPosBG.width / 2) - 20,songPosBG.y,0,SONG.song, 16);
-				if (PlayStateChangeables.useDownscroll)
-					songName.y -= 3;
-				songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+				var songName = new FlxText(songPosBar.x, songPosBG.y + songPosBG.height / 2, songPosBar.barWidth, '${SONG.song} - [$storyDifficultyText]', 16);
+				songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 				songName.scrollFactor.set();
 				add(songName);
+				songName.y -= songName.height / 2;
 				songName.cameras = [camHUD];
 			}
 
@@ -980,26 +938,19 @@ class PlayState extends MusicBeatState
 		add(healthBar);
 
 		// Add Kade Engine watermark
-		kadeEngineWatermark = new FlxText(4,healthBarBG.y + 50,0,SONG.song + " " + (storyDifficulty == 2 ? "Hard" : storyDifficulty == 1 ? "Normal" : "Easy") + (Main.watermarks ? " - KE " + MainMenuState.kadeEngineVer : ""), 16);
-		kadeEngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
+		kadeEngineWatermark = new FlxText(5, FlxG.height - 5, 0, (Main.watermarks ? '- RG Engine v${MainMenuState.kadeEngineVer}' : ""), 16);
+		kadeEngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
 		kadeEngineWatermark.scrollFactor.set();
 		add(kadeEngineWatermark);
+		kadeEngineWatermark.y -= kadeEngineWatermark.height;
 
 		if (PlayStateChangeables.useDownscroll)
 			kadeEngineWatermark.y = FlxG.height * 0.9 + 45;
 
-		scoreTxt = new FlxText(FlxG.width / 2 - 235, healthBarBG.y + 50, 0, "", 20);
-
+		scoreTxt = new FlxText(0, healthBarBG.y + 40, FlxG.width, "", 20);
 		scoreTxt.screenCenter(X);
-
-		originalX = scoreTxt.x;
-
-
 		scoreTxt.scrollFactor.set();
-		
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
-
-		add(scoreTxt);
 
 		replayTxt = new FlxText(healthBarBG.x + healthBarBG.width / 2 - 75, healthBarBG.y + (PlayStateChangeables.useDownscroll ? 100 : -100), 0, "REPLAY", 20);
 		replayTxt.setFormat(Paths.font("vcr.ttf"), 42, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE,FlxColor.BLACK);
@@ -1025,6 +976,8 @@ class PlayState extends MusicBeatState
 		iconP2 = new HealthIcon(SONG.player2, false);
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		add(iconP2);
+
+		add(scoreTxt);
 
 		strumLineNotes.cameras = [camHUD];
 		notes.cameras = [camHUD];
@@ -1414,7 +1367,9 @@ class PlayState extends MusicBeatState
 					case 'philly-nice': songLowercase = 'philly';
 				}
 
-			var songPath = 'assets/songs/' + songLowercase + '/';
+			var daDiff = storyDifficultyText.toLowerCase();
+			var songPath = Assets.getPath('assets/songs/$songLowercase/$daDiff.json');
+			songPath = songPath.substr(0, songPath.length - 5 - daDiff.length);
 			
 			for(file in sys.FileSystem.readDirectory(songPath))
 			{
@@ -1860,8 +1815,6 @@ class PlayState extends MusicBeatState
 		scoreTxt.text = Ratings.CalculateRanking(songScore,songScoreDef,nps,maxNPS,accuracy);
 
 		var lengthInPx = scoreTxt.textField.length * scoreTxt.frameHeight; // bad way but does more or less a better job
-
-		scoreTxt.x = (originalX - (lengthInPx / 2)) + 335;
 
 		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
 		{
@@ -2574,15 +2527,14 @@ class PlayState extends MusicBeatState
 					}
 					#end
 
-					// if ()
-					StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
+					//StoryMenuState.weekUnlocked[Std.int(Math.min(storyWeek + 1, StoryMenuState.weekUnlocked.length - 1))] = true;
 
 					if (SONG.validScore)
 					{
 						Highscore.saveWeekScore(storyWeek, campaignScore, storyDifficulty);
 					}
 
-					FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
+					//FlxG.save.data.weekUnlocked = StoryMenuState.weekUnlocked;
 					FlxG.save.flush();
 				}
 				else
@@ -2616,7 +2568,7 @@ class PlayState extends MusicBeatState
 					prevCamFollow = camFollow;
 
 
-					PlayState.SONG = Song.loadFromJson(Highscore.diffArray[storyDifficulty].toLowerCase(), PlayState.storyPlaylist[0]);
+					PlayState.SONG = Song.loadFromJson(storyDifficultyText.toLowerCase(), PlayState.storyPlaylist[0]);
 					FlxG.sound.music.stop();
 
 					LoadingState.loadAndSwitchState(new PlayState());

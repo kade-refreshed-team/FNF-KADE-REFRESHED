@@ -1,0 +1,34 @@
+{
+  "asset": "characters/picoSpeaker",
+  "iconAsset": "pico",
+  "barColor": "#B7D855",
+  "commonSide": "dad",
+  "offsets": {
+    "x": 120,
+    "y": -125,
+    "camX": -310,
+    "camY": 100
+  },
+  "animations": [
+    {
+      "name": "shoot1",
+      "prefix": "Pico shoot 1",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "shoot2",
+      "prefix": "Pico shoot 2",
+      "offsets": [-1, -128]
+    },
+    {
+      "name": "shoot3",
+      "prefix": "Pico shoot 3",
+      "offsets": [412, -64]
+    },
+    {
+      "name": "shoot4",
+      "prefix": "Pico shoot 4",
+      "offsets": [439, -19]
+    }
+  ]
+}

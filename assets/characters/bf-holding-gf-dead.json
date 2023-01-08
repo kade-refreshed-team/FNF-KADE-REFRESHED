@@ -1,0 +1,32 @@
+{
+  "asset": "characters/bfHoldingGF-DEAD",
+  "iconAsset": "bf",
+  "barColor": "#31B0D1",
+  "commonSide": "bf",
+  "offsets": {
+    "x": 0,
+    "y": 350,
+    "camX": 0,
+    "camY": 0
+  },
+  "animations": [
+    {
+      "name": "deathLoop",
+      "prefix": "BF Dead with GF Loop",
+      "offsets": [37, -3],
+      "looped": true
+    },
+    {
+      "name": "firstDeath",
+      "prefix": "BF Dies with GF",
+      "offsets": [37, 14]
+    },
+    {
+      "name": "deathConfirm",
+      "prefix": "RETRY confirm holding gf",
+      "offsets": [37, 28]
+    }
+  ],
+  "scale": 1.05,
+  "flipX": true
+}

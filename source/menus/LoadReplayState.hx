@@ -15,6 +15,7 @@ import lime.utils.Assets;
 
 import ui.Alphabet;
 import utils.Highscore;
+import menus.FreeplayState.SongMetadata;
 import funkin.PlayState;
 import funkin.Replay;
 import funkin.SongClasses.Song;
@@ -28,7 +29,7 @@ class LoadReplayState extends base.MusicBeatState
 	var selector:FlxText;
 	var curSelected:Int = 0;
 
-    var songs:Array<menus.FreeplayState.SongMetadata> = [];
+    var songs:Array<SongMetadata> = [];
 
 	var controlsStrings:Array<String> = [];
     var actualNames:Array<String> = [];
@@ -46,15 +47,7 @@ class LoadReplayState extends base.MusicBeatState
 
         controlsStrings.sort(Reflect.compare);
 
-        addWeek(['Bopeebo', 'Fresh', 'Dadbattle'], 1, ['dad']);
-        addWeek(['Spookeez', 'South', 'Monster'], 2, ['spooky']);
-        addWeek(['Pico', 'Philly', 'Blammed'], 3, ['pico']);
-
-        addWeek(['Satin-Panties', 'High', 'Milf'], 4, ['mom']);
-        addWeek(['Cocoa', 'Eggnog', 'Winter-Horrorland'], 5, ['parents-christmas', 'parents-christmas', 'monster-christmas']);
-        
-        addWeek(['Senpai', 'Roses', 'Thorns'], 6, ['senpai', 'senpai', 'spirit']);
-
+		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')));
 
         for(i in 0...controlsStrings.length)
         {
@@ -108,32 +101,12 @@ class LoadReplayState extends base.MusicBeatState
         var week:Int = 0;
         for (i in 0...songs.length)
         {
-            var pog:FreeplayState.SongMetadata = songs[i];
+            var pog:SongMetadata = songs[i];
             if (pog.songName == songName)
                 week = pog.week;
         }
         return week;
     }
-
-	public function addSong(songName:String, weekNum:Int, songCharacter:String)
-        {
-            songs.push(new FreeplayState.SongMetadata(songName, weekNum, songCharacter));
-        }
-    
-        public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>)
-        {
-            if (songCharacters == null)
-                songCharacters = ['bf'];
-    
-            var num:Int = 0;
-            for (song in songs)
-            {
-                addSong(song, weekNum, songCharacters[num]);
-    
-                if (songCharacters.length != 1)
-                    num++;
-            }
-        }
     
 
 	override function update(elapsed:Float)

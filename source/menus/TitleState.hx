@@ -57,11 +57,6 @@ class TitleState extends base.MusicBeatState
 		if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
 			sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");
 		#end
-
-		@:privateAccess
-		{
-			trace("Loaded " + openfl.Assets.getLibrary("default").assetsLoaded + " assets (DEFAULT)");
-		}
 		
 		settings.PlayerSettings.init();
 
@@ -88,7 +83,7 @@ class TitleState extends base.MusicBeatState
 
 		utils.Highscore.load();
 
-		if (FlxG.save.data.weekUnlocked != null)
+		/*if (FlxG.save.data.weekUnlocked != null)
 		{
 			// FIX LATER!!!
 			// WEEK UNLOCK PROGRESSION!!
@@ -100,7 +95,7 @@ class TitleState extends base.MusicBeatState
 			// QUICK PATCH OOPS!
 			if (!menus.StoryMenuState.weekUnlocked[0])
 				menus.StoryMenuState.weekUnlocked[0] = true;
-		}
+		}*/
 
 		#if FREEPLAY
 		FlxG.switchState(new FreeplayState());

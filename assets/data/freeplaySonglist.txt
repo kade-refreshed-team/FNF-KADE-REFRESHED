@@ -1,19 +1,10 @@
-Tutorial:gf:1
-Bopeebo:dad:1
-Fresh:dad:1
-Dad Battle:dad:1
-Spookeez:spooky:2
-South:spooky:2
-Monster:monster:2
-Pico:pico:3
-Philly Nice:pico:3
-Blammed:pico:3
-Satin Panties:mom:4
-High:mom:4
-Milf:mom:4
-Cocoa:parents-christmas:5
-Eggnog:parents-christmas:5
-Winter Horrorland:monster-christmas:5
-Senpai:senpai:6
-Roses:senpai:6
-Thorns:spirit:6
+Tutorial | gf:bf | Easy, Normal, Hard | #A5004D | 0
+Bopeebo, Fresh, Dad Battle | dad:bf | Easy, Normal, Hard | #B755D8 | 1
+Spookeez, South | spooky:bf | Easy, Normal, Hard | #E68600 | 2
+Monster | monster:bf | Easy, Normal, Hard | #303030 | 2
+Pico, Philly Nice, Blammed | pico:bf | Easy, Normal, Hard | #AFCE66 | 3
+Satin Panties, High, Milf | mom:bf | Easy, Normal, Hard | #D8558E | 4
+Cocoa, Eggnog | parents:bf | Easy, Normal, Hard | #CCE4FF | 5
+Winter-Horrorland | monster:bf | Easy, Normal, Hard | #303030 | 5
+Senpai, Roses | senpai:bf | Easy, Normal, Hard | #FFAA6F | 6
+Thorns | spirit:bf | Easy, Normal, Hard | #520016 | 6

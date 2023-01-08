@@ -1,0 +1,39 @@
+{
+  "asset": "characters/monsterChristmas",
+  "iconAsset": "monster",
+  "barColor": "#F3FF6E",
+  "commonSide": "dad",
+  "offsets": {
+    "x": 0,
+    "y": 130,
+    "camX": 0,
+    "camY": 0
+  },
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "monster idle",
+      "offsets": [1, 0]
+    },
+    {
+      "name": "singUP",
+      "prefix": "monster up note",
+      "offsets": [-20, 50]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "Monster left note",
+      "offsets": [-30, 0]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "Monster Right note",
+      "offsets": [-51, 0]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "monster down",
+      "offsets": [-40, -94]
+    }
+  ]
+}

@@ -25,14 +25,13 @@ class HealthIcon extends FlxSprite
 	}
 
 	public function changeIcon(char:String) {
-		if (char != 'bf-pixel' && char != 'bf-old')
-			char = char.split('-')[0].trim();
-		
+		var dashIndex = char.indexOf("-");
+		var noDash:String = char.substring(0, (dashIndex > -1) ? dashIndex : char.length);
+
 		if (char != this.char) {
-			if (!Assets.exists(Paths.image('game-side/icons/icon-$char')) || char == null)
-				loadGraphic(Paths.image('game-side/icons/icon-face'), true, 150, 150);
-			else
-				loadGraphic(Paths.image('game-side/icons/icon-$char'), true, 150, 150);
+			var assetIndex = [Assets.exists(Paths.image('game-side/icons/icon-$char')), Assets.exists(Paths.image('game-side/icons/icon-$noDash')), true].indexOf(true);
+			var paths = ['game-side/icons/icon-$char', 'game-side/icons/icon-$noDash', 'game-side/icons/icon-face'];
+			loadGraphic(Paths.image(paths[assetIndex]), true, 150, 150);
 
 			animation.add(char, [0, 1], 0, false, isPlayer);
 		}

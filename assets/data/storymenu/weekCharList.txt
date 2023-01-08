@@ -1,0 +1,9 @@
+bf | boyfriend | BF idle dance white | 0 | -30 | 0.9 | true
+CONFIRM_bf | boyfriend | BF HEY!! | 0 | -20 | 0.9 | true
+gf | girlfriend | GF Dancing Beat WHITE | 110 | 140 | 0.45 | true
+dad | dad | Dad idle dance BLACK LINE | -15 | 220 | 0.45 | false
+spooky | s&p | spooky dance idle BLACK LINES | 50 | 110 | 0.6 | false
+pico | pico | Pico Idle Dance | -40 | 40 | 0.6 | true
+mom | mom | Mom Idle BLACK LINES | -30 | 250 | 0.45 | false
+parents-christmas | parents | Parent Christmas Idle | 200 | 230 | 0.5 | false
+senpai | senpai | SENPAI idle Black Lines | -50 | -30 | 1 | false

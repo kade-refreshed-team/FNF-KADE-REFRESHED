@@ -1,0 +1,70 @@
+{
+  "asset": "characters/tankmanCaptain",
+  "iconAsset": "tankman",
+  "barColor": "#202020",
+  "commonSide": "dad",
+  "offsets": {
+    "x": 0,
+    "y": 240,
+    "camX": 0,
+    "camY": 0
+  },
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "Tankman Idle Dance",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singUP",
+      "prefix": "Tankman UP note 1",
+      "offsets": [48, 54]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "Tankman DOWN note 1",
+      "offsets": [76, -101]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "Tankman Right Note 1",
+      "offsets": [84, -14]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "Tankman Note Left 1",
+      "offsets": [-21, -31]
+    },
+    {
+      "name": "singUP-alt",
+      "prefix": "TANKMAN UGH",
+      "offsets": [-15, -8]
+    },
+    {
+      "name": "singDOWN-alt",
+      "prefix": "PRETTY GOOD tankman",
+      "offsets": [1, 16]
+    },
+    {
+      "name": "singUPmiss",
+      "prefix": "Tankman UP note MISS",
+      "offsets": [48, 54]
+    },
+    {
+      "name": "singDOWNmiss",
+      "prefix": "Tankman DOWN note MISS",
+      "offsets": [76, -101]
+    },
+    {
+      "name": "singLEFTmiss",
+      "prefix": "Tankman Right Note MISS",
+      "offsets": [84, -14]
+    },
+    {
+      "name": "singRIGHTmiss",
+      "prefix": "Tankman Note Left MISS",
+      "offsets": [-21, -31]
+    }
+  ],
+  "flipX": true
+}

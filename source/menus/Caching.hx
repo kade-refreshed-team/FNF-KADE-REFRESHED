@@ -27,10 +27,10 @@ class Caching extends base.MusicBeatState
         #if polymod
         polymod.Polymod.init({
             modRoot: "./mods/",
-            dirs: []
+            dirs: ["introMod"] //Just to test rn.
            });
 
-        polymod.Polymod.scan('./mods/');
+        //polymod.Polymod.scan('./mods/');
         #end
 
         text = new FlxText(FlxG.width / 2, FlxG.height / 2 + 300,0,"Loading...");
@@ -94,14 +94,12 @@ class Caching extends base.MusicBeatState
             var replaced:String = i.substr(0, i.length - 4);
             FlxG.bitmap.add(Paths.image("game-side/characters/" + replaced));
             addLine(replaced);
-            done++;
         }
 
         for (i in music) {
             FlxG.sound.cache(Paths.inst(i));
             FlxG.sound.cache(Paths.voices(i));
             addLine(i);
-            done++;
         }
 
         cacheList.text = "Finished Caching. Enjoy!";
@@ -118,6 +116,7 @@ class Caching extends base.MusicBeatState
             var toSplice = lines - 30;
             splitList = splitList.splice(0, toSplice);
             cacheList.text = splitList.join("\n");
+            lines = splitList.length;
         }
     }
 

@@ -1,0 +1,53 @@
+{
+  "asset": "characters/spooky_kids_assets",
+  "iconAsset": "spooky",
+  "barColor": "#D57E00",
+  "commonSide": "dad",
+  "offsets": {
+    "x": 0,
+    "y": 200,
+    "camX": 0,
+    "camY": 0
+  },
+  "animations": [
+    {
+      "name": "hey",
+      "prefix": "spooky kids YEAH!!",
+      "offsets": [59, -20]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "note sing left",
+      "offsets": [130, -10]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "spooky sing right",
+      "offsets": [-130, -14]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "spooky DOWN note",
+      "offsets": [-50, -130]
+    },
+    {
+      "name": "danceLeft",
+      "prefix": "spooky dance idle",
+      "offsets": [0, 0],
+      "frameRate": 12,
+      "frameIndices": [0, 2, 6]
+    },
+    {
+      "name": "danceRight",
+      "prefix": "spooky dance idle",
+      "offsets": [0, 0],
+      "frameRate": 12,
+      "frameIndices": [8, 10, 12, 14]
+    },
+    {
+      "name": "singUP",
+      "prefix": "spooky UP NOTE",
+      "offsets": [-20, 26]
+    }
+  ]
+}
