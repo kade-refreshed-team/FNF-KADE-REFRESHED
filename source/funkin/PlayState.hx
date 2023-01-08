@@ -1,5 +1,6 @@
 package funkin;
 
+import lime.ui.Window;
 import webm.WebmPlayer;
 import flixel.input.keyboard.FlxKey;
 import haxe.Exception;
@@ -2474,10 +2475,13 @@ class PlayState extends MusicBeatState
 			keyShit();
 
 
-		#if debug
 		if (FlxG.keys.justPressed.ONE)
 			endSong();
-		#end
+
+		if (FlxG.keys.justPressed.TWO)
+			FlxG.resetState();
+		if (FlxG.keys.justPressed.THREE)
+			FlxG.updateFramerate = 10;
 	}
 
 	function endSong():Void
@@ -2635,7 +2639,7 @@ class PlayState extends MusicBeatState
 				if (FlxG.save.data.scoreScreen)
 					openSubState(new ResultsScreen());
 				else
-					FlxG.switchState(new PlayState());
+					FlxG.switchState(new FreeplayState());
 			}
 		}
 	}
