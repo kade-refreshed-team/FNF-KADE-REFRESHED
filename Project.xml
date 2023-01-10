@@ -40,7 +40,7 @@
 
 	<classpath name="source" />
 
-	<assets path="assets" rename="assets" exclude="*.mp3"/>
+	<assets path="assets" exclude="*.mp3"/>
 		
 	<assets path='example_mods' rename='mods' embed='false'/>
 	<assets path='LICENSE' rename='LICENSE.txt' />
