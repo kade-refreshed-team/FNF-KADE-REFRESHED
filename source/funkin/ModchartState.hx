@@ -1,4 +1,4 @@
-package;
+package funkin;
 
 // this file is for modchart things, this is to declutter playstate.hx
 

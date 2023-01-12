@@ -1152,7 +1152,7 @@ class PlayState extends MusicBeatState
 	var luaWiggles:Array<WiggleEffect> = [];
 
 	#if windows
-	public static var luaModchart:ModchartState = null;
+	public static var luaModchart:funkin.ModchartState = null;
 	#end
 
 	function startCountdown():Void
@@ -1172,7 +1172,7 @@ class PlayState extends MusicBeatState
 		}
 		if (executeModchart)
 		{
-			luaModchart = ModchartState.createModchartState();
+			luaModchart = funkin.ModchartState.createModchartState();
 			luaModchart.executeState('start',[songLowercase]);
 		}
 		#end
