@@ -67,6 +67,7 @@ class Replay
 			"songDiff": PlayState.storyDifficulty,
 			"noteSpeed": (FlxG.save.data.scrollSpeed > 1 ? FlxG.save.data.scrollSpeed : PlayState.SONG.speed),
 			"isDownscroll": FlxG.save.data.downscroll,
+			"PsychUI": FlxG.save.data.psychui,
 			"songNotes": notearray,
 			"timestamp": Date.now(),
 			"replayGameVer": version,

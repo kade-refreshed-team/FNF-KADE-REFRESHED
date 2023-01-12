@@ -1,5 +1,6 @@
 package debug;
 
+import menus.MainMenuState;
 import flixel.addons.ui.FlxUIInputText;
 import flixel.ui.FlxButton;
 import flixel.FlxG;
@@ -42,10 +43,11 @@ class AnimationDebug extends FlxState
 
 		var gridBG:FlxSprite = FlxGridOverlay.create(10, 10);
 		gridBG.scrollFactor.set(0, 0);
+		gridBG.color = 0x2e2c2c;
 		add(gridBG);
 
 		var addanimtext = new FlxUIInputText(10, 10, 70, 'idle', 8);
-		add(addanimtext);
+		//add(addanimtext);
 
 		var addanimbutton:FlxButton = new FlxButton(addanimtext.x, 20, "Reload Audio", function()
 		{
@@ -53,15 +55,19 @@ class AnimationDebug extends FlxState
 			updateTexts();
 			dad.animation.add(addanimtext.text, null);
 		});
-		add(addanimbutton);
+		//add(addanimbutton);
 
 		var shadow:Character = new Character(0, 0, daAnim);
 		shadow.screenCenter();
 		shadow.debugMode = true;
+		shadow.alpha = 0.5;
+		shadow.color = 0x000000;
 		add(shadow);
 
-		if (daAnim == 'bf')
+		if (daAnim == 'bf'){
 			isDad = false;
+			shadow.flipX = true;
+		}
 
 		if (isDad)
 		{
@@ -138,6 +144,9 @@ class AnimationDebug extends FlxState
 			FlxG.camera.zoom += 0.25;
 		if (FlxG.keys.justPressed.Q)
 			FlxG.camera.zoom -= 0.25;
+
+		if (FlxG.keys.justPressed.ESCAPE)
+			FlxG.switchState(new funkin.PlayState());
 
 		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
 		{
