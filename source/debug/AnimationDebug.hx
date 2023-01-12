@@ -64,8 +64,10 @@ class AnimationDebug extends FlxState
 		shadow.color = 0x000000;
 		add(shadow);
 
-		if (daAnim == 'bf')
+		if (daAnim == 'bf'){
 			isDad = false;
+			shadow.flipX = true;
+		}
 
 		if (isDad)
 		{

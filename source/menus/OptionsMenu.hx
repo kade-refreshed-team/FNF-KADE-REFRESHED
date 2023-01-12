@@ -31,6 +31,7 @@ class OptionsMenu extends base.MusicBeatState
 		new OptionCategory("Gameplay", [
 			new DFJKOption(controls),
 			new DownscrollOption("Change the layout of the strumline."),
+			new PsychUIOption("Makes the UI Simulur to Psych."),
 			new GhostTapOption("Ghost Tapping is when you tap a direction and it doesn't give you a miss."),
 			new Judgement("Customize your Hit Timings (LEFT or RIGHT)"),
 			#if desktop

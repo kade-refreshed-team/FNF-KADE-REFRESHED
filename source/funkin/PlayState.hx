@@ -95,7 +95,7 @@ class PlayState extends MusicBeatState
 	var halloweenLevel:Bool = false;
 
 	var songLength:Float = 0;
-	var kadeEngineWatermark:FlxText;
+	var rgEngineWatermark:FlxText;
 
 	#if windows
 	// Discord RPC variables
@@ -197,6 +197,7 @@ class PlayState extends MusicBeatState
 
 	var songScoreDef:Int = 0;
 	var scoreTxt:FlxText;
+	var songName:FlxText;
 	var replayTxt:FlxText;
 
 	public static var campaignScore:Int = 0;
@@ -269,6 +270,7 @@ class PlayState extends MusicBeatState
 		repReleases = 0;
 
 		PlayStateChangeables.useDownscroll = FlxG.save.data.downscroll;
+		PlayStateChangeables.PsychUI = FlxG.save.data.psychui;
 		PlayStateChangeables.safeFrames = FlxG.save.data.frames;
 		PlayStateChangeables.scrollSpeed = FlxG.save.data.scrollSpeed;
 		PlayStateChangeables.botPlay = FlxG.save.data.botplay;
@@ -974,6 +976,11 @@ class PlayState extends MusicBeatState
 			songPosBG = new FlxSprite(0, 10).loadGraphic(Paths.image('game-side/healthBar'));
 			if (PlayStateChangeables.useDownscroll)
 				songPosBG.y = FlxG.height * 0.9 + 45;
+			if (PlayStateChangeables.PsychUI)
+			{
+				songPosBG.scale.set(0.6, 1);
+				songPosBG.y += 18.7;
+			}
 			songPosBG.screenCenter(X);
 			songPosBG.scrollFactor.set();
 			add(songPosBG);
@@ -981,15 +988,27 @@ class PlayState extends MusicBeatState
 			songPosBar = new FlxBar(songPosBG.x + 4, songPosBG.y + 4, LEFT_TO_RIGHT, Std.int(songPosBG.width - 8), Std.int(songPosBG.height - 8), this,
 				'songPositionBar', 0, 90000);
 			songPosBar.scrollFactor.set();
-			songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
+			if (PlayStateChangeables.PsychUI)
+			{
+				songPosBar.scale.set(0.6, 1);
+				songPosBar.createFilledBar(FlxColor.BLACK, FlxColor.WHITE);
+			}
+			else
+				songPosBar.createFilledBar(FlxColor.GRAY, FlxColor.LIME);
 			add(songPosBar);
 
-			var songName = new FlxText(songPosBar.x, songPosBG.y + songPosBG.height / 2, songPosBar.barWidth, '${SONG.song} - [$storyDifficultyText]', 16);
+			songName = new FlxText(songPosBar.x, songPosBG.y + songPosBG.height / 2, songPosBar.barWidth, '${SONG.song} - [$storyDifficultyText]', 16);
 			songName.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 			songName.scrollFactor.set();
 			add(songName);
 			songName.y -= songName.height / 2;
 			songName.cameras = [camHUD];
+			if (PlayStateChangeables.PsychUI)
+			{
+				songName.size = 32;
+				songName.borderSize = 2;
+				songName.y -= 7.8;
+			}
 		}
 
 		healthBarBG = new FlxSprite(0, FlxG.height * 0.9).loadGraphic(Paths.image('game-side/healthBar'));
@@ -1007,19 +1026,24 @@ class PlayState extends MusicBeatState
 		add(healthBar);
 
 		// Add Kade Engine watermark
-		kadeEngineWatermark = new FlxText(5, FlxG.height - 5, 0, (Main.watermarks ? '- RG Engine v${MainMenuState.kadeEngineVer}' : ""), 16);
-		kadeEngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		kadeEngineWatermark.scrollFactor.set();
-		add(kadeEngineWatermark);
-		kadeEngineWatermark.y -= kadeEngineWatermark.height;
+		rgEngineWatermark = new FlxText(5, FlxG.height - 5, 0, (Main.watermarks ? 'RG Engine v${MainMenuState.kadeEngineVer}' : ""), 16);
+		rgEngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		rgEngineWatermark.scrollFactor.set();
+		if (!PlayStateChangeables.PsychUI)
+			add(rgEngineWatermark);
+		rgEngineWatermark.y -= rgEngineWatermark.height;
 
 		if (PlayStateChangeables.useDownscroll)
-			kadeEngineWatermark.y = FlxG.height * 0.9 + 45;
+			rgEngineWatermark.y = FlxG.height * 0.9 + 45;
 
 		scoreTxt = new FlxText(0, healthBarBG.y + 40, FlxG.width, "", 20);
 		scoreTxt.screenCenter(X);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		if (PlayStateChangeables.PsychUI){
+			scoreTxt.size = 20;
+			scoreTxt.borderSize = 1.25;
+		}
 
 		replayTxt = new FlxText(healthBarBG.x + healthBarBG.width / 2 - 75, healthBarBG.y + (PlayStateChangeables.useDownscroll ? 100 : -100), 0, "REPLAY",
 			20);
@@ -1064,7 +1088,7 @@ class PlayState extends MusicBeatState
 			songPosBG.cameras = [camHUD];
 			songPosBar.cameras = [camHUD];
 		}
-		kadeEngineWatermark.cameras = [camHUD];
+		rgEngineWatermark.cameras = [camHUD];
 		if (loadRep)
 			replayTxt.cameras = [camHUD];
 
@@ -1865,7 +1889,7 @@ class PlayState extends MusicBeatState
 			if (luaModchart.getVar("showOnlyStrums", 'bool'))
 			{
 				healthBarBG.visible = false;
-				kadeEngineWatermark.visible = false;
+				rgEngineWatermark.visible = false;
 				healthBar.visible = false;
 				iconP1.visible = false;
 				iconP2.visible = false;
@@ -1874,7 +1898,7 @@ class PlayState extends MusicBeatState
 			else
 			{
 				healthBarBG.visible = true;
-				kadeEngineWatermark.visible = true;
+				rgEngineWatermark.visible = true;
 				healthBar.visible = true;
 				iconP1.visible = true;
 				iconP2.visible = true;
@@ -1938,7 +1962,17 @@ class PlayState extends MusicBeatState
 
 		super.update(elapsed);
 
-		scoreTxt.text = Ratings.CalculateRanking(songScore, songScoreDef, nps, maxNPS, accuracy);
+		var prefix = (FlxG.save.data.npsDisplay) ? "NPS: " + nps + " (Max " + maxNPS + ")" : "";
+		var daScale:Float = Math.max(scoreTxt.scale.x- elapsed * 5, 1);
+
+		if (PlayStateChangeables.PsychUI)
+		{
+			songName.text = FlxStringUtil.formatTime((FlxG.sound.music.length - Math.max(Conductor.songPosition, 0)) / 1000, false);
+			scoreTxt.text = '$prefix Score: $songScore | Misses: $misses | Accuracy: ${HelperFunctions.truncateFloat(accuracy, 2)}% | Rateing: ${Ratings.GenerateLetterRank(accuracy)}';
+			scoreTxt.scale.set(daScale, daScale);
+		}
+		else
+			scoreTxt.text = Ratings.CalculateRanking(songScore, songScoreDef, nps, maxNPS, accuracy);
 
 		var lengthInPx = scoreTxt.textField.length * scoreTxt.frameHeight; // bad way but does more or less a better job
 
@@ -1981,49 +2015,49 @@ class PlayState extends MusicBeatState
 		}
 
 		if (FlxG.keys.justPressed.FIVE)
+		{
+			if (useVideo)
 			{
-				if (useVideo)
-				{
-					GlobalVideo.get().stop();
-					remove(videoSprite);
-					FlxG.stage.window.onFocusOut.remove(focusOut);
-					FlxG.stage.window.onFocusIn.remove(focusIn);
-					removedVideo = true;
-				}
-				#if windows
-				DiscordClient.changePresence("Char Editor", SONG.player2, null, true);
-				#end
-				FlxG.switchState(new debug.AnimationDebug(SONG.player2));
-				#if windows
-				if (luaModchart != null)
-				{
-					luaModchart.die();
-					luaModchart = null;
-				}
-				#end
+				GlobalVideo.get().stop();
+				remove(videoSprite);
+				FlxG.stage.window.onFocusOut.remove(focusOut);
+				FlxG.stage.window.onFocusIn.remove(focusIn);
+				removedVideo = true;
 			}
+			#if windows
+			DiscordClient.changePresence("Char Editor", SONG.player2, null, true);
+			#end
+			FlxG.switchState(new debug.AnimationDebug(SONG.player2));
+			#if windows
+			if (luaModchart != null)
+			{
+				luaModchart.die();
+				luaModchart = null;
+			}
+			#end
+		}
 		if (FlxG.keys.justPressed.SIX)
+		{
+			if (useVideo)
 			{
-				if (useVideo)
-				{
-					GlobalVideo.get().stop();
-					remove(videoSprite);
-					FlxG.stage.window.onFocusOut.remove(focusOut);
-					FlxG.stage.window.onFocusIn.remove(focusIn);
-					removedVideo = true;
-				}
-				#if windows
-				DiscordClient.changePresence("Char Editor", SONG.player1, null, true);
-				#end
-				FlxG.switchState(new debug.AnimationDebug(SONG.player1));
-				#if windows
-				if (luaModchart != null)
-				{
-					luaModchart.die();
-					luaModchart = null;
-				}
-				#end
+				GlobalVideo.get().stop();
+				remove(videoSprite);
+				FlxG.stage.window.onFocusOut.remove(focusOut);
+				FlxG.stage.window.onFocusIn.remove(focusIn);
+				removedVideo = true;
 			}
+			#if windows
+			DiscordClient.changePresence("Char Editor", SONG.player1, null, true);
+			#end
+			FlxG.switchState(new debug.AnimationDebug(SONG.player1));
+			#if windows
+			if (luaModchart != null)
+			{
+				luaModchart.die();
+				luaModchart = null;
+			}
+			#end
+		}
 
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
 		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
@@ -3468,24 +3502,24 @@ class PlayState extends MusicBeatState
 	}
 
 	/*function badNoteCheck()
-			{
-				// just double pasting this shit cuz fuk u
-				// REDO THIS SYSTEM!
-				var upP = controls.UP_P;
-				var rightP = controls.RIGHT_P;
-				var downP = controls.DOWN_P;
-				var leftP = controls.LEFT_P;
+		{
+			// just double pasting this shit cuz fuk u
+			// REDO THIS SYSTEM!
+			var upP = controls.UP_P;
+			var rightP = controls.RIGHT_P;
+			var downP = controls.DOWN_P;
+			var leftP = controls.LEFT_P;
 
-				if (leftP)
-					noteMiss(0);
-				if (upP)
-					noteMiss(2);
-				if (rightP)
-					noteMiss(3);
-				if (downP)
-					noteMiss(1);
-				updateAccuracy();
-			}
+			if (leftP)
+				noteMiss(0);
+			if (upP)
+				noteMiss(2);
+			if (rightP)
+				noteMiss(3);
+			if (downP)
+				noteMiss(1);
+			updateAccuracy();
+		}
 	 */
 	function updateAccuracy()
 	{
@@ -3639,6 +3673,9 @@ class PlayState extends MusicBeatState
 			note.destroy();
 
 			updateAccuracy();
+
+			if (PlayStateChangeables.PsychUI)
+				scoreTxt.scale.set(1.075, 1.075);	
 		}
 	}
 

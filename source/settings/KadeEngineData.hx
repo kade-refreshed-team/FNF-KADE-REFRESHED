@@ -91,6 +91,9 @@ class KadeEngineData
 		if (FlxG.save.data.scoreScreen == null)
 			FlxG.save.data.scoreScreen = true;
 
+		if (FlxG.save.data.psychui == null)
+			FlxG.save.data.psychui = false;
+
 		base.Conductor.recalculateTimings();
 		PlayerSettings.player1.controls.loadKeyBinds();
 		KeyBinds.keyCheck();

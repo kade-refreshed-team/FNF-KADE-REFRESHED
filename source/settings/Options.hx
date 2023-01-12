@@ -189,6 +189,27 @@ class AccuracyOption extends Option
 	}
 }
 
+class PsychUIOption extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.psychui = !FlxG.save.data.psychui;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return FlxG.save.data.psychui ? "Psych UI on" : "Psych UI off";
+	}
+}
+
 class SongPositionOption extends Option
 {
 	public function new(desc:String)
