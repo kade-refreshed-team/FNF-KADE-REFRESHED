@@ -210,6 +210,27 @@ class PsychUIOption extends Option
 	}
 }
 
+class OGFREEPLAYOption extends Option
+{
+	public function new(desc:String)
+	{
+		super();
+		description = desc;
+	}
+
+	public override function press():Bool
+	{
+		FlxG.save.data.ogfreeplay = !FlxG.save.data.ogfreeplay;
+		display = updateDisplay();
+		return true;
+	}
+
+	private override function updateDisplay():String
+	{
+		return FlxG.save.data.ogfreeplay ? "OG freeplay on" : "OG freeplay off";
+	}
+}
+
 class SongPositionOption extends Option
 {
 	public function new(desc:String)

@@ -1008,6 +1008,7 @@ class PlayState extends MusicBeatState
 				songName.size = 32;
 				songName.borderSize = 2;
 				songName.y -= 7.8;
+				Application.current.window.title = 'Friday Night Funkin : Psych Engine';
 			}
 		}
 
