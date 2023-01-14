@@ -685,6 +685,7 @@ class PlayState extends MusicBeatState
 					var girlAnim:String = (songLowercase == 'roses') ? "BG fangirls dissuaded" : "BG girls group";
 					bgGirls = new BackgroundDancer(-100, 190, "stages/school/bgFreaks", girlAnim);
 					bgGirls.scrollFactor.set(0.9, 0.9);
+					bgGirls.antialiasing = false;
 
 					bgGirls.setGraphicSize(Std.int(bgGirls.width * daPixelZoom));
 					bgGirls.updateHitbox();
@@ -1971,7 +1972,7 @@ class PlayState extends MusicBeatState
 		if (PlayStateChangeables.PsychUI)
 		{
 			songName.text = FlxStringUtil.formatTime((FlxG.sound.music.length - Math.max(Conductor.songPosition, 0)) / 1000, false);
-			scoreTxt.text = '$prefix Score: $songScore | Misses: $misses | Accuracy: ${HelperFunctions.truncateFloat(accuracy, 2)}% | Rateing: ${Ratings.GenerateLetterRank(accuracy)}';
+			scoreTxt.text = '$prefix Score: $songScore | Misses: $misses | Accuracy: ${HelperFunctions.truncateFloat(accuracy, 2)}% | Rating: ${Ratings.GenerateLetterRank(accuracy)}';
 			scoreTxt.scale.set(daScale, daScale);
 		}
 		else

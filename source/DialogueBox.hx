@@ -1,5 +1,6 @@
 package;
 
+import openfl.Assets;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.text.FlxTypeText;
@@ -36,6 +37,9 @@ class DialogueBox extends FlxSpriteGroup
 
 	var handSelect:FlxSprite;
 	var bgFade:FlxSprite;
+
+	var dadimg:FlxAtlasFrames = Paths.getSparrowAtlas('cutscene/portraits/senpaiPortrait');
+	var bfimg:FlxAtlasFrames = Paths.getSparrowAtlas('cutscene/portraits/bfPortrait');
 
 	public function new(talkingRight:Bool = true, ?dialogueList:Array<String>)
 	{
@@ -74,6 +78,7 @@ class DialogueBox extends FlxSpriteGroup
 				box.animation.addByPrefix('normalOpen', 'Text Box Appear', 24, false);
 				box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
 				box.animation.addByIndices('normal', 'Text Box Appear', [4], "", 24);
+
 			case 'roses':
 				hasDialog = true;
 				FlxG.sound.play(Paths.sound('week6/ANGRY'));
@@ -91,7 +96,6 @@ class DialogueBox extends FlxSpriteGroup
 				box.animation.addByIndices('normal', 'Spirit Textbox spawn', [11], "", 24);
 				box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
 
-
 				var face:FlxSprite = new FlxSprite(320, 170).loadGraphic(Paths.image('cutscene/week6/spiritFaceForward'));
 				face.setGraphicSize(Std.int(face.width * 6));
 				add(face);
@@ -103,6 +107,12 @@ class DialogueBox extends FlxSpriteGroup
 				box.animation.addByPrefix('normal', 'speech bubble normal', 24, false);
 				box.y += 386.8;
 				box.scale.set(0.8, 0.8);
+
+				if (Assets.exists(Paths.image('cutscene/portraits/${PlayState.SONG.player2}')))
+					dadimg = Paths.getSparrowAtlas('cutscene/portraits/${PlayState.SONG.player2}');
+
+				if (Assets.exists(Paths.image('cutscene/portraits/${PlayState.SONG.player1}')))
+					bfimg = Paths.getSparrowAtlas('cutscene/portraits/${PlayState.SONG.player1}');
 		}
 
 		this.dialogueList = dialogueList;
@@ -111,8 +121,8 @@ class DialogueBox extends FlxSpriteGroup
 			kill();
 		
 		portraitLeft = new FlxSprite(-20, 40);
-		portraitLeft.frames = Paths.getSparrowAtlas('cutscene/week6/senpaiPortrait');
-		portraitLeft.animation.addByPrefix('enter', 'Senpai Portrait Enter instance 1', 24, false);
+		portraitLeft.frames = dadimg;
+		portraitLeft.animation.addByPrefix('enter', 'Dad Portrait', 24, false);
 		portraitLeft.setGraphicSize(Std.int(portraitLeft.width * PlayState.daPixelZoom * 0.9));
 		portraitLeft.updateHitbox();
 		portraitLeft.scrollFactor.set();
@@ -120,8 +130,8 @@ class DialogueBox extends FlxSpriteGroup
 		portraitLeft.visible = false;
 
 		portraitRight = new FlxSprite(0, 40);
-		portraitRight.frames = Paths.getSparrowAtlas('cutscene/week6/bfPortrait');
-		portraitRight.animation.addByPrefix('enter', 'Boyfriend portrait enter instance 1', 24, false);
+		portraitRight.frames = bfimg;
+		portraitRight.animation.addByPrefix('enter', 'Boyfriend Portrait', 24, false);
 		portraitRight.setGraphicSize(Std.int(portraitRight.width * PlayState.daPixelZoom * 0.9));
 		portraitRight.updateHitbox();
 		portraitRight.scrollFactor.set();
@@ -139,7 +149,7 @@ class DialogueBox extends FlxSpriteGroup
 		add(handSelect);
 
 
-		if (!talkingRight && box.frames == Paths.getSparrowAtlas('cutscene/speech_bubble_talking'))
+		if (!talkingRight && PlayState.storyWeek != 6)
 		{
 			box.flipX = true;
 		}
@@ -152,7 +162,6 @@ class DialogueBox extends FlxSpriteGroup
 		swagDialogue = new FlxTypeText(240, 500, Std.int(FlxG.width * 0.6), "", 32);
 		swagDialogue.font = 'Pixel Arial 11 Bold';
 		swagDialogue.color = 0xFF3F2021;
-		swagDialogue.sounds = [FlxG.sound.load(Paths.sound('pixelText'), 0.6)];
 		add(swagDialogue);
 
 		dialogue = new Alphabet(0, 80, "", false, true);
@@ -166,8 +175,10 @@ class DialogueBox extends FlxSpriteGroup
 	override function update(elapsed:Float)
 	{
 		// HARD CODING CUZ IM STUPDI
-		if (PlayState.storyWeek == 6)
-		dropText.text = swagDialogue.text;
+		if (PlayState.storyWeek == 6){
+			dropText.text = swagDialogue.text;
+			swagDialogue.sounds = [FlxG.sound.load(Paths.sound('pixelText'), 0.6)];
+		}
 
 		if (PlayState.SONG.song.toLowerCase() == 'roses')
 			portraitLeft.visible = false;
