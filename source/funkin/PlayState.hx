@@ -378,8 +378,12 @@ class PlayState extends MusicBeatState
 					"If you can beat me here...",
 					"Only then I will even CONSIDER letting you\ndate my daughter!"
 				];
-			case 'senpai' | 'roses' | 'thorns':
-				dialogue = CoolUtil.coolTextFile(Paths.songFile('${songLowercase}Dialogue.txt', songLowercase));
+			default:
+				if (Assets.exists(Paths.songFile('Dialogue.txt', songLowercase)))
+					dialogue = CoolUtil.coolTextFile(Paths.songFile('Dialogue.txt', songLowercase));
+				else
+					dialogue = [':bf: null?', ':dad: yep', ':bf: WHAAAAAAAAAAAA'];
+					trace(Paths.songFile('Dialogue.txt', songLowercase));
 		}
 
 		// defaults if no stage was found in chart
@@ -1132,14 +1136,12 @@ class PlayState extends MusicBeatState
 							});
 						});
 					});
-				case 'senpai':
-					schoolIntro(doof);
-				case 'roses':
-					FlxG.sound.play(Paths.sound('week6/ANGRY'));
-					schoolIntro(doof);
 				case 'thorns':
-					schoolIntro(doof);
+					thornsIntro(doof);
 				default:
+					if (Assets.exists(Paths.songFile('Dialogue.txt', songLowercase)))
+					dialogueIntro(doof);
+					else
 					startCountdown();
 			}
 		}
@@ -1157,8 +1159,16 @@ class PlayState extends MusicBeatState
 
 		super.create();
 	}
+	function dialogueIntro(?dialogueBox:DialogueBox):Void{
+		if (dialogueBox != null)
+			{
+				inCutscene = true;
+				add(dialogueBox);
+			}
+	}
 
-	function schoolIntro(?dialogueBox:DialogueBox):Void
+
+	function thornsIntro(?dialogueBox:DialogueBox):Void
 	{
 		var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
 		black.scrollFactor.set();
@@ -1200,8 +1210,6 @@ class PlayState extends MusicBeatState
 				{
 					inCutscene = true;
 
-					if (StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase() == 'thorns')
-					{
 						add(senpaiEvil);
 						senpaiEvil.alpha = 0;
 						new FlxTimer().start(0.3, function(swagTimer:FlxTimer)
@@ -1234,10 +1242,6 @@ class PlayState extends MusicBeatState
 					{
 						add(dialogueBox);
 					}
-				}
-				else
-					startCountdown();
-
 				remove(black);
 			}
 		});
@@ -1499,8 +1503,6 @@ class PlayState extends MusicBeatState
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 		for (section in noteData)
 		{
-			var coolSection:Int = Std.int(section.lengthInSteps / 4);
-
 			for (songNotes in section.sectionNotes)
 			{
 				var daStrumTime:Float = songNotes[0] + FlxG.save.data.offset + songOffset;
@@ -1940,7 +1942,7 @@ class PlayState extends MusicBeatState
 		if (FlxG.keys.justPressed.NINE)
 		{
 			if (iconP1.char == 'bf-old')
-				iconP1.changeIcon(SONG.player1);
+				iconP1.changeIcon(boyfriend.data.iconAsset);
 			else
 				iconP1.changeIcon('bf-old');
 		}

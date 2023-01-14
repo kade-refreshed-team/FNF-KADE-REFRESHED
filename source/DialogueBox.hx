@@ -72,13 +72,16 @@ class DialogueBox extends FlxSpriteGroup
 				hasDialog = true;
 				box.frames = Paths.getSparrowAtlas('cutscene/week6/dialogueBox-pixel');
 				box.animation.addByPrefix('normalOpen', 'Text Box Appear', 24, false);
+				box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
 				box.animation.addByIndices('normal', 'Text Box Appear', [4], "", 24);
 			case 'roses':
 				hasDialog = true;
+				FlxG.sound.play(Paths.sound('week6/ANGRY'));
 				FlxG.sound.play(Paths.sound('week6/ANGRY_TEXT_BOX'));
 
 				box.frames = Paths.getSparrowAtlas('cutscene/week6/dialogueBox-senpaiMad');
 				box.animation.addByPrefix('normalOpen', 'SENPAI ANGRY IMPACT SPEECH', 24, false);
+				box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
 				box.animation.addByIndices('normal', 'SENPAI ANGRY IMPACT SPEECH', [4], "", 24);
 
 			case 'thorns':
@@ -86,20 +89,30 @@ class DialogueBox extends FlxSpriteGroup
 				box.frames = Paths.getSparrowAtlas('cutscene/week6/dialogueBox-evil');
 				box.animation.addByPrefix('normalOpen', 'Spirit Textbox spawn', 24, false);
 				box.animation.addByIndices('normal', 'Spirit Textbox spawn', [11], "", 24);
+				box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
+
 
 				var face:FlxSprite = new FlxSprite(320, 170).loadGraphic(Paths.image('cutscene/week6/spiritFaceForward'));
 				face.setGraphicSize(Std.int(face.width * 6));
 				add(face);
+
+			default:
+				hasDialog = true;
+				box.frames = Paths.getSparrowAtlas('cutscene/speech_bubble_talking');
+				box.animation.addByPrefix('normalOpen', 'Speech Bubble Normal Open', 24, false);
+				box.animation.addByPrefix('normal', 'speech bubble normal', 24, false);
+				box.y += 386.8;
+				box.scale.set(0.8, 0.8);
 		}
 
 		this.dialogueList = dialogueList;
 		
 		if (!hasDialog)
-			return;
+			kill();
 		
 		portraitLeft = new FlxSprite(-20, 40);
 		portraitLeft.frames = Paths.getSparrowAtlas('cutscene/week6/senpaiPortrait');
-		portraitLeft.animation.addByPrefix('enter', 'Senpai Portrait Enter', 24, false);
+		portraitLeft.animation.addByPrefix('enter', 'Senpai Portrait Enter instance 1', 24, false);
 		portraitLeft.setGraphicSize(Std.int(portraitLeft.width * PlayState.daPixelZoom * 0.9));
 		portraitLeft.updateHitbox();
 		portraitLeft.scrollFactor.set();
@@ -108,7 +121,7 @@ class DialogueBox extends FlxSpriteGroup
 
 		portraitRight = new FlxSprite(0, 40);
 		portraitRight.frames = Paths.getSparrowAtlas('cutscene/week6/bfPortrait');
-		portraitRight.animation.addByPrefix('enter', 'Boyfriend portrait enter', 24, false);
+		portraitRight.animation.addByPrefix('enter', 'Boyfriend portrait enter instance 1', 24, false);
 		portraitRight.setGraphicSize(Std.int(portraitRight.width * PlayState.daPixelZoom * 0.9));
 		portraitRight.updateHitbox();
 		portraitRight.scrollFactor.set();
@@ -116,7 +129,6 @@ class DialogueBox extends FlxSpriteGroup
 		portraitRight.visible = false;
 		
 		box.animation.play('normalOpen');
-		box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
 		box.updateHitbox();
 		add(box);
 
@@ -127,9 +139,9 @@ class DialogueBox extends FlxSpriteGroup
 		add(handSelect);
 
 
-		if (!talkingRight)
+		if (!talkingRight && box.frames == Paths.getSparrowAtlas('cutscene/speech_bubble_talking'))
 		{
-			// box.flipX = true;
+			box.flipX = true;
 		}
 
 		dropText = new FlxText(242, 502, Std.int(FlxG.width * 0.6), "", 32);
@@ -154,6 +166,9 @@ class DialogueBox extends FlxSpriteGroup
 	override function update(elapsed:Float)
 	{
 		// HARD CODING CUZ IM STUPDI
+		if (PlayState.storyWeek == 6)
+		dropText.text = swagDialogue.text;
+
 		if (PlayState.SONG.song.toLowerCase() == 'roses')
 			portraitLeft.visible = false;
 		if (PlayState.SONG.song.toLowerCase() == 'thorns')
@@ -162,8 +177,6 @@ class DialogueBox extends FlxSpriteGroup
 			swagDialogue.color = FlxColor.WHITE;
 			dropText.color = FlxColor.BLACK;
 		}
-
-		dropText.text = swagDialogue.text;
 
 		if (box.animation.curAnim != null)
 		{
