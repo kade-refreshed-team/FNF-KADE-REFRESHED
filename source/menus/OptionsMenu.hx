@@ -31,7 +31,6 @@ class OptionsMenu extends base.MusicBeatState
 		new OptionCategory("Gameplay", [
 			new DFJKOption(controls),
 			new DownscrollOption("Change the layout of the strumline."),
-			new PsychUIOption("Makes the UI Simulur to Psych."),
 			new GhostTapOption("Ghost Tapping is when you tap a direction and it doesn't give you a miss."),
 			new Judgement("Customize your Hit Timings (LEFT or RIGHT)"),
 			#if desktop
@@ -46,6 +45,7 @@ class OptionsMenu extends base.MusicBeatState
 		new OptionCategory("Appearance", [
 			new DistractionsAndEffectsOption("Toggle stage distractions that can hinder your gameplay."),
 			new CamZoomOption("Toggle the camera zoom in-game."),
+			new PsychUIOption("Makes the UI Simulur to Psych."),
 			#if desktop
 			new RainbowFPSOption("Make the FPS Counter Rainbow"),
 			new AccuracyOption("Display accuracy information."),
@@ -63,7 +63,8 @@ class OptionsMenu extends base.MusicBeatState
 			new FlashingLightsOption("Toggle flashing lights that can cause epileptic seizures and strain."),
 			new WatermarkOption("Enable and disable all watermarks from the engine."),
 			new BotPlay("Showcase your charts and mods with autoplay."),
-			new ScoreScreen("Show the score screen after the end of a song")
+			new ScoreScreen("Show the score screen after the end of a song."),
+			new OGFREEPLAYOption("Makes the freeplay look like base game.")
 		])
 		
 	];
