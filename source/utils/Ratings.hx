@@ -122,13 +122,67 @@ class Ratings
 
     public static function CalculateRanking(score:Int,scoreDef:Int,nps:Int,maxNPS:Int,accuracy:Float):String
     {
-        return
+        var npsTxt:String = (FlxG.save.data.npsDisplay) ? ('NPS: $nps (Max: $maxNPS)' + (!PlayStateChangeables.botPlay || PlayState.loadRep ? " | " : "")) : "";
+
+        var scoreTxt:String = (Conductor.safeFrames != 10) ? 'Score: $score ($scoreDef)' : 'Score: $score';
+
+        var accTxt:String = "| Accuracy: " + ((PlayStateChangeables.botPlay && !PlayState.loadRep) ? "N/A" : '${HelperFunctions.truncateFloat(accuracy, 2)}%');
+
+        var missNAccTxt:String = (FlxG.save.data.accuracyDisplay) ? ' | Combo Breaks: ${PlayState.misses} $accTxt | ${GenerateLetterRank(accuracy)}' : "";
+
+        return '$npsTxt' + ((!PlayStateChangeables.botPlay || PlayState.loadRep) ? '$scoreTxt$missNAccTxt' : "");
+        /*return
          (FlxG.save.data.npsDisplay ?																							// NPS Toggle
          "NPS: " + nps + " (Max " + maxNPS + ")" + (!PlayStateChangeables.botPlay || PlayState.loadRep ? " | " : "") : "") +								// 	NPS
          (!PlayStateChangeables.botPlay || PlayState.loadRep ? "Score:" + (Conductor.safeFrames != 10 ? score + " (" + scoreDef + ")" : "" + score) + 		// Score
          (FlxG.save.data.accuracyDisplay ?																						// Accuracy Toggle
          " | Combo Breaks:" + PlayState.misses + 																				// 	Misses/Combo Breaks
          " | Accuracy:" + (PlayStateChangeables.botPlay && !PlayState.loadRep ? "N/A" : HelperFunctions.truncateFloat(accuracy, 2) + " %") +  				// 	Accuracy
-         " | " + GenerateLetterRank(accuracy) : "") : ""); 																		// 	Letter Rank
+         " | " + GenerateLetterRank(accuracy) : "") : "");*/ 																		// 	Letter Rank
+    }
+    
+    //Goddammit Brandon.
+    public static function PsychScoreTxt(songScore:Int, misses:Int, accuracy:Float, nps:Int, maxNPS:Int) {
+        var ratingStuff:Array<Dynamic> = [
+            ["?", (accuracy <= 0)],
+            ['You Suck!', (accuracy < 20)],
+            ['Shit', (accuracy < 40)],
+            ['Bad', (accuracy < 50)],
+            ['Bruh', (accuracy < 60)],
+            ['Meh', (accuracy < 69)],
+            ['Nice', (accuracy < 70)],
+            ['Good', (accuracy < 80)],
+            ['Great', (accuracy < 90)],
+            ['Sick!', (accuracy < 100)],
+            ['Perfect!!', (accuracy >= 100)]
+        ];
+        var daRating:String = "?";
+        for (thing in ratingStuff) {
+            if (thing[1]) {
+                daRating = thing[0];
+                break;
+            }
+        }
+        //I dont think this should be here cuz psych ui but ok
+        var prefix = (FlxG.save.data.npsDisplay) ? "NPS: " + nps + " (Max " + maxNPS + ") | " : "";
+        var daResult = '${prefix}Score: $songScore | Misses: $misses | Rating: $daRating';
+        if (daRating != "?") {
+            var fcIndex:Int = [
+                (PlayState.misses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods == 0),
+                (PlayState.misses == 0 && PlayState.bads == 0 && PlayState.shits == 0 && PlayState.goods >= 1),
+                (PlayState.misses == 0),
+                (PlayState.misses < 10),
+                true
+            ].indexOf(true);
+            var fcNames:Array<String> = [
+                "PFC",
+                "GFC",
+                "FC",
+                "SDCB",
+                "Clear"
+            ];
+            daResult += ' (${HelperFunctions.truncateFloat(accuracy, 2)}%) - ${fcNames[fcIndex]}';
+        }
+        return daResult;
     }
 }
