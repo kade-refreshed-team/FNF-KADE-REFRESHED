@@ -1,0 +1,19 @@
+setZoom | 0.9
+
+newSprite | stageBack, -600, -200
+setGraphic | stages/stage/stageback
+setScroll | 0.9, 0.9
+
+newSprite | stageFront, -650, 600
+setGraphic | stages/stage/stagefront
+setScale | 1.1, 1.1, true
+
+newSprite | stageCurtains, -500, -300
+setGraphic | stages/stage/stagecurtains
+setScroll | 1.3, 1.3
+setScale | 0.9, 0.9, true
+
+camOffsets | bf, 0, 0
+addChar | gf, setPos, 400, 130
+addChar | bf, offsetPos, 0, 0
+addChar | dad, setPos, 100, 100

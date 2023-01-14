@@ -16,7 +16,7 @@ class CoolUtil
 	public static function coolStringFile(path:String):Array<String>
 		return [for (line in path.trim().split('\n')) line.trim()];
 
-	public static function numberArray(max:Int, ?min = 0):Array<Int>
+	public static function numberArray(max:Int, ?min:Int = 0):Array<Int>
 		return [for (i in min...max) i];
 
 	public static function stringColor(color:String) {

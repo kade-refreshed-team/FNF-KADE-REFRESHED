@@ -11,11 +11,6 @@
   },
   "animations": [
     {
-      "name": "hey",
-      "prefix": "spooky kids YEAH!!",
-      "offsets": [59, -20]
-    },
-    {
       "name": "singLEFT",
       "prefix": "note sing left",
       "offsets": [130, -10]

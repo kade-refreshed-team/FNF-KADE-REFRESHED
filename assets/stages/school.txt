@@ -1,0 +1,60 @@
+//It's weird how I dont have to do any code to make comments work here.
+
+setZoom | 1
+
+newSprite | bgSky, 0, 0
+setGraphic | stages/school/weebSky
+setScroll | 0.1, 0.1
+setScale | 6, 6, true
+setAntialiasing | false
+
+//They have weird scaling with these so imma not scale these
+newSprite | bgSchool, -200, 0
+setGraphic | stages/school/weebSchool
+setScroll | 0.6, 0.9
+setAntialiasing | false
+
+newSprite | bgStreet, -200, 0
+setGraphic | stages/school/weebStreet
+setScroll | 0.95, 0.95
+setAntialiasing | false
+
+newSprite | fgTrees, -30, 130
+setGraphic | stages/school/weebTreesBack
+setScroll | 0.9, 0.9
+setAntialiasing | false
+
+newSprite | bgTrees, -580, -800
+	//there are four types of setGraphic functions.
+	//setGraphic: Just a regular graphic.
+	//setFrames: Loads a XML to seperate the graphic into frames. Used for anims.
+	//setPackerFrames: Loads a TXT to seperate the graphic into frames.
+	//setGridFrames: Seperates the graphic by specified numbers into frames.
+setPackerFrames | stages/school/weebTrees, 512, 512
+	//for int arrays for indice and int anims (int anims mainly for grid frames),
+	//adding a dash means LEFT_NUMBER to RIGHT_NUMBER
+	//if you're not doing num to num, seperate each number with a ":".
+	//like this: [0:2:4:6:8:10]
+	//note that you cant combine num to num and colon array.
+addIntAnim | treeLoop, [0-18], 12, loop
+setScroll | 0.85, 0.85
+setAntialiasing | false
+
+newSprite | treeLeaves, -200, -40
+setFrames | stages/school/petals
+addAnim | leaves, PETALS ALL, 24, loop
+setScroll | 0.85, 0.85
+setAntialiasing | false
+
+newSprite | bgGirls, -100, 190
+setFrames | stages/school/bgFreaks
+addIndiceAnim | danceLeft, BG girls group, [0-14], 24, first
+addIndiceAnim | danceRight, BG girls group, [15-30], 24, special
+setScroll | 0.9, 0.9
+setScale | 6, 6, true
+setAntialiasing | false
+
+camOffsets | bf, -100, -100
+addChar | gf, offsetPos, 180, 300
+addChar | bf, offsetPos, 200, 220
+addChar | dad, setPos, 100, 100

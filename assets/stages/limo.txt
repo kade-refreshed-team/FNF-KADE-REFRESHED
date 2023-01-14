@@ -1,0 +1,23 @@
+setZoom | 0.9
+
+newSprite | bg, -120, -50
+setGraphic | stages/limo/limoSunset
+setScroll | 0.1, 0.1
+
+newSprite | bgLimo, -200, 480
+setFrames | stages/limo/bgLimo
+addAnim | drive, background limo pink, 24, loop
+setScroll | 0.4, 0.4
+
+newSprite | fastCar, -300, 160
+setGraphic | stages/limo/fastCarLol
+
+addChar | gf, setPos, 400, 130
+
+newSprite | limo, -120, 550
+setFrames | stages/limo/limoDrive
+addAnim | drive, Limo stage, 24, loop
+
+camOffsets | bf, -200, 0
+addChar | bf, offsetPos, 260, -220
+addChar | dad, setPos, 100, 100

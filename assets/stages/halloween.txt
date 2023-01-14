@@ -1,0 +1,9 @@
+newSprite | halloweenBG, -200, -100
+setFrames | stages/spooky/halloween_bg
+addAnim | idle, halloweem bg0, 24, first
+addAnim | lightning, halloween bg lightning strike, 24, special
+
+camOffsets | bf, 0, 0
+addChar | gf, setPos, 400, 130
+addChar | bf, offsetPos, 0, 0
+addChar | dad, setPos, 100, 100
