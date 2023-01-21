@@ -44,9 +44,11 @@ class MainMenuState extends base.MusicBeatState
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
 	public static var finishedFunnyMove:Bool = false;
+	var isVsRG:Bool = false;
 
 	override function create()
 	{
+		isVsRG = (openfl.Assets.exists("assets/This is vs rg.txt"));
 		#if windows
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
@@ -143,6 +145,13 @@ class MainMenuState extends base.MusicBeatState
 
 		if (!selectedSomethin)
 		{
+			if (FlxG.keys.justPressed.R && isVsRG) {
+				persistentUpdate = false;
+				persistentDraw = true;
+				openSubState(new menus.CoolRgStoryMenu());
+				return;
+			}
+
 			if (controls.UP_P)
 			{
 				FlxG.sound.play(Paths.sound('scrollMenu'));

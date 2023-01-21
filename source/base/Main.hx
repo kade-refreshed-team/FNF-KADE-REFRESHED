@@ -1,25 +1,23 @@
 package base;
 
-
 import webm.WebmPlayer;
-import openfl.display.BlendMode;
-import openfl.text.TextFormat;
-import openfl.display.Application;
 import flixel.util.FlxColor;
 import flixel.FlxG;
 import flixel.FlxGame;
 import flixel.FlxState;
-import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
 import openfl.display.Sprite;
 import openfl.events.Event;
+#if windows
+import Discord.DiscordClient;
+#end
 
 class Main extends Sprite
 {
 	var gameWidth:Int = 1280; // Width of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
-	var initialState:Class<FlxState> = menus.Caching; // The FlxState the game starts with.
+	var initialState:Class<FlxState> = #if (sys) menus.Caching#else menus.TitleState#end; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var framerate:Int = 120; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
@@ -81,12 +79,33 @@ class Main extends Sprite
 
 		addChild(game);
 
+		initStuff();
+
 		#if !mobile
 		fpsCounter = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsCounter);
 		toggleFPS(FlxG.save.data.fps);
 
 		#end
+	}
+
+	function initStuff() {
+		#if sys
+		if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
+			sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");
+		#end
+
+		#if windows
+		DiscordClient.initialize();
+		lime.app.Application.current.onExit.add (function (exitCode) {
+			DiscordClient.shutdown();
+		 });
+		#end
+
+		settings.PlayerSettings.init();
+		FlxG.save.bind('funkin', 'ninjamuffin99');
+		settings.KadeEngineData.initSave();
+		utils.Highscore.load();
 	}
 
 	var game:FlxGame;

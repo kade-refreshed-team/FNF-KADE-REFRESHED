@@ -1,0 +1,28 @@
+newSprite | bg, -1000, -300
+setGraphic | stages/warmup/sky
+setScroll | 0.9, 0.9
+setScale | 2, 2, true
+
+newSprite | build, -900, 100
+setGraphic | stages/warmup/buildings
+setScroll | 0.9, 0.9
+setScale | 1.52, 1.52, true
+
+newSprite | fg, -800, 480
+setGraphic | stages/warmup/grass
+setScroll | 0.8, 0.8
+setScale | 1.52, 1.45, true
+
+newSprite | scren, 0, 0
+setGraphic | stages/warmup/screen
+setScroll | 0.77, 0.77
+setScale | 1.31, 1.31, true
+
+newSprite | stag, -460, 500
+setGraphic | stages/warmup/stage
+setScroll | 0.95, 0.95
+setScale | 1.59, 1.5, true
+
+addChar | gf, setPos, -190, 1080
+addChar | bf, setPos, 320, 150
+addChar | dad, setPos, -380, 100

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="storybar.png">
+	<!-- Created with Adobe Animate version 23.0.0.407 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="flash0000" x="2" y="2" width="596" height="335"/>
+	<SubTexture name="flash0001" x="603" y="2" width="596" height="335"/>
+	<SubTexture name="flash0002" x="1204" y="2" width="596" height="335"/>
+	<SubTexture name="flash0003" x="2" y="342" width="596" height="335"/>
+	<SubTexture name="flash0004" x="603" y="342" width="596" height="335"/>
+	<SubTexture name="flash0005" x="1204" y="342" width="596" height="335"/>
+	<SubTexture name="open ses0000" x="2" y="682" width="596" height="53" frameX="0" frameY="-141" frameWidth="596" frameHeight="335"/>
+	<SubTexture name="open ses0001" x="603" y="682" width="596" height="113" frameX="0" frameY="-111" frameWidth="596" frameHeight="335"/>
+	<SubTexture name="open ses0002" x="1204" y="682" width="596" height="173" frameX="0" frameY="-81" frameWidth="596" frameHeight="335"/>
+	<SubTexture name="open ses0003" x="2" y="860" width="596" height="233" frameX="0" frameY="-51" frameWidth="596" frameHeight="335"/>
+	<SubTexture name="open ses0004" x="603" y="860" width="596" height="294" frameX="0" frameY="-20" frameWidth="596" frameHeight="335"/>
+	<SubTexture name="open ses0005" x="1204" y="860" width="596" height="335"/>
+</TextureAtlas>

@@ -27,10 +27,6 @@ import ui.Alphabet;
 import base.Conductor;
 import base.Main;
 
-#if windows
-import Discord.DiscordClient;
-#end
-
 #if cpp
 import sys.thread.Thread;
 #end
@@ -53,60 +49,21 @@ class TitleState extends base.MusicBeatState
 
 	override public function create():Void
 	{
-		#if sys
-		if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
-			sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");
-		#end
-		
-		settings.PlayerSettings.init();
-
-		#if windows
-		DiscordClient.initialize();
-
-		Application.current.onExit.add (function (exitCode) {
-			DiscordClient.shutdown();
-		 });
-		 
-		#end
+        #if (polymod && sys)
+        polymod.Polymod.init({
+            modRoot: "./mods/",
+            dirs: utils.CoolUtil.coolStringFile(sys.io.File.getContent("./mods/modList.txt"))
+           });
+        #end
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
-		// DEBUG BULLSHIT
-
 		super.create();
 
-		// NGio.noLogin(APIStuff.API);
-
-		FlxG.save.bind('funkin', 'ninjamuffin99');
-
-		settings.KadeEngineData.initSave();
-
-		utils.Highscore.load();
-
-		/*if (FlxG.save.data.weekUnlocked != null)
-		{
-			// FIX LATER!!!
-			// WEEK UNLOCK PROGRESSION!!
-			// StoryMenuState.weekUnlocked = FlxG.save.data.weekUnlocked;
-
-			if (menus.StoryMenuState.weekUnlocked.length < 4)
-				menus.StoryMenuState.weekUnlocked.insert(0, true);
-
-			// QUICK PATCH OOPS!
-			if (!menus.StoryMenuState.weekUnlocked[0])
-				menus.StoryMenuState.weekUnlocked[0] = true;
-		}*/
-
-		#if FREEPLAY
-		FlxG.switchState(new FreeplayState());
-		#elseif CHARTING
-		FlxG.switchState(new ChartingState());
-		#else
 		new FlxTimer().start(1, function(tmr:FlxTimer)
 		{
 			startIntro();
 		});
-		#end
 	}
 
 	var logoBl:FlxSprite;

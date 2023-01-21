@@ -1,0 +1,40 @@
+{
+  "asset": "characters/RG",
+  "iconAsset": "RG",
+  "barColor": "#FFFFFF",
+  "commonSide": "dad",
+  "offsets": {
+    "x": 120,
+    "y": 420,
+    "camX": -250,
+    "camY": -170
+  },
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "RG idle",
+      "offsets": [395, 575]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "RG left",
+      "offsets": [616, 575]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "RG down",
+      "offsets": [500, 359]
+    },
+    {
+      "name": "singUP",
+      "prefix": "RG up",
+      "offsets": [371, 562]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "RG right",
+      "offsets": [392, 523]
+    }
+  ],
+  "scale": 0.4
+}

@@ -1,6 +1,5 @@
 package menus;
 
-import polymod.Polymod;
 import sys.FileSystem;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -23,15 +22,6 @@ class Caching extends base.MusicBeatState
         FlxG.mouse.visible = false;
 
         FlxG.worldBounds.set(0,0);
-
-        #if polymod
-        polymod.Polymod.init({
-            modRoot: "./mods/",
-            dirs: ["introMod"] //Just to test rn.
-           });
-
-        //polymod.Polymod.scan('./mods/');
-        #end
 
         text = new FlxText(FlxG.width / 2, FlxG.height / 2 + 300,0,"Loading...");
         text.size = 34;

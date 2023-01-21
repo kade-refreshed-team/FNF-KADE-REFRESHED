@@ -1,0 +1,2 @@
+Adding scripts to menus is not on my to do list rn.
+This file is to detect vs rg for the cool story menu.

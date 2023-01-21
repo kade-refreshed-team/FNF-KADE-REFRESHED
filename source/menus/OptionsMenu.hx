@@ -219,10 +219,12 @@ class OptionsMenu extends base.MusicBeatState
 				if (isCat)
 				{
 					if (currentSelectedCat.getOptions()[curSelected].press()) {
-						grpControls.remove(grpControls.members[curSelected]);
+						grpControls.remove(grpControls.members[curSelected], true);
 						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), true, false);
+						var scaledY = FlxMath.remapToRange(0, 0, 1, 0, 1.3);
+						ctrl.y = (scaledY * 120) + (FlxG.height * 0.48);
 						ctrl.isMenuItem = true;
-						grpControls.add(ctrl);
+						grpControls.insert(curSelected, ctrl);
 					}
 				}
 				else
@@ -241,7 +243,7 @@ class OptionsMenu extends base.MusicBeatState
 					curSelected = 0;
 				}
 				
-				changeSelection(curSelected);
+				changeSelection();
 			}
 		}
 		FlxG.save.flush();
@@ -257,12 +259,7 @@ class OptionsMenu extends base.MusicBeatState
 		
 		FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
 
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = grpControls.length - 1;
-		if (curSelected >= grpControls.length)
-			curSelected = 0;
+		curSelected = (curSelected + grpControls.length + change) % grpControls.length;
 
 		if (isCat)
 			currentDescription = currentSelectedCat.getOptions()[curSelected].getDescription();

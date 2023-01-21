@@ -257,8 +257,8 @@ class StoryMenuState extends base.MusicBeatState
 
 				grpWeekText.members[curWeek].startFlashing();
 				for (char in grpWeekCharacters.members) {
-					if (MenuCharacter.settings.exists("CONFIRM_" + char.animation.curAnim.name))
-						char.animation.play("CONFIRM_" + char.animation.curAnim.name);
+					if (MenuCharacter.settings.exists("CONFIRM_" + char.curChar))
+						char.animation.play("CONFIRM_" + char.curChar);
 				}
 				stopspamming = true;
 			}
