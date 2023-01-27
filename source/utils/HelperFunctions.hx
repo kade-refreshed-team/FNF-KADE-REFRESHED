@@ -144,9 +144,4 @@ class HelperFunctions
 		}
 		return stageSprites;
 	}
-
-	/*//When sprite has been initiated
-	static function parseLineWSprite() {
-		
-	}*/
 }

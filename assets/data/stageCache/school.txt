@@ -1,0 +1,8 @@
+//These graphics only have names because of how song/stage specific preloading works.
+sky | image | stages/school/weebSky
+school | image | stages/school/weebSchool
+street | image | stages/school/weebStreet
+backTrees | image | stages/school/weebTreesBack
+trees | image | stages/school/weebTrees, 512, 512
+petals | image | stages/school/petals
+girls | image | stages/school/bgFreaks

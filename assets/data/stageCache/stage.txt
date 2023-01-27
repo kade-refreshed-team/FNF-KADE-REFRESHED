@@ -1,0 +1,4 @@
+//These graphics only have names because of how song/stage specific preloading works.
+wall | image | stages/stage/stageback
+floor | image | stages/stage/stagefront
+curtains | image | stages/stage/stagecurtains

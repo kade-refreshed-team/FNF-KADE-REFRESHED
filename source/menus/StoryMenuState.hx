@@ -283,7 +283,7 @@ class StoryMenuState extends base.MusicBeatState
 				grpWeekText.members[i].visible = (i >= curWeek);
 			var ogValues = [txtWeekTitle.x, leftArrow.x, sprDifficulty.x,  rightArrow.x];
 			var yellowBG:FlxSprite = cast(members[members.indexOf(grpWeekCharacters) - 1], FlxSprite);
-			FlxTween.num(0, 1.2, 1, {onComplete: (twn:FlxTween) -> {LoadingState.loadAndSwitchState(new PlayState(), true);}}, function(num:Float) {
+			FlxTween.num(0, 1.2, 1, {onComplete: (twn:FlxTween) -> {openSubState(new funkin.PreloadingSubState());}}, function(num:Float) {
 				for (i=>text in grpWeekText.members)
 					text.targetY = i - curWeek + num * 2.2;
 				yellowBG.alpha = 1 - num;

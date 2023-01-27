@@ -15,8 +15,7 @@ class HealthIcon extends FlxSprite
 	public var char:String;
 	public var isPlayer:Bool = false;
 
-	public function new(char:String = 'bf', isPlayer:Bool = false)
-	{
+	public function new(char:String = 'bf', isPlayer:Bool = false) {
 		super();
 		this.isPlayer = isPlayer;
 		changeIcon(char);
@@ -24,24 +23,18 @@ class HealthIcon extends FlxSprite
 		scrollFactor.set();
 	}
 
-	public function changeIcon(char:String)
-	{
+	public function changeIcon(char:String) {
 		var dashIndex = char.indexOf("-");
 		var noDash:String = char.substring(0, (dashIndex > -1) ? dashIndex : char.length);
 
-		if (char != this.char)
-		{
-			var assetIndex = [
-				Assets.exists(Paths.image('game-side/icons/icon-$char')),
-				Assets.exists(Paths.image('game-side/icons/icon-$noDash')),
-				true
-			].indexOf(true);
-			var paths = [
-				'game-side/icons/icon-$char',
-				'game-side/icons/icon-$noDash',
-				'game-side/icons/icon-face'
-			];
-			loadGraphic(Paths.image(paths[assetIndex]), true, 150, 150);
+		if (char != this.char) {
+			var path = 'game-side/icons/icon-face';
+			if (Assets.exists(Paths.image('game-side/icons/icon-$char')))
+				path = 'game-side/icons/icon-$char';
+			else if (Assets.exists(Paths.image('game-side/icons/icon-$noDash')))
+				path = 'game-side/icons/icon-$noDash';
+
+			loadGraphic(Paths.image(path), true, 150, 150);
 
 			animation.add(char, [0, 1], 0, false, isPlayer);
 		}
@@ -49,8 +42,7 @@ class HealthIcon extends FlxSprite
 		this.char = char;
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (sprTracker != null)

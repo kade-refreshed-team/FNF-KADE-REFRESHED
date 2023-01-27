@@ -1,0 +1,6 @@
+//These graphics only have names because of how song/stage specific preloading works.
+sky | image | stages/warmup/sky
+buildings | image | stages/warmup/buildings
+grass | image | stages/warmup/grass
+screen | image | stages/warmup/screen
+stage | image | stages/warmup/stage

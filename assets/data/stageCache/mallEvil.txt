@@ -1,0 +1,4 @@
+//These graphics only have names because of how song/stage specific preloading works.
+bg | image | stages/mall/evilBG
+tree | image | stages/mall/evilTree
+snow | image | stages/mall/evilSnow

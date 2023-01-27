@@ -31,7 +31,7 @@ class OptionsMenu extends base.MusicBeatState
 		new OptionCategory("Gameplay", [
 			new DFJKOption(controls),
 			new DownscrollOption("Change the layout of the strumline."),
-			new GhostTapOption("Ghost Tapping is when you tap a direction and it doesn't give you a miss."),
+			new GhostTapOption("Allow tappping a direction and not getting a miss."),
 			new Judgement("Customize your Hit Timings (LEFT or RIGHT)"),
 			#if desktop
 			new FPSCapOption("Cap your FPS"),
@@ -43,14 +43,14 @@ class OptionsMenu extends base.MusicBeatState
 			new CustomizeGameplay("Drag'n'Drop Gameplay Modules around to your preference")
 		]),
 		new OptionCategory("Appearance", [
-			new DistractionsAndEffectsOption("Toggle stage distractions that can hinder your gameplay."),
-			new CamZoomOption("Toggle the camera zoom in-game."),
-			new PsychUIOption("Makes the UI Simulur to Psych."),
+			new DistractionsAndEffectsOption("Toggles stage distractions that can hinder your gameplay."),
+			new CamZoomOption("Toggles the camera zoom in-game."),
+			new PsychUIOption("Makes the UI similar to Psych Engine."),
 			#if desktop
-			new RainbowFPSOption("Make the FPS Counter Rainbow"),
-			new AccuracyOption("Display accuracy information."),
-			new NPSDisplayOption("Shows your current Notes Per Second."),
-			new SongPositionOption("Show the songs current position (as a bar)"),
+			new RainbowFPSOption("Make the FPS Counter rainbow."),
+			new AccuracyOption("Display accuracy information on the hud score text."),
+			new NPSDisplayOption("Shows your current Notes Per Second on the hud score text."),
+			new SongPositionOption("Shows how much of the song you've completed as a secondary bar."),
 			new CpuStrums("CPU's strumline lights up when a note hits it."),
 			#end
 		]),

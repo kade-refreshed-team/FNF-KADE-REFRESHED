@@ -1,0 +1,4 @@
+//These graphics only have names because of how song/stage specific preloading works.
+bg | image | stages/stage/halloween_bg
+thunderSound1 | sound | stageSounds/spooky-thunder_1
+thunderSound2 | sound | stageSounds/spooky-thunder_2

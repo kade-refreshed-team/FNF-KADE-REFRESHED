@@ -1,0 +1,2 @@
+//These graphics only have names because of how song/stage specific preloading works.
+evilSchool | image | stages/school/animatedEvilSchool

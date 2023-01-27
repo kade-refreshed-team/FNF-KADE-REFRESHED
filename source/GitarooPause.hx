@@ -58,13 +58,9 @@ class GitarooPause extends base.MusicBeatState
 		if (controls.ACCEPT)
 		{
 			if (replaySelect)
-			{
-				FlxG.switchState(new funkin.PlayState());
-			}
+				openSubState(new funkin.PreloadingSubState());
 			else
-			{
 				FlxG.switchState(new menus.MainMenuState());
-			}
 		}
 
 		super.update(elapsed);

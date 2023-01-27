@@ -222,16 +222,12 @@ class ResultsScreen extends FlxSubState
                 case 'dad-battle': songFormat = 'Dadbattle';
                 case 'philly-nice': songFormat = 'Philly';
             }
-
-            var poop:String = Highscore.formatSong(songFormat, PlayState.rep.replay.songDiff);
-
             music.fadeOut(0.3);
 
-            PlayState.SONG = Song.loadFromJson(poop, PlayState.rep.replay.songName);
+            PlayState.SONG = Song.loadFromJson(Highscore.diffArray[PlayState.rep.replay.songDiff], PlayState.rep.replay.songName);
             PlayState.isStoryMode = false;
             PlayState.storyDifficulty = PlayState.rep.replay.songDiff;
-            PlayState.storyWeek = 0;
-            LoadingState.loadAndSwitchState(new PlayState());
+            openSubState(new funkin.PreloadingSubState());
         }
 
         if (FlxG.keys.justPressed.F2 )
@@ -247,16 +243,12 @@ class ResultsScreen extends FlxSubState
                 case 'dad-battle': songFormat = 'Dadbattle';
                 case 'philly-nice': songFormat = 'Philly';
             }
-
-            var poop:String = Highscore.formatSong(songFormat, PlayState.storyDifficulty);
-
             music.fadeOut(0.3);
 
-            PlayState.SONG = Song.loadFromJson(poop, PlayState.SONG.song);
+            PlayState.SONG = Song.loadFromJson(Highscore.diffArray[PlayState.storyDifficulty], PlayState.SONG.song);
             PlayState.isStoryMode = false;
             PlayState.storyDifficulty = PlayState.storyDifficulty;
-            PlayState.storyWeek = 0;
-            LoadingState.loadAndSwitchState(new PlayState());
+            openSubState(new funkin.PreloadingSubState());
         }
 
 		super.update(elapsed);

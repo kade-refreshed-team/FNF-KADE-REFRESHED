@@ -1,0 +1,7 @@
+//These graphics only have names because of how song/stage specific preloading works.
+sky | image | stages/philly/sky
+city | image | stages/philly/city
+windows | image | stages/philly/win
+streetBehind | image | stages/philly/behindTrain
+train | image | stages/philly/train
+street | image | stages/philly/street

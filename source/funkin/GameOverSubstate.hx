@@ -7,7 +7,6 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 
-import funkin.Boyfriend;
 import menus.StoryMenuState;
 import menus.FreeplayState;
 import base.Conductor;
@@ -15,7 +14,7 @@ import menus.LoadingState;
 
 class GameOverSubstate extends base.MusicBeatSubstate
 {
-	var bf:Boyfriend;
+	var bf:Character;
 	var camFollow:FlxObject;
 
 	var stageSuffix:String = "";
@@ -31,7 +30,7 @@ class GameOverSubstate extends base.MusicBeatSubstate
 
 		Conductor.songPosition = 0;
 
-		bf = new Boyfriend(x, y, deadChr);
+		bf = new Character(x, y, deadChr, true);
 		add(bf);
 
 		camFollow = new FlxObject(bf.getGraphicMidpoint().x, bf.getGraphicMidpoint().y, 1, 1);
@@ -105,7 +104,7 @@ class GameOverSubstate extends base.MusicBeatSubstate
 			{
 				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
 				{
-					LoadingState.loadAndSwitchState(new PlayState());
+					openSubState(new funkin.PreloadingSubState());
 				});
 			});
 		}

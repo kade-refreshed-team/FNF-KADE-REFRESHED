@@ -18,7 +18,6 @@ import openfl.ui.Keyboard;
 import flixel.FlxSprite;
 import flixel.FlxG;
 
-import funkin.Boyfriend;
 import funkin.Character;
 import funkin.Note;
 import base.Conductor;
@@ -38,7 +37,7 @@ class GameplayCustomizeState extends base.MusicBeatState
     var text:FlxText;
     var blackBorder:FlxSprite;
 
-    var bf:Boyfriend;
+    var bf:Character;
     var dad:Character;
 
     var strumLine:FlxSprite;
@@ -79,7 +78,7 @@ class GameplayCustomizeState extends base.MusicBeatState
 
 		dad = new Character(100, 100, 'dad');
 
-        bf = new Boyfriend(770, 450, 'bf');
+        bf = new Character(770, 100, 'bf', true);
 
 		var camPos:FlxPoint = new FlxPoint(dad.getGraphicMidpoint().x + 400, dad.getGraphicMidpoint().y);
 

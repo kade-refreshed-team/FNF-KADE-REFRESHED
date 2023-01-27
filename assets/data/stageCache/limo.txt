@@ -1,0 +1,6 @@
+//These graphics only have names because of how song/stage specific preloading works.
+sunset | image | stages/limo/limoSunset
+backLimo | image | stages/limo/bfLimo
+dancer | image | stages/limo/limoDancer
+fastCar | image | stages/limo/fastCarLol
+frontLimo | image | stages/limo/limoDrive

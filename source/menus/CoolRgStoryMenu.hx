@@ -121,7 +121,7 @@ class CoolRgStoryMenu extends base.MusicBeatSubstate {
                         PlayState.storyDifficulty = PlayState.sicks = PlayState.goods = PlayState.bads = PlayState.shits = PlayState.campaignMisses = PlayState.campaignScore = 0;
                         PlayState.SONG = funkin.SongClasses.Song.loadFromJson("hard", PlayState.storyPlaylist[0]);
                         PlayState.storyWeek = 7 + i;
-                        LoadingState.loadAndSwitchState(new PlayState(), true);
+                        openSubState(new funkin.PreloadingSubState());
                     }});
                 }
                 return;

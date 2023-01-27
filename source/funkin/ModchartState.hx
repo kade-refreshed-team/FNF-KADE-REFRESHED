@@ -26,7 +26,6 @@ import flixel.FlxG;
 import base.Conductor;
 import funkin.PlayState;
 import funkin.Character;
-import funkin.Boyfriend;
 
 class ModchartState 
 {
@@ -255,7 +254,7 @@ class ModchartState
 	{				var oldboyfriendx = PlayState.boyfriend.x;
 					var oldboyfriendy = PlayState.boyfriend.y;
 					PlayState.instance.removeObject(PlayState.boyfriend);
-					PlayState.boyfriend = new Boyfriend(oldboyfriendx, oldboyfriendy, id);
+					PlayState.boyfriend = new Character(oldboyfriendx, oldboyfriendy, id, true);
 					PlayState.instance.addObject(PlayState.boyfriend);
 					PlayState.instance.iconP2.animation.play(id);
 	}
@@ -572,7 +571,7 @@ class ModchartState
 
 				Lua_helper.add_callback(lua,"getRenderedNoteCalcX", function(id:Int) {
 					if (PlayState.instance.notes.members[id].mustPress)
-						return PlayState.playerStrums.members[Math.floor(Math.abs(PlayState.instance.notes.members[id].noteData))].x;
+						return PlayState.playerStrums[Math.floor(Math.abs(PlayState.instance.notes.members[id].noteData))].x;
 					return PlayState.strumLineNotes.members[Math.floor(Math.abs(PlayState.instance.notes.members[id].noteData))].x;
 				});
 

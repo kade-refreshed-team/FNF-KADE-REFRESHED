@@ -63,12 +63,12 @@ class Character extends FlxSprite
 	public var curCharacter:String = 'bf';
 	var leftRightDancer:Bool = false;
 
+	public var stunned:Bool = false;
 	public var holdTimer:Float = 0;
 	public var hpcolor:FlxColor;
 
 	public var regX:Float = 770;
 	public var regY:Float = 100;
-	var settingOffsets:Bool = false;
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
@@ -78,29 +78,6 @@ class Character extends FlxSprite
 		animOffsets = new Map<String, Array<Float>>();
 		this.isPlayer = isPlayer;
 		loadCharacter(character);
-			/*case 'RG':
-				// DAD ANIMATION LOADING CODE
-				tex = Paths.getSparrowAtlas('game-side/characters/RG', 'shared');
-				frames = tex;
-				animation.addByPrefix('idle', 'RG idle', 24);
-				animation.addByPrefix('singUP', 'RG up', 24);
-				animation.addByPrefix('singRIGHT', 'RG right', 24);
-				animation.addByPrefix('singDOWN', 'RG down', 24);
-				animation.addByPrefix('singLEFT', 'RG left', 24);
-
-				addOffset('idle');
-				addOffset("singUP", -6, 54);
-				addOffset("singRIGHT", 0, -53);
-				addOffset("singLEFT", 186, 20);
-				addOffset("singDOWN", 30, -249);
-
-				playAnim('idle');
-
-				scale.set(0.4, 0.4);
-
-				setPosition(-187.6, 32);
-
-				hpcolor = 0xFF990000;*/
 	}
 
 	public function loadCharacter(charName:String) {
@@ -189,29 +166,28 @@ class Character extends FlxSprite
 		y = regY + data.offsets.y;
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		x = regX + data.offsets.x;
 		y = regY + data.offsets.y;
 
-		if (!curCharacter.startsWith('bf'))
-		{
-			if (animation.curAnim.name.startsWith('sing'))
-			{
-				holdTimer += elapsed;
-			}
-			if (holdTimer >= base.Conductor.stepCrochet * data.singLength * 0.001)
-			{
-				dance();
-				holdTimer = 0;
-			}
-		}
+		if (animation.curAnim == null || debugMode) return;
 
-		switch (curCharacter)
-		{
-			case 'gf':
-				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished)
-					playAnim('danceRight');
+		if (animation.curAnim.name.startsWith('sing'))
+			holdTimer += elapsed;
+		else if (isPlayer)
+			holdTimer = 0;
+
+		if (animation.curAnim.name == 'firstDeath' && animation.curAnim.finished)
+			playAnim('deathLoop');
+
+		var missEnded = (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished);
+		var singEnded = (holdTimer >= base.Conductor.stepCrochet * data.singLength * 0.001 && !isPlayer);
+		var hairEnded = (animation.curAnim.name == 'hairFall' && animation.curAnim.finished);
+		if (missEnded || singEnded || hairEnded) {
+			dance();
+			danced = (danced && !hairEnded);
+			if (singEnded)
+				holdTimer = 0;
 		}
 
 		super.update(elapsed);
@@ -222,70 +198,19 @@ class Character extends FlxSprite
 	/**
 	 * FOR GF DANCING SHIT
 	 */
-	public function dance()
-	{
-		if (!debugMode)
-		{
-			switch (curCharacter)
-			{
-				case 'gf':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
+	public function dance() {
+		if (debugMode || (animation.curAnim != null && animation.curAnim.name.startsWith('hair'))) return;
 
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
+		danced = !danced;
 
-				case 'gf-christmas':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
+		var danceAnim:String = 'idle';
+		if (leftRightDancer)
+			danceAnim = danced ? 'danceLeft' : "danceRight";
 
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'gf-car':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-				case 'gf-pixel':
-					if (!animation.curAnim.name.startsWith('hair'))
-					{
-						danced = !danced;
-
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-
-				case 'spooky':
-					danced = !danced;
-
-					if (danced)
-						playAnim('danceRight');
-					else
-						playAnim('danceLeft');
-				default:
-					playAnim('idle');
-			}
-		}
+		playAnim(danceAnim);
 	}
 
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
 		if (!animOffsets.exists(AnimName) || !animation.exists(AnimName))
 			return; //Prevent playing animation if unavailable.
 
@@ -299,20 +224,12 @@ class Character extends FlxSprite
 		else
 			offset.set(0, 0);
 
-		if (curCharacter == 'gf')
-		{
-			if (AnimName == 'singLEFT')
-			{
-				danced = true;
-			}
-			else if (AnimName == 'singRIGHT')
-			{
-				danced = false;
-			}
-
-			if (AnimName == 'singUP' || AnimName == 'singDOWN')
-			{
-				danced = !danced;
+		if (data.commonSide == "gf" && leftRightDancer) {
+			danced = switch(AnimName) {
+				case "singLEFT": true;
+				case "singRIGHT": false;
+				case "singUP" | "singDOWN": !danced;
+				default: danced;
 			}
 		}
 	}

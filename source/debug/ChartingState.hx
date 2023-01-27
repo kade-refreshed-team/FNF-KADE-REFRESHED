@@ -879,7 +879,7 @@ class ChartingState extends base.MusicBeatState
 			PlayState.SONG = _song;
 			FlxG.sound.music.stop();
 			vocals.stop();
-			LoadingState.loadAndSwitchState(new PlayState());
+			openSubState(new funkin.PreloadingSubState());
 		}
 
 		if (FlxG.keys.justPressed.E)

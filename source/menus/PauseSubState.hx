@@ -138,7 +138,7 @@ class PauseSubState extends base.MusicBeatSubstate
 						PlayState.instance.remove(PlayState.instance.videoSprite);
 						PlayState.instance.removedVideo = true;
 					}
-					FlxG.resetState();
+					openSubState(new funkin.PreloadingSubState());
 				case "Exit to menu":
 					if (PlayState.instance.useVideo)
 					{

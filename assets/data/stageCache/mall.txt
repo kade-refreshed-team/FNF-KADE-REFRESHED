@@ -1,0 +1,8 @@
+//These graphics only have names because of how song/stage specific preloading works.
+walls | image | stages/mall/bgWalls
+upperBoppers | image | stages/mall/upperBop
+bgEscalator | image | stages/mall/bgEscalator
+tree | image | stages/mall/christmasTree
+bottomBoppers | image | stages/mall/bottomBop
+snow | image | stages/mall/fgSnow
+santa | image | stages/mall/santa

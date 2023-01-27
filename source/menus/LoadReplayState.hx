@@ -40,22 +40,19 @@ class LoadReplayState extends base.MusicBeatState
 	override function create()
 	{
 		var menuBG:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menu-side/menuDesat'));
-        #if sys
-		controlsStrings = sys.FileSystem.readDirectory(Sys.getCwd() + "/assets/replays/");
-        #end
-		trace(controlsStrings);
-
-        controlsStrings.sort(Reflect.compare);
 
 		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')));
-
-        for(i in 0...controlsStrings.length)
-        {
-            var string:String = controlsStrings[i];
-            actualNames[i] = string;
-			var rep:Replay = Replay.LoadReplay(string);
-            controlsStrings[i] = string.split("time")[0] + " " + (rep.replay.songDiff == 2 ? "HARD" : rep.replay.songDiff == 1 ? "EASY" : "NORMAL");
-        }
+        #if sys
+		var daReplays = sys.FileSystem.readDirectory(Sys.getCwd() + "/assets/replays/");
+		daReplays.sort(Reflect.compare);
+		for (daReplay in daReplays) {
+			var rep:Replay = Replay.LoadReplay(daReplay);
+			var daSong = getSongFromName(rep.replay.songName);
+			if (daSong == null) continue;
+            controlsStrings.push(daReplay.split("time")[0] + " " + daSong.diffs[rep.replay.songDiff].toUpperCase());
+			actualNames.push(daReplay);
+		}
+        #end
 
         if (controlsStrings.length == 0)
             controlsStrings.push("No Replays...");
@@ -94,6 +91,14 @@ class LoadReplayState extends base.MusicBeatState
 		changeSelection(0);
 
 		super.create();
+	}
+
+	function getSongFromName(songName:String) {
+		for (song in songs) {
+			if (song.songName == songName)
+				return song;
+		}
+		return null;
 	}
 
     public function getWeekNumbFromSong(songName:String):Int
@@ -135,7 +140,7 @@ class LoadReplayState extends base.MusicBeatState
 					PlayState.isStoryMode = false;
 					PlayState.storyDifficulty = PlayState.rep.replay.songDiff;
 					PlayState.storyWeek = getWeekNumbFromSong(PlayState.rep.replay.songName);
-					LoadingState.loadAndSwitchState(new PlayState());
+					openSubState(new funkin.PreloadingSubState());
 				}
 				else
 				{

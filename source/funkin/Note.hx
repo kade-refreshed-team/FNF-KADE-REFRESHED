@@ -60,22 +60,18 @@ class Note extends FlxSprite
 
 		var daStage:String = PlayState.curStage;
 
-		//defaults if no noteStyle was found in chart
-		var noteTypeCheck:String = 'normal';
+		var noteTypeCheck:String = PlayState.SONG.noteStyle;
 
-		if (PlayState.SONG.noteStyle == null) {
-			switch(PlayState.storyWeek) {case 6: noteTypeCheck = 'pixel';}
-		} else {noteTypeCheck = PlayState.SONG.noteStyle;}
+		if (PlayState.SONG.noteStyle == null && PlayState.storyWeek == 6)
+			noteTypeCheck = 'pixel';
 
-		switch (noteTypeCheck)
-		{
+		switch (noteTypeCheck) {
 			case 'pixel':
 				loadGraphic(Paths.image('game-side/pixelUI/arrows-pixels','week6'), true, 17, 17);
 
 				animation.add("scroll", [noteData + 4]);
 
-				if (isSustainNote)
-				{
+				if (isSustainNote) {
 					loadGraphic(Paths.image('game-side/pixelUI/arrowEnds','week6'), true, 7, 6);
 
 					animation.add("hold", [noteData]);
@@ -109,8 +105,7 @@ class Note extends FlxSprite
 		if (FlxG.save.data.downscroll && sustainNote) 
 			flipY = true;
 
-		if (isSustainNote && prevNote != null)
-		{
+		if (isSustainNote && prevNote != null) {
 			noteScore * 0.2;
 			alpha = 0.6;
 
@@ -119,11 +114,10 @@ class Note extends FlxSprite
 			updateHitbox();
 			x -= width / 2;
 
-			if (PlayState.curStage.startsWith('school'))
+			if (noteTypeCheck == "pixel")
 				x += 30;
 
-			if (prevNote.isSustainNote)
-			{
+			if (prevNote.isSustainNote) {
 				prevNote.animation.play('hold');
 
 				if(FlxG.save.data.scrollSpeed != 1)
@@ -136,8 +130,7 @@ class Note extends FlxSprite
 		}
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		canBeHit = mustPress && ((isSustainNote && strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 1.5) && strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))

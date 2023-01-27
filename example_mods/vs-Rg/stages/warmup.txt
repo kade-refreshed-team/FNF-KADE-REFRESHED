@@ -23,6 +23,5 @@ setGraphic | stages/warmup/stage
 setScroll | 0.95, 0.95
 setScale | 1.59, 1.5, true
 
-addChar | gf, setPos, -190, 1080
 addChar | bf, setPos, 320, 150
 addChar | dad, setPos, -380, 100

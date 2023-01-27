@@ -12,7 +12,6 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
-import funkin.Boyfriend;
 import funkin.Character;
 
 /**
@@ -20,14 +19,12 @@ import funkin.Character;
  */
 class AnimationDebug extends FlxState
 {
-	var bf:Boyfriend;
-	var dad:Character;
 	var char:Character;
+	var shadow:Character;
 	var textAnim:FlxText;
 	var dumbTexts:FlxTypedGroup<FlxText>;
 	var animList:Array<String> = [];
 	var curAnim:Int = 0;
-	var isDad:Bool = true;
 	var daAnim:String = 'spooky';
 	var camFollow:FlxObject;
 
@@ -45,50 +42,29 @@ class AnimationDebug extends FlxState
 		gridBG.scrollFactor.set(0, 0);
 		gridBG.color = 0x2e2c2c;
 		add(gridBG);
+		
+		var bfCharData:funkin.Character.CharJson = haxe.Json.parse(openfl.Assets.getText('assets/characters/bf.json'));
+		var charData:funkin.Character.CharJson = bfCharData;
+		try {
+			charData = haxe.Json.parse(openfl.Assets.getText('assets/characters/$daAnim.json'));
+		} catch(e) {
+			lime.app.Application.current.window.alert('Character file "$daAnim" could not be parsed.\n$e\nThe game will instead load BF.', "Character Parsing Fail");
+			daAnim = "bf";
+			charData = bfCharData;
+		}
 
-		var addanimtext = new FlxUIInputText(10, 10, 70, 'idle', 8);
-		//add(addanimtext);
-
-		var addanimbutton:FlxButton = new FlxButton(addanimtext.x, 20, "Reload Audio", function()
-		{
-			animList.push(addanimtext.text);
-			updateTexts();
-			dad.animation.add(addanimtext.text, null);
-		});
-		//add(addanimbutton);
-
-		var shadow:Character = new Character(0, 0, daAnim);
+		var isPlayer = (charData.commonSide == "bf");
+		shadow = new Character(0, 0, daAnim, isPlayer);
 		shadow.screenCenter();
 		shadow.debugMode = true;
 		shadow.alpha = 0.5;
 		shadow.color = 0x000000;
 		add(shadow);
 
-		if (daAnim == 'bf'){
-			isDad = false;
-			shadow.flipX = true;
-		}
-
-		if (isDad)
-		{
-			dad = new Character(0, 0, daAnim);
-			dad.screenCenter();
-			dad.debugMode = true;
-			add(dad);
-
-			char = dad;
-			dad.flipX = false;
-		}
-		else
-		{
-			bf = new Boyfriend(0, 0);
-			bf.screenCenter();
-			bf.debugMode = true;
-			add(bf);
-
-			char = bf;
-			bf.flipX = false;
-		}
+		char = new Character(0, 0, daAnim, isPlayer);
+		char.screenCenter();
+		char.debugMode = true;
+		add(char);
 
 		dumbTexts = new FlxTypedGroup<FlxText>();
 		add(dumbTexts);
@@ -146,7 +122,7 @@ class AnimationDebug extends FlxState
 			FlxG.camera.zoom -= 0.25;
 
 		if (FlxG.keys.justPressed.ESCAPE)
-			FlxG.switchState(new funkin.PlayState());
+			openSubState(new funkin.PreloadingSubState());
 
 		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
 		{

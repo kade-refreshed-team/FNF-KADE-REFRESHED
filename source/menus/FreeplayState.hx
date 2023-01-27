@@ -175,7 +175,7 @@ class FreeplayState extends base.MusicBeatState
 			PlayState.storyDifficulty = curDifficulty;
 			PlayState.storyWeek = songs[curSelected].week;
 			trace('CUR WEEK' + PlayState.storyWeek);
-			menus.LoadingState.loadAndSwitchState(new PlayState());
+			openSubState(new funkin.PreloadingSubState());
 		}
 
 		for (text in grpSongs.members)
