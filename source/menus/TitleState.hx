@@ -60,10 +60,7 @@ class TitleState extends base.MusicBeatState
 
 		super.create();
 
-		new FlxTimer().start(1, function(tmr:FlxTimer)
-		{
-			startIntro();
-		});
+		startIntro();
 	}
 
 	var logoBl:FlxSprite;
