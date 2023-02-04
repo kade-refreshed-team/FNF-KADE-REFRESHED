@@ -17,7 +17,7 @@ import llua.Macro.*;
  * Most Code Written By Srt
  */
 class LuaScript extends scripts.BaseScript {
-	static var currentLua:LuaScript;
+	static var currentLua:LuaScript = null;
 
     var luaState:State;
 	var script:Dynamic = {"parent": null};
@@ -64,7 +64,7 @@ class LuaScript extends scripts.BaseScript {
 		Lua.pushcfunction(luaState, Callable.fromStaticFunction(callEnumIndex));
 		Lua.settable(luaState, enumMetatableIndex);
 
-		script = {
+		script = { //Overriding `set_parent` wasnt working for me soo.....
 			"import": importClass,
 			"filePath": filePath,
 			"parent": parent
@@ -85,18 +85,21 @@ class LuaScript extends scripts.BaseScript {
     }
 
     override public function execute() {
+		var lastLua:LuaScript = currentLua;
 		currentLua = this;
 
 		script = { //Overriding `set_parent` wasnt working for me soo.....
 			"import": importClass,
 			"filePath": filePath,
 			"parent": parent
-		}
+		};
 		specialVars[0] = script;
 
         if (LuaL.dostring(luaState, openfl.Assets.getText(filePath)) != 0)
             lime.app.Application.current.window.alert('Lua file "$filePath" could not be ran.\n${Lua.tostring(luaState, -1)}\nThe game will not utilize this script.', "Lua Running Fail");
-    }
+
+		currentLua = lastLua;
+	}
 
     static inline function scriptTrace(s:String):Int {
 		trace('Lua Value: $s | Haxe Value: ${currentLua.fromLua(-2)}');
@@ -104,18 +107,22 @@ class LuaScript extends scripts.BaseScript {
 	}
 
     override public function setVar(name:String, newValue:Dynamic) {
+		var lastLua:LuaScript = currentLua;
         currentLua = this;
         toLua(newValue);
 		Lua.setglobal(luaState, name);
+		currentLua = lastLua;
     }
 
     override public function callFunc(name:String, ?params:Array<Dynamic>):Dynamic {
+		var lastLua:LuaScript = currentLua;
 		currentLua = this;
+
 		script = { //Overriding `set_parent` wasnt working for me soo.....
 			"import": importClass,
 			"filePath": filePath,
 			"parent": parent
-		}
+		};
 		specialVars[0] = script;
 
         Lua.settop(luaState, 0);
@@ -142,6 +149,7 @@ class LuaScript extends scripts.BaseScript {
 		//Grabs and returns the result of the function.
         var v = fromLua(Lua.gettop(luaState));
         Lua.settop(luaState, 0);
+		currentLua = lastLua;
         return v;
     }
 
