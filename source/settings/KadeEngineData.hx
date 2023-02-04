@@ -5,30 +5,41 @@ import flixel.FlxG;
 
 import base.Main;
 
-class KadeEngineData
-{
-    public static function initSave()
-    {
-        if (FlxG.save.data.newInput == null)
-			FlxG.save.data.newInput = true;
+class KadeEngineData {
+    public static function initSave() {
+		var defaults:Map<String, Dynamic> = [
+			"newInput" => true,
+			"ghost" => true,
+			"downscroll" => false,
+			"dfjk" => false,
+			"accuracyDisplay" => true,
+			"offset" => 0,
+			"songPosition" => false,
+			"fps" => true,
+			"fpsRain" => false,
+			"fpsCap" => 120,
+			"scrollSpeed" => 1,
+			"npsDisplay" => false,
+			"frames" => 10,
+			"accuracyMod" => 1,
+			"watermark" => true,
+			"distractions" => true,
+			"flashing" => true,
+			"resetButton" => false,
+			"botplay" => false,
+			"cpuStrums" => false,
+			"strumline" => false,
+			"customStrumLine" => 0,
+			"camzoom" => true,
+			"scoreScreen" => true,
+			"psychui" => false,
+			"ogfreeplay" => false
+		];
 
-		if (FlxG.save.data.downscroll == null)
-			FlxG.save.data.downscroll = false;
-
-		if (FlxG.save.data.dfjk == null)
-			FlxG.save.data.dfjk = false;
-			
-		if (FlxG.save.data.accuracyDisplay == null)
-			FlxG.save.data.accuracyDisplay = true;
-
-		if (FlxG.save.data.offset == null)
-			FlxG.save.data.offset = 0;
-
-		if (FlxG.save.data.songPosition == null)
-			FlxG.save.data.songPosition = false;
-
-		if (FlxG.save.data.fps == null)
-			FlxG.save.data.fps = false;
+		for (setting in defaults.keys()) {
+			if (Reflect.field(FlxG.save.data, setting) == null)
+				Reflect.setField(FlxG.save.data, setting, defaults[setting]);
+		}
 
 		if (FlxG.save.data.changedHit == null)
 		{
@@ -37,65 +48,8 @@ class KadeEngineData
 			FlxG.save.data.changedHit = false;
 		}
 
-		if (FlxG.save.data.fpsRain == null)
-			FlxG.save.data.fpsRain = false;
-
-		if (FlxG.save.data.fpsCap == null)
-			FlxG.save.data.fpsCap = 120;
-
 		if (FlxG.save.data.fpsCap > 285 || FlxG.save.data.fpsCap < 60)
 			FlxG.save.data.fpsCap = 120; // baby proof so you can't hard lock ur copy of kade engine
-		
-		if (FlxG.save.data.scrollSpeed == null)
-			FlxG.save.data.scrollSpeed = 1;
-
-		if (FlxG.save.data.npsDisplay == null)
-			FlxG.save.data.npsDisplay = false;
-
-		if (FlxG.save.data.frames == null)
-			FlxG.save.data.frames = 10;
-
-		if (FlxG.save.data.accuracyMod == null)
-			FlxG.save.data.accuracyMod = 1;
-
-		if (FlxG.save.data.watermark == null)
-			FlxG.save.data.watermark = true;
-
-		if (FlxG.save.data.ghost == null)
-			FlxG.save.data.ghost = true;
-
-		if (FlxG.save.data.distractions == null)
-			FlxG.save.data.distractions = true;
-
-		if (FlxG.save.data.flashing == null)
-			FlxG.save.data.flashing = true;
-
-		if (FlxG.save.data.resetButton == null)
-			FlxG.save.data.resetButton = false;
-		
-		if (FlxG.save.data.botplay == null)
-			FlxG.save.data.botplay = false;
-
-		if (FlxG.save.data.cpuStrums == null)
-			FlxG.save.data.cpuStrums = false;
-
-		if (FlxG.save.data.strumline == null)
-			FlxG.save.data.strumline = false;
-		
-		if (FlxG.save.data.customStrumLine == null)
-			FlxG.save.data.customStrumLine = 0;
-
-		if (FlxG.save.data.camzoom == null)
-			FlxG.save.data.camzoom = true;
-
-		if (FlxG.save.data.scoreScreen == null)
-			FlxG.save.data.scoreScreen = true;
-
-		if (FlxG.save.data.psychui == null)
-			FlxG.save.data.psychui = false;
-
-		if (FlxG.save.data.ogfreeplay == null)
-			FlxG.save.data.ogfreeplay = false;
 
 		base.Conductor.recalculateTimings();
 		PlayerSettings.player1.controls.loadKeyBinds();

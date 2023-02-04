@@ -1,6 +1,5 @@
 package scripts;
 
-import haxe.DynamicAccess;
 import cpp.Callable;
 
 import llua.Lua;
@@ -371,7 +370,7 @@ class LuaScript extends scripts.BaseScript {
 			});
 			cast v;
 		} else {
-			var v:DynamicAccess<Any> = {};
+			var v:haxe.DynamicAccess<Any> = {};
 			loopTable(luaState, i, {
 				switch Lua.type(luaState, -2) {
 					case t if(t == Lua.LUA_TSTRING): v.set(Lua.tostring(luaState, -2), fromLua(-1));

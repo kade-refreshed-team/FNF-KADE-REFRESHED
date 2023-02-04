@@ -84,11 +84,11 @@ class Character extends FlxSprite
 		animOffsets = [];
 		curCharacter = charName;
 		try {
-			data = Json.parse(Assets.getText('assets/characters/$curCharacter.json'));
+			data = Json.parse(Assets.getText(Paths.json('characters/$curCharacter')));
 		} catch(e) {
 			lime.app.Application.current.window.alert('Character file "$curCharacter" could not be parsed.\n$e\nThe game will instead load BF.', "Character Parsing Fail");
 			curCharacter = "bf";
-			data = Json.parse(Assets.getText('assets/characters/bf.json'));
+			data = Json.parse(Assets.getText(Paths.json('characters/bf')));
 		}
 
 		if (data.scale == null) data.scale = 1;

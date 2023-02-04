@@ -1,5 +1,6 @@
 package base;
 
+import scripts.BaseScript;
 #if windows
 import Discord.DiscordClient;
 #end
@@ -18,21 +19,48 @@ class MusicBeatState extends FlxUIState
 	private var lastBeat:Float = 0;
 	private var lastStep:Float = 0;
 
+	private var autoUpdateSongPos:Bool = true;
+	private var floatStep:Float = 0;
 	private var curStep:Int = 0;
+	private var floatBeat:Float = 0;
 	private var curBeat:Int = 0;
-	private var controls(get, never):settings.Controls;
 
+	private var controls(get, never):settings.Controls;
 	inline function get_controls():settings.Controls
 		return settings.PlayerSettings.player1.controls;
 
-	override function create()
-	{
+	var script:BaseScript;
+	var scriptName:String;
+	@:unreflective var overridden:Bool = false;
+
+	public function new(?script_name:String) {
+		super();
+		
+		//fuck i accidentialy made this look similar to codename
+		//Trust me, I didn't copy-paste. I didn't even look at codename while typing this.
+		if (script_name == null) {
+			var classPath = Type.getClassName(Type.getClass(this));
+			script_name = classPath.substr(classPath.lastIndexOf(".") + 1, classPath.length);
+		}
+		scriptName = script_name;
+	}
+
+	public function tryCreate() {
+		script = BaseScript.makeScript('assets/data/states/$scriptName');
+		script.parent = this;
+		script.setVar("parent", this);
+		script.execute();
+
 		(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
 
-		if (transIn != null)
-			trace('reg ' + transIn.region);
+		var toOverride:Null<Bool> = script.callFunc("overrideState");
+		if (toOverride != null)
+			overridden = toOverride;
 
-		super.create();
+		script.callFunc('create');
+		if (!overridden)
+			create();
+		script.callFunc("createPost");
 	}
 
 
@@ -46,43 +74,59 @@ class MusicBeatState extends FlxUIState
 		FlxColor.fromRGB(255, 0 , 0)
 	];
 
+	public static var currentColor = 0;
+
 	var skippedFrames = 0;
 
-	override function update(elapsed:Float)
-	{
-		//everyStep();
-		var oldStep:Int = curStep;
+	override public function tryUpdate(elapsed:Float) {
+		var main:Main = cast (Lib.current.getChildAt(0), Main);
 
-		updateCurStep();
-		updateBeat();
+		if (FlxG.save.data.fpsRain && skippedFrames >= 6) {
+			if (currentColor >= array.length)
+				currentColor = 0;
+			main.changeFPSColor(array[currentColor]);
+			currentColor++;
+			skippedFrames = 0;
+		} else
+			skippedFrames++;
 
-		if (oldStep != curStep && curStep > 0)
-			stepHit();
+		if (main.getFPSCap() != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
+			main.setFPSCap(FlxG.save.data.fpsCap);
+		
+		if (persistentUpdate || subState == null) {
+			script.callFunc("update", [elapsed]);
 
-		if (FlxG.save.data.fpsRain && skippedFrames >= 6)
-			{
-				if (currentColor >= array.length)
-					currentColor = 0;
-				(cast (Lib.current.getChildAt(0), Main)).changeFPSColor(array[currentColor]);
-				currentColor++;
-				skippedFrames = 0;
+			if (autoUpdateSongPos) {
+				Conductor.songPosition += elapsed * 1000;
+
+				var oldStep:Int = curStep;
+
+				updateCurStep();
+				updateBeat();
+		
+				if (oldStep != curStep && curStep > 0)
+					tryStepHit();
 			}
-			else
-				skippedFrames++;
+			if (!overridden)
+				update(elapsed);
 
-		if ((cast (Lib.current.getChildAt(0), Main)).getFPSCap != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
-			(cast (Lib.current.getChildAt(0), Main)).setFPSCap(FlxG.save.data.fpsCap);
+			script.callFunc("updatePost", [elapsed]);
+		}
 
-		super.update(elapsed);
+		if (_requestSubStateReset) {
+			_requestSubStateReset = false;
+			resetSubState();
+		}
+		if (subState != null)
+			subState.tryUpdate(elapsed);
 	}
 
 	private function updateBeat():Void
 	{
 		lastBeat = curStep;
-		curBeat = Math.floor(curStep / 4);
+		floatBeat = floatStep / 4;
+		curBeat = Math.floor(floatBeat);
 	}
-
-	public static var currentColor = 0;
 
 	private function updateCurStep():Void
 	{
@@ -97,20 +141,28 @@ class MusicBeatState extends FlxUIState
 				lastChange = Conductor.bpmChangeMap[i];
 		}
 
-		curStep = lastChange.stepTime + Math.floor((Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet);
+		floatStep = lastChange.stepTime + (Conductor.songPosition - lastChange.songTime) / Conductor.stepCrochet;
+		curStep = Math.floor(floatStep);
 	}
 
-	public function stepHit():Void
-	{
-
+	public function tryStepHit():Void {
 		if (curStep % 4 == 0)
-			beatHit();
+			tryBeatHit();
+
+		if (!overridden)
+			stepHit();
+		script.callFunc("stepHit", [curStep]);
 	}
 
-	public function beatHit():Void
-	{
-		//do literally nothing dumbass
+	public function tryBeatHit():Void {
+		if (!overridden)
+			beatHit();
+		script.callFunc("beatHit", [curBeat]);
 	}
+
+	public function stepHit():Void {}
+
+	public function beatHit():Void {}
 	
 	public function fancyOpenURL(schmancy:String)
 	{

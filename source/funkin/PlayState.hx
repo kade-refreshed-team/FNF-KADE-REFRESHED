@@ -357,7 +357,7 @@ class PlayState extends MusicBeatState
 		boyfriend = preloadedAssets.get("bf");
 
 		curStage = SONG.stage;
-		stageSprites = HelperFunctions.parseStage('assets/stages/$curStage.txt', this);
+		stageSprites = HelperFunctions.parseStage(Paths.txt('stages/$curStage'), this);
 
 		switch (curStage) {
 			case "halloween":
@@ -1260,23 +1260,10 @@ class PlayState extends MusicBeatState
 			#end
 		}
 
-		if (startingSong)
-		{
-			if (startedCountdown)
-			{
-				Conductor.songPosition += FlxG.elapsed * 1000;
-				if (Conductor.songPosition >= 0)
+		if (startingSong) {
+			if (startedCountdown && Conductor.songPosition >= 0)
 					startSong();
-			}
-		}
-		else
-		{
-			// Conductor.songPosition = FlxG.sound.music.time;
-			Conductor.songPosition += FlxG.elapsed * 1000;
-			/*@:privateAccess
-				{
-					FlxG.sound.music._channel.
-			}*/
+		} else {
 			songPositionBar = Conductor.songPosition;
 
 			if (!paused)
