@@ -47,7 +47,7 @@ class TitleState extends base.MusicBeatState
 
 	var wackyImage:FlxSprite;
 
-	override public function create():Void {
+	override public function tryCreate() {
 		#if (polymod && sys)
         polymod.Polymod.init({
             modRoot: "./mods/",
@@ -55,6 +55,10 @@ class TitleState extends base.MusicBeatState
            });
         #end
 
+		super.tryCreate();
+	}
+
+	override public function create():Void {
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
 		super.create();
@@ -194,11 +198,7 @@ class TitleState extends base.MusicBeatState
 
 	var transitioning:Bool = false;
 
-	override function update(elapsed:Float)
-	{
-		if (FlxG.keys.justPressed.GRAVEACCENT)
-			FlxG.switchState(new menus.DoubleScriptTest());
-
+	override function update(elapsed:Float)	{
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
 		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
