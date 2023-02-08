@@ -105,6 +105,8 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
     
             "FlxG" => flixel.FlxG,
             "FlxSprite" => flixel.FlxSprite,
+            "FlxTween" => flixel.tweens.FlxTween,
+            "FlxEase" => flixel.tweens.FlxEase,
             "FlxText" => flixel.text.FlxText,
             "FlxTrail" => flixel.addons.effects.FlxTrail,
             "FlxBackdrop" => flixel.addons.display.FlxBackdrop,
@@ -112,6 +114,7 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
             "Paths" => utils.Paths,
             "Conductor" => base.Conductor,
             "PlayState" => funkin.PlayState,
+            "KadeEngineData" => settings.KadeEngineData,
     
             "Assets" => Assets
         ];

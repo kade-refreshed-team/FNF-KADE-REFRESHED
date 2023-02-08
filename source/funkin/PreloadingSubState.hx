@@ -40,7 +40,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
     }
 
     function preloadStuff() {
-        preloadedAssets.set("bf", new Character(770, 100, PlayState.SONG.player1, true));
+		cacheChar("bf", PlayState.SONG.player1, 770, 100, true);
 		cast (preloadedAssets["bf"], Character).alpha = 0.0001;
 		add(preloadedAssets["bf"]);
         preloadingText.text = "Preloading Specator...";
@@ -58,11 +58,11 @@ class PreloadingSubState extends base.MusicBeatSubstate {
             }
         }
         PlayState.SONG.gfVersion = daGF;
-        preloadedAssets.set("gf", new Character(400, 130, daGF));
+		cacheChar("gf", daGF, 400, 130, false);
 		cast (preloadedAssets["gf"], Character).alpha = 0.0001;
 		add(preloadedAssets["gf"]);
         preloadingText.text = "Preloading Opponent...";
-        preloadedAssets.set("dad", new Character(100, 100, PlayState.SONG.player2));
+		cacheChar("dad", PlayState.SONG.player2, 100, 100, false);
 		cast (preloadedAssets["dad"], Character).alpha = 0.0001;
 		add(preloadedAssets["dad"]);
 
@@ -74,12 +74,10 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 			case 'philly-nice':
 				PlayState.songLowercase = 'philly';
 		}
-        FlxG.sound.cache(Paths.inst(PlayState.SONG.song));
-        preloadedAssets.set("inst", Paths.inst(PlayState.SONG.song));
-        if (PlayState.SONG.needsVoices) {
-            FlxG.sound.cache(Paths.inst(PlayState.SONG.song));
-            preloadedAssets.set("vocals", Paths.voices(PlayState.SONG.song));
-        }
+        cacheSound("inst", Paths.inst(PlayState.SONG.song));
+        if (PlayState.SONG.needsVoices)
+			cacheSound("vocals", Paths.voices(PlayState.SONG.song));
+
         preloadingText.text = "Preloading Strumline...";
         generateStrums();
         preloadingText.text = "Preloading Song Notes...";
@@ -89,14 +87,10 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         var countdownToPreload = ["countdown/intro3", "countdown/intro2", "countdown/intro1", "countdown/introGo", "ready", "set", "go"];
         if (Assets.exists(Paths.songFile("customCountdown.txt", PlayState.SONG.song)))
             countdownToPreload = utils.CoolUtil.coolTextFile(Paths.songFile("customCountdown.txt", PlayState.SONG.song));
-        for (i in 0...4) { //Preload Sounds
-            FlxG.sound.cache(Paths.sound(countdownToPreload[i]));
-            preloadedAssets.set("countdownSound" + (3 - i), Paths.sound(countdownToPreload[i]));
-        }
-        for (i in 4...7) { //Preload Images
-            FlxG.bitmap.add(Paths.image("game-side/" + countdownToPreload[i]));
-            preloadedAssets.set("countdownImage" + (i - 4), Paths.image("game-side/" + countdownToPreload[i]));
-        }
+        for (i in 0...4) //Preload Sounds
+			cacheSound('countdownSound${3 - i}', Paths.sound(countdownToPreload[i]));
+        for (i in 4...7) //Preload Images
+			cacheImage('countdownImage${i - 4}', Paths.image("game-side/" + countdownToPreload[i]));
 
 		var daStage:Null<String> = PlayState.SONG.stage;
 		if (daStage == null) {
@@ -302,32 +296,39 @@ class PreloadingSubState extends base.MusicBeatSubstate {
             var daVars:Array<String> = line.split(" | ");
             switch (daVars[1].toLowerCase().trim()) {
                 case "character" | "char":
-                    //preloadingText.text = 'Preloading $secondWord Specific Assets...\nCurrent: ${daVars[0]} | Type: Character | Json name: ${daVars[2]}';
-
                     var defaultVars = ["newChar", "char", "bf", "100", "100", "false"];
                     while (daVars.length < 6)
                         daVars.push(defaultVars[daVars.length]);
 
-                    preloadedAssets.set(
-                        daVars[0], 
-                        new Character(
-                            Std.parseFloat(daVars[3].trim()),
-                            Std.parseFloat(daVars[4].trim()),
-                            daVars[2].trim(),
-                            daVars[5].trim() == "true"
-                        )
+                    cacheChar(
+                        daVars[0],
+						daVars[2].trim(),
+                        Std.parseFloat(daVars[3].trim()),
+                        Std.parseFloat(daVars[4].trim()),
+                        daVars[5].trim() == "true"
                     );
                 case "image" | "graphic":
                     var imagePath = Paths.image(daVars[2].trim());
-                    //preloadingText.text = 'Preloading $secondWord Specific Assets...\nCurrent: ${daVars[0]} | Type: Image | Image path: ${imagePath}';
-                    FlxG.bitmap.add(imagePath);
-                    preloadedAssets.set(daVars[0], imagePath);
+                    cacheImage(daVars[0], imagePath);
                 case "sound" | "audio":
                     var soundPath = Paths.sound(daVars[2].trim());
-                    //preloadingText.text = 'Preloading $secondWord Specific Assets...\nCurrent: ${daVars[0]} | Type: Sound | Sound path: ${soundPath}';
-                    Assets.getSound(soundPath);
-                    preloadedAssets.set(daVars[0], soundPath);
+                    cacheSound(daVars[0], soundPath);
             }
         }
     }
+
+	function cacheChar(name:String, char:String, x:Float, y:Float, isPlr:Bool) {
+		var daChar = new Character(x, y, char, isPlr);
+		preloadedAssets.set(name, daChar);
+	}
+
+	function cacheImage(name:String, path:String) {
+		FlxG.bitmap.add(path);
+		preloadedAssets.set(name, path);
+	}
+
+	function cacheSound(name:String, path:String) {
+		FlxG.sound.cache(path);
+		preloadedAssets.set(name, path);
+	}
 }

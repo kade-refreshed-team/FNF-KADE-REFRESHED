@@ -6,6 +6,11 @@ import flixel.FlxG;
 import base.Main;
 
 class KadeEngineData {
+	//Lua's weird with `FlxG.save.data`.
+	public static function getOption(string:String):Any {
+		return Reflect.field(FlxG.save.data, string);
+	}
+
     public static function initSave() {
 		var defaults:Map<String, Dynamic> = [
 			"newInput" => true,

@@ -263,27 +263,18 @@ class StoryMenuState extends base.MusicBeatState
 				stopspamming = true;
 			}
 
-			Highscore.diffArray = weekArray[curWeek].diffs;
-			PlayState.storyPlaylist = weekArray[curWeek].songs;
-			PlayState.isStoryMode = true;
 			selectedWeek = true;
-
-
-			PlayState.storyDifficulty = curDifficulty;
-			PlayState.sicks = 0;
-			PlayState.bads = 0;
-			PlayState.shits = 0;
-			PlayState.goods = 0;
-			PlayState.campaignMisses = 0;
-			PlayState.SONG = Song.loadFromJson(Highscore.diffArray[curDifficulty].toLowerCase(), PlayState.storyPlaylist[0]);
-			PlayState.storyWeek = curWeek;
-			PlayState.campaignScore = 0;
 
 			for (i in 0...grpWeekText.length)
 				grpWeekText.members[i].visible = (i >= curWeek);
+
 			var ogValues = [txtWeekTitle.x, leftArrow.x, sprDifficulty.x,  rightArrow.x];
 			var yellowBG:FlxSprite = cast(members[members.indexOf(grpWeekCharacters) - 1], FlxSprite);
-			FlxTween.num(0, 1.2, 1, {onComplete: (twn:FlxTween) -> {openSubState(new funkin.PreloadingSubState());}}, function(num:Float) {
+
+			function tweenComplete(twn:FlxTween)
+				utils.CoolUtil.loadWeek(weekArray[curWeek].songs, weekArray[curWeek].diffs, curDifficulty, curWeek);
+
+			FlxTween.num(0, 1.2, 1, {onComplete: tweenComplete}, function(num:Float) {
 				for (i=>text in grpWeekText.members)
 					text.targetY = i - curWeek + num * 2.2;
 				yellowBG.alpha = 1 - num;
