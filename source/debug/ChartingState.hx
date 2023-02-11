@@ -315,10 +315,10 @@ class ChartingState extends base.MusicBeatState
 			shiftNotes(Std.int(stepperShiftNoteDial.value),Std.int(stepperShiftNoteDialstep.value),Std.int(stepperShiftNoteDialms.value));
 		});
 
-		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('game/characterList'));
-		var gfVersions:Array<String> = CoolUtil.coolTextFile(Paths.txt('game/gfVersionList'));
-		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('game/stageList'));
-		var noteStyles:Array<String> = CoolUtil.coolTextFile(Paths.txt('game/noteStyleList'));
+		var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt('lists/characterList'));
+		var gfVersions:Array<String> = CoolUtil.coolTextFile(Paths.txt('lists/gfVersionList'));
+		var stages:Array<String> = CoolUtil.coolTextFile(Paths.txt('lists/stageList'));
+		var noteStyles:Array<String> = CoolUtil.coolTextFile(Paths.txt('lists/noteStyleList'));
 
 		var player1DropDown = new FlxUIDropDownMenu(10, 100, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{

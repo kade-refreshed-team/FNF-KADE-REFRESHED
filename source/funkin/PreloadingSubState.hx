@@ -16,6 +16,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
     var preloadedAssets:Map<String, Dynamic> = [];
 
     var preloadingText:FlxText;
+	var curAsset:String = "Player";
 
     public function new() {
         super();
@@ -29,7 +30,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         add(bg);
         bg.scrollFactor.set();
 
-        preloadingText = new FlxText(0, 480, 1280, "Preloading Player...", 18);
+        preloadingText = new FlxText(0, 480, 1280, 'Preloading Assets for "${PlayState.SONG.song}"...\nCurrent: Player', 18);
         preloadingText.scale.scale(1 / cameras[0].zoom);
         preloadingText.updateHitbox();
         preloadingText.alignment = "center";
@@ -39,11 +40,17 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         sys.thread.Thread.create(preloadStuff);
     }
 
+	override public function update(elapsed:Float) {
+		super.update(elapsed);
+
+		preloadingText.text = 'Preloading Assets for "${PlayState.SONG.song}"...\nCurrent: $curAsset';
+	}
+
     function preloadStuff() {
 		cacheChar("bf", PlayState.SONG.player1, 770, 100, true);
 		cast (preloadedAssets["bf"], Character).alpha = 0.0001;
 		add(preloadedAssets["bf"]);
-        preloadingText.text = "Preloading Specator...";
+        curAsset = "Specator";
         var daGF = PlayState.SONG.gfVersion;
         if (daGF == null) {
             switch (PlayState.storyWeek) {
@@ -61,12 +68,12 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 		cacheChar("gf", daGF, 400, 130, false);
 		cast (preloadedAssets["gf"], Character).alpha = 0.0001;
 		add(preloadedAssets["gf"]);
-        preloadingText.text = "Preloading Opponent...";
+        curAsset = "Opponent";
 		cacheChar("dad", PlayState.SONG.player2, 100, 100, false);
 		cast (preloadedAssets["dad"], Character).alpha = 0.0001;
 		add(preloadedAssets["dad"]);
 
-        preloadingText.text = "Preloading Song...";
+        curAsset = "Song Audio";
         PlayState.songLowercase = StringTools.replace(PlayState.SONG.song, " ", "-").toLowerCase();
 		switch (PlayState.songLowercase) {
 			case 'dad-battle':
@@ -78,12 +85,12 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         if (PlayState.SONG.needsVoices)
 			cacheSound("vocals", Paths.voices(PlayState.SONG.song));
 
-        preloadingText.text = "Preloading Strumline...";
+        curAsset = "Strumline";
         generateStrums();
-        preloadingText.text = "Preloading Song Notes...";
+        curAsset = "Song Notes";
         preloadedAssets.set("notes", generateNotes(PlayState.SONG.notes));
 
-        preloadingText.text = "Preloading Countdown...";
+        curAsset = "Countdown";
         var countdownToPreload = ["countdown/intro3", "countdown/intro2", "countdown/intro1", "countdown/introGo", "ready", "set", "go"];
         if (Assets.exists(Paths.songFile("customCountdown.txt", PlayState.SONG.song)))
             countdownToPreload = utils.CoolUtil.coolTextFile(Paths.songFile("customCountdown.txt", PlayState.SONG.song));
@@ -110,11 +117,15 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 			}
 		}
         PlayState.SONG.stage = daStage;
-        if (Assets.exists(Paths.txt('stageCache/$daStage')))
+        if (Assets.exists(Paths.txt('stageCache/$daStage'))) {
+			curAsset = "Stage Assets";
             preloadFromTxt(Paths.txt('stageCache/$daStage'), "Stage");
-        
-        if (Assets.exists(Paths.songFile("extraPreload.txt", PlayState.SONG.song)))
+		}
+
+        if (Assets.exists(Paths.songFile("extraPreload.txt", PlayState.SONG.song))) {
+			curAsset = "Extra Song Assets";
             preloadFromTxt(Paths.songFile("extraPreload.txt", PlayState.SONG.song), "Song");
+		}
 
         PlayStateChangeables.useDownscroll = FlxG.save.data.downscroll;
 		PlayStateChangeables.PsychUI = FlxG.save.data.psychui;
@@ -291,7 +302,6 @@ class PreloadingSubState extends base.MusicBeatSubstate {
     }
 
     function preloadFromTxt(path:String, secondWord:String) {
-        preloadingText.text = 'Preloading $secondWord Specific Assets...';
         for (line in utils.CoolUtil.coolTextFile(path)) {
             var daVars:Array<String> = line.split(" | ");
             switch (daVars[1].toLowerCase().trim()) {

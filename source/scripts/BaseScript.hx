@@ -73,7 +73,7 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
      * Ex: If the parent was `PlayState.instance` and you want to get `health` from `PlayState.instance`, you can just do `health` instead of `PlayState.instance.health`.
      * You may have to override `get_parent` and `set_parent` if you want to use this in a script.
      */
-    public var parent:Dynamic;
+    @:isVar public var parent(get, set):Dynamic;
 
     /**
      * The getter function of `parent`.
@@ -105,6 +105,7 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
     
             "FlxG" => flixel.FlxG,
             "FlxSprite" => flixel.FlxSprite,
+            "FlxTimer" => flixel.util.FlxTimer,
             "FlxTween" => flixel.tweens.FlxTween,
             "FlxEase" => flixel.tweens.FlxEase,
             "FlxText" => flixel.text.FlxText,

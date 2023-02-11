@@ -42,7 +42,7 @@ class FreeplayState extends base.MusicBeatState
 
 	override function create()
 	{
-		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')));
+		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('lists/freeplaySonglist')));
 
 		/* 
 			if (FlxG.sound.music != null)

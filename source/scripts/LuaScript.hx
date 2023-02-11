@@ -116,7 +116,9 @@ class LuaScript extends scripts.BaseScript {
 		currentLua = lastLua;
     }
 
+	var curFunc = '';
     override public function callFunc(name:String, ?params:Array<Dynamic>):Dynamic {
+		curFunc = name;
 		var lastLua:LuaScript = currentLua;
 		currentLua = this;
 
@@ -171,22 +173,22 @@ class LuaScript extends scripts.BaseScript {
 	static function staticToFunc(state:State, funcNum:Int) {
 		var returnVars = [];
 		var functions:Array<Dynamic> = [currentLua.index, currentLua.newIndex, currentLua.metatableCall, currentLua.enumIndex];
-		var func = functions[funcNum];
 
 		//Making the params for the function.
 		var nparams:Int = Lua.gettop(state);
 		var params:Array<Dynamic> = [for(i in 0...nparams) currentLua.fromLua(-nparams + i)];
 		
-		if (funcNum >= 2) {
-			var funcParams = [for (i in 2...params.length) params[i]];
-			params.splice(2, params.length);
-			params.push(funcParams);
-		}
+		var funcParams = [for (i in 2...params.length) params[i]];
+		params.splice(2, params.length);
+		params.push(funcParams);
+
+		if (funcNum == 1)
+			params[2] = params[2][0];
 
 		//Calling the function. If it catches something, will trace what went wrong.
 		var returned = null;
 		try {
-            returned = (nparams > 0) ? Reflect.callMethod(null, func, params) : func();
+            returned = functions[funcNum](params[0], params[1], params[2]);
         } catch(e) {
             trace("Lua Error: " + e.details());
         }
@@ -203,7 +205,7 @@ class LuaScript extends scripts.BaseScript {
 
 	//These three functions are the actual functions that the metatable use.
 	//Without these, object oriented lua woudln't work at all.
-	public function index(object:Dynamic, property:String):Dynamic {
+	public function index(object:Dynamic, property:String, ?uselessValue:Any):Dynamic {
 		var grabbedProperty:Dynamic = null;
 
 		if (object != null && (grabbedProperty = Reflect.getProperty(object, property)) != null)
@@ -227,7 +229,7 @@ class LuaScript extends scripts.BaseScript {
 		var enumValue:EnumValue;
 
 		enumValue = object.createByName(value, funcParams);
-		if (object != null && enumValue != null/*&& (enumValue = object.createByName(value, funcParams)) != null*/)
+		if (object != null && enumValue != null)
             return enumValue;
         return null;
 	}
@@ -389,7 +391,6 @@ class LuaScript extends scripts.BaseScript {
 
 				Lua.newtable(luaState);
 				var tableIndex = Lua.gettop(luaState); //The variable position of the table. Used for paring the metatable with this table and attaching variables.
-				Lua.pushvalue(luaState, tableIndex);
 
 				Lua.pushstring(luaState, '__special_id'); //This is a helper var in the table that is used by the conversion functions to detect a special var.
 				Lua.pushinteger(luaState, location);

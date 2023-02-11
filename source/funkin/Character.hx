@@ -65,7 +65,7 @@ class Character extends FlxSprite
 
 	public var stunned:Bool = false;
 	public var holdTimer:Float = 0;
-	public var hpcolor:FlxColor;
+	public var hpColor:FlxColor;
 
 	public var regX:Float = 770;
 	public var regY:Float = 100;
@@ -108,7 +108,7 @@ class Character extends FlxSprite
 				frames = Paths.getSparrowAtlas("game-side/" + data.asset);
 		}
 		
-		hpcolor = utils.CoolUtil.stringColor(data.barColor);
+		hpColor = utils.CoolUtil.stringColor(data.barColor);
 
 		for (anim in data.animations) {
 			if (anim.looped == null) anim.looped = false;
@@ -181,7 +181,7 @@ class Character extends FlxSprite
 			playAnim('deathLoop');
 
 		var missEnded = (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished);
-		var singEnded = (holdTimer >= base.Conductor.stepCrochet * data.singLength * 0.001 && !isPlayer);
+		var singEnded = (holdTimer >= base.Conductor.stepCrochet * data.singLength * 0.001);
 		var hairEnded = (animation.curAnim.name == 'hairFall' && animation.curAnim.finished);
 		if (missEnded || singEnded || hairEnded) {
 			dance();
@@ -199,7 +199,9 @@ class Character extends FlxSprite
 	 * FOR GF DANCING SHIT
 	 */
 	public function dance() {
-		if (debugMode || (animation.curAnim != null && animation.curAnim.name.startsWith('hair'))) return;
+		var hairFalling = (animation.curAnim != null && animation.curAnim.name.startsWith('hair') && !animation.curAnim.finished);
+		var isSinging = (animation.curAnim != null && animation.curAnim.name.startsWith('sing') && holdTimer < base.Conductor.stepCrochet * data.singLength * 0.001);
+		if (debugMode || hairFalling || isSinging) return;
 
 		danced = !danced;
 

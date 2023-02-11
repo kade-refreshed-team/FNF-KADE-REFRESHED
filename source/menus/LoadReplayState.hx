@@ -41,7 +41,7 @@ class LoadReplayState extends base.MusicBeatState
 	{
 		var menuBG:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menu-side/menuDesat'));
 
-		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('freeplaySonglist')));
+		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('lists/freeplaySonglist')));
         #if sys
 		var daReplays = sys.FileSystem.readDirectory(Sys.getCwd() + "/assets/replays/");
 		daReplays.sort(Reflect.compare);
