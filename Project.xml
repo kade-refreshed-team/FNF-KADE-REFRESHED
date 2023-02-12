@@ -54,7 +54,7 @@
 	<haxelib name="flixel-ui" />
 	<haxedev set='webgl' />
 
-	<haxelib name="polymod"/>
+	<haxelib name="scriptless-polymod"/>
 	<haxelib name="hscript" />
 	<haxelib name="linc_luajit" if="windows"/>
 
