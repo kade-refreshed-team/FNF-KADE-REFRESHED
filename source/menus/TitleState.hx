@@ -31,7 +31,7 @@ class TitleState extends base.MusicBeatState
 	var wackyImage:FlxSprite;
 
 	override public function tryCreate() {
-		#if (polymod && sys)
+		#if sys
 		var modList = sys.io.File.getContent(sys.FileSystem.absolutePath('mods/modList.txt'));
         polymod.Polymod.init({
             modRoot: "./mods/",
