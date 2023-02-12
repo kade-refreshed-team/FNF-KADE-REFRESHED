@@ -27,10 +27,10 @@ class BarShader extends FlxGraphicsShader {
 
             if (daX <= percent) {
                 gl_FragColor = texture2D(fillBitmap, openfl_TextureCoordv);
-                gl_FragColor = gl_FragColor * fillColor;
+                gl_FragColor = gl_FragColor * fillColor * openfl_Alphav;
             } else {
                 gl_FragColor = texture2D(emptyBitmap, openfl_TextureCoordv);
-                gl_FragColor = gl_FragColor * emptyColor;
+                gl_FragColor = gl_FragColor * emptyColor * openfl_Alphav;
             }
         }
     ')

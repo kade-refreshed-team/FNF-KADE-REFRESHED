@@ -271,7 +271,7 @@ class LuaScript extends scripts.BaseScript {
 						return null;
 					}
 
-					function callLocalLuaFunc(...startParams:Dynamic) {
+					function callLocalLuaFunc(params:Array<Dynamic>) {
 						var lastLua:LuaScript = currentLua;
 						currentLua = this;
 				
@@ -287,9 +287,6 @@ class LuaScript extends scripts.BaseScript {
 				
 						if (Lua.isfunction(luaState, -1)) {
 							//Pushes the parameters of the script.
-							var params = [];
-							if (startParams != null)
-								params = startParams.toArray();
 							var nparams:Int = 0;
 							if (params != null && params.length > 0) {
 								nparams = params.length;
@@ -305,7 +302,7 @@ class LuaScript extends scripts.BaseScript {
 						currentLua = lastLua;
 					}
 
-					ret = callLocalLuaFunc;
+					ret = Reflect.makeVarArgs(callLocalLuaFunc);
 				}
 			case idk:
 				ret = null;

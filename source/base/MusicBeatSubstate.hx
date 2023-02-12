@@ -47,6 +47,7 @@ class MusicBeatSubstate extends FlxSubState
 			script.callFunc("update", [elapsed]);
 
 			if (autoUpdateSongPos) {
+				Conductor.lastSongPos = Conductor.songPosition;
 				Conductor.songPosition += elapsed * 1000;
 
 				var oldStep:Int = curStep;

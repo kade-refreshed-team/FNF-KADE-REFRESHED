@@ -57,7 +57,9 @@ class PlayState extends MusicBeatState
 
 	public static var weekSong:Int = 0;
 	public static var weekScore:Int = 0;
+	public static var campaignScore:Int = 0;
 	public static var campaignMisses:Int = 0;
+	public var songScore:Int = 0;
 	public static var misses:Int = 0;
 	public static var shits:Int = 0;
 	public static var bads:Int = 0;
@@ -148,16 +150,9 @@ class PlayState extends MusicBeatState
 	}
 	public var defaultCamZoom:Float = 1.05;
 	public static var daPixelZoom:Float = 6;
-	var isHalloween:Bool = false;
-	var grpLimoDancers:FlxTypedGroup<BackgroundDancer>;
-	var trainSound:FlxSound;
-
-	public var songScore:Int = 0;
 
 	var songScoreDef:Int = 0;
 	var currentTimingShown:FlxText = null;
-
-	public static var campaignScore:Int = 0;
 
 	public static var theFunne:Bool = true;
 
@@ -1172,24 +1167,20 @@ class PlayState extends MusicBeatState
 
 			if (!PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection) {
 				var dadMidpoint = dad.getMidpoint();
-				var offsetX = 0;
-				var offsetY = 0;
 
 				camFollow.setPosition(
-					dadMidpoint.x + 150 + offsetX + camOffsets.dadCamX + dad.data.offsets.camX,
-					dadMidpoint.y - 100 + offsetY + camOffsets.dadCamY + dad.data.offsets.camY
+					dadMidpoint.x + 150 + camOffsets.dadCamX + dad.data.offsets.camX,
+					dadMidpoint.y - 100 + camOffsets.dadCamY + dad.data.offsets.camY
 				);
 
 				vocals.volume = 1;
 				dadMidpoint.put();
 			} else {
 				var bfMidpoint = boyfriend.getMidpoint();
-				var offsetX = 0;
-				var offsetY = 0;
 
 				camFollow.setPosition(
-					bfMidpoint.x - 100 + offsetX + camOffsets.bfCamX + boyfriend.data.offsets.camX,
-					bfMidpoint.y - 100 + offsetY + camOffsets.bfCamY + boyfriend.data.offsets.camY
+					bfMidpoint.x - 100 + camOffsets.bfCamX + boyfriend.data.offsets.camX,
+					bfMidpoint.y - 100 + camOffsets.bfCamY + boyfriend.data.offsets.camY
 				);
 
 				bfMidpoint.put();
@@ -1240,7 +1231,7 @@ class PlayState extends MusicBeatState
 			boyfriend.stunned = true;
 
 			persistentUpdate = false;
-			persistentDraw = false;
+			persistentDraw = true;
 			paused = true;
 
 			vocals.stop();

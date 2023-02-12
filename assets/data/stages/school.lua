@@ -3,7 +3,7 @@ local danceLeft = true
 function create()
 	parent.deadChr = "bf-pixel-dead"
 	parent.deadSFX = "week6/fnf_loss_sfx-pixel"
-	parent.deadMus = "wee6/gameOver-pixel"
+	parent.deadMus = "week6/gameOver-pixel"
 	parent.deadEnd = "week6/gameOverEnd-pixel"
 
 	local mults = {1, 1, 1.4, 0.8, 1}

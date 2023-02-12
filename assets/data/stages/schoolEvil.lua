@@ -1,7 +1,7 @@
 function create()
 	parent.deadChr = "bf-pixel-dead"
 	parent.deadSFX = "week6/fnf_loss_sfx-pixel"
-	parent.deadMus = "wee6/gameOver-pixel"
+	parent.deadMus = "week6/gameOver-pixel"
 	parent.deadEnd = "week6/gameOverEnd-pixel"
 
 	if KadeEngineData:getOption("distractions") then

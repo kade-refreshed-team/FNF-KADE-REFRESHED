@@ -60,7 +60,7 @@ class Character extends FlxSprite
 		animations: [{name: "idle", prefix: "bf idle dance", offsets: [-5, 0]}],
 		flipX: true
 	};
-	public var curCharacter:String = 'bf';
+	public var curCharacter:String = '';
 	var leftRightDancer:Bool = false;
 
 	public var stunned:Bool = false;
@@ -81,6 +81,8 @@ class Character extends FlxSprite
 	}
 
 	public function loadCharacter(charName:String) {
+		if (curCharacter == charName) return; //No need to load if they're already loaded.
+
 		animOffsets = [];
 		curCharacter = charName;
 		try {
