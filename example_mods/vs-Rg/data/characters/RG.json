@@ -4,37 +4,38 @@
   "barColor": "#FFFFFF",
   "commonSide": "dad",
   "offsets": {
-    "x": 120,
-    "y": 420,
-    "camX": -250,
-    "camY": -170
+    "x": -275,
+    "y": -155,
+    "camX": 300,
+    "camY": 420
   },
   "animations": [
     {
       "name": "idle",
       "prefix": "RG idle",
-      "offsets": [395, 575]
+      "offsets": [2, 0]
     },
     {
       "name": "singLEFT",
       "prefix": "RG left",
-      "offsets": [616, 575]
+      "offsets": [237, 22]
     },
     {
       "name": "singDOWN",
       "prefix": "RG down",
-      "offsets": [500, 359]
+      "offsets": [-20, -236]
     },
     {
       "name": "singUP",
       "prefix": "RG up",
-      "offsets": [371, 562]
+      "offsets": [-23, -34]
     },
     {
       "name": "singRIGHT",
       "prefix": "RG right",
-      "offsets": [392, 523]
+      "offsets": [-7, -57]
     }
   ],
-  "scale": 0.4
+  "scale": 0.4,
+  "singLength": 6
 }

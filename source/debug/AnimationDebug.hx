@@ -43,10 +43,10 @@ class AnimationDebug extends FlxState
 		gridBG.color = 0x2e2c2c;
 		add(gridBG);
 		
-		var bfCharData:funkin.Character.CharJson = haxe.Json.parse(openfl.Assets.getText('assets/characters/bf.json'));
+		var bfCharData:funkin.Character.CharJson = haxe.Json.parse(openfl.Assets.getText('assets/data/characters/bf.json'));
 		var charData:funkin.Character.CharJson = bfCharData;
 		try {
-			charData = haxe.Json.parse(openfl.Assets.getText('assets/characters/$daAnim.json'));
+			charData = haxe.Json.parse(openfl.Assets.getText('assets/data/characters/$daAnim.json'));
 		} catch(e) {
 			lime.app.Application.current.window.alert('Character file "$daAnim" could not be parsed.\n$e\nThe game will instead load BF.', "Character Parsing Fail");
 			daAnim = "bf";

@@ -113,31 +113,31 @@ class HelperFunctions
 							var daX:Float = 0;
 							var daY:Float = 0;
 							if (daVars[1] == "offsetPos") {
-								daX = ps.boyfriend.regX;
-								daY = ps.boyfriend.regY;
+								daX = ps.boyfriend.x;
+								daY = ps.boyfriend.y;
 							}
-							ps.boyfriend.regX = daX + Std.parseFloat(daVars[2]);
-							ps.boyfriend.regY = daY + Std.parseFloat(daVars[3]);
+							ps.boyfriend.x = daX + Std.parseFloat(daVars[2]);
+							ps.boyfriend.y = daY + Std.parseFloat(daVars[3]);
 							ps.add(ps.boyfriend);
 						case "gf" | "girlfriend" | "specator":
 							var daX:Float = 0;
 							var daY:Float = 0;
 							if (daVars[1] == "offsetPos") {
-								daX = ps.gf.regX;
-								daY = ps.gf.regY;
+								daX = ps.gf.x;
+								daY = ps.gf.y;
 							}
-							ps.gf.regX = daX + Std.parseFloat(daVars[2]);
-							ps.gf.regY = daY + Std.parseFloat(daVars[3]);
+							ps.gf.x = daX + Std.parseFloat(daVars[2]);
+							ps.gf.y = daY + Std.parseFloat(daVars[3]);
 							ps.add(ps.gf);
 						case "dad" | "opponent":
 							var daX:Float = 0;
 							var daY:Float = 0;
 							if (daVars[1] == "offsetPos") {
-								daX = ps.dad.regX;
-								daY = ps.dad.regY;
+								daX = ps.dad.x;
+								daY = ps.dad.y;
 							}
-							ps.dad.regX = daX + Std.parseFloat(daVars[2]);
-							ps.dad.regY = daY + Std.parseFloat(daVars[3]);
+							ps.dad.x = daX + Std.parseFloat(daVars[2]);
+							ps.dad.y = daY + Std.parseFloat(daVars[3]);
 							ps.add(ps.dad);
 					}
 			}

@@ -67,14 +67,8 @@ class Character extends FlxSprite
 	public var holdTimer:Float = 0;
 	public var hpColor:FlxColor;
 
-	public var regX:Float = 770;
-	public var regY:Float = 100;
-
-	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
-	{
+	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)	{
 		super(x, y);
-		regX = x;
-		regY = y;
 		animOffsets = new Map<String, Array<Float>>();
 		this.isPlayer = isPlayer;
 		loadCharacter(character);
@@ -123,11 +117,6 @@ class Character extends FlxSprite
 			else
 				animation.addByPrefix(anim.name, anim.prefix, anim.frameRate, anim.looped, anim.flipX, anim.flipY);
 
-			if (data.scaleAffectsOffset) {
-				anim.offsets[0] = anim.offsets[0] / data.scale;
-				anim.offsets[1] = anim.offsets[1] / data.scale;
-			}
-
 			if (!animation.exists(anim.name))
 				trace(curCharacter + ": COULDN'T ADD ANIMATION: " + anim.name);
 
@@ -163,14 +152,10 @@ class Character extends FlxSprite
 		playAnim(leftRightDancer ? "danceRight" : "idle");
 		danced = false;
 		dance();
-
-		x = regX + data.offsets.x;
-		y = regY + data.offsets.y;
 	}
 
 	override function update(elapsed:Float) {
-		x = regX + data.offsets.x;
-		y = regY + data.offsets.y;
+		super.update(elapsed);
 
 		if (animation.curAnim == null || debugMode) return;
 
@@ -191,8 +176,6 @@ class Character extends FlxSprite
 			if (singEnded)
 				holdTimer = 0;
 		}
-
-		super.update(elapsed);
 	}
 
 	private var danced:Bool = false;
@@ -214,19 +197,48 @@ class Character extends FlxSprite
 		playAnim(danceAnim);
 	}
 
+	var daOffset = [0.0, 0.0];
+
+	override public function draw() {
+		offset.set(daOffset[0], daOffset[1]);
+		if (daOffset[0] != 0 && daOffset[1] != 0) {
+			var scaleX = scale.x;
+			var scaleY = scale.y;
+			if (!data.scaleAffectsOffset) {
+				scaleX = scaleX / data.scale;
+				scaleY = scaleY / data.scale;
+			}
+			offset = offset.rotateByDegrees(angle % 360).scale(scaleX, scaleY);
+		}
+
+		offset.x += ((data.commonSide == "bf") != isPlayer) ? data.offsets.x : -data.offsets.x;
+		offset.y -= data.offsets.y;
+
+		super.draw();
+	}
+
+	override public function getMidpoint(?point:flixel.math.FlxPoint) {
+		var oldPoint = super.getMidpoint(point);
+		return oldPoint.add(data.offsets.x, data.offsets.y);
+	}
+
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
 		if (!animOffsets.exists(AnimName) || !animation.exists(AnimName))
 			return; //Prevent playing animation if unavailable.
 
 		animation.play(AnimName, Force, Reversed, Frame);
 
-		var daOffset = animOffsets.get(AnimName);
-		if (animOffsets.exists(AnimName))
-		{
-			offset.set(daOffset[0], daOffset[1]);
+		daOffset = animOffsets.get(AnimName);
+		offset.set(daOffset[0], daOffset[1]);
+		if (daOffset[0] != 0 && daOffset[1] != 0) {
+			var scaleX = scale.x;
+			var scaleY = scale.y;
+			if (!data.scaleAffectsOffset) {
+				scaleX = scaleX / data.scale;
+				scaleY = scaleY / data.scale;
+			}
+			offset = offset.rotateByDegrees(angle % 360).scale(scaleX, scaleY);
 		}
-		else
-			offset.set(0, 0);
 
 		if (data.commonSide == "gf" && leftRightDancer) {
 			danced = switch(AnimName) {
