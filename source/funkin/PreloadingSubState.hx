@@ -47,6 +47,12 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 	}
 
     function preloadStuff() {
+		FlxG.bitmap.clearCache();
+		Assets.cache.clear();
+		#if FLX_SOUND_SYSTEM
+		FlxG.sound.destroy();
+		#end
+
 		cacheChar("bf", PlayState.SONG.player1, 770, 100, true);
 		cast (preloadedAssets["bf"], Character).alpha = 0.0001;
 		add(preloadedAssets["bf"]);

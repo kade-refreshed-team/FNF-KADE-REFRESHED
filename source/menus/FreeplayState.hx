@@ -70,7 +70,9 @@ class FreeplayState extends base.MusicBeatState
 		for (i in 0...songs.length)
 		{
 			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, true, false, true);
+			songText.x = FlxG.width / 2 - songText.width / 2;
 			songText.isMenuItem = true;
+			songText.centerPos = !FlxG.save.data.ogfreeplay;
 			songText.targetY = i;
 			grpSongs.add(songText);
 			if (!FlxG.save.data.ogfreeplay)
@@ -149,26 +151,19 @@ class FreeplayState extends base.MusicBeatState
 		var accepted = controls.ACCEPT;
 
 		if (upP)
-		{
 			changeSelection(-1);
-		}
-		if (downP)
-		{
+		else if (downP)
 			changeSelection(1);
-		}
 
 		if (controls.LEFT_P)
 			changeDiff(-1);
-		if (controls.RIGHT_P)
+		else if (controls.RIGHT_P)
 			changeDiff(1);
 
 		if (controls.BACK)
-		{
 			FlxG.switchState(new menus.MainMenuState());
-		}
-
-		if (accepted)
-		{
+		
+		if (accepted) {
 			Highscore.diffArray = songs[curSelected].diffs;
 			PlayState.SONG = funkin.SongClasses.Song.loadFromJson(Highscore.diffArray[curDifficulty].toLowerCase(), songs[curSelected].songName);
 			PlayState.isStoryMode = false;
@@ -178,19 +173,15 @@ class FreeplayState extends base.MusicBeatState
 			openSubState(new funkin.PreloadingSubState());
 		}
 
-		for (text in grpSongs.members)
-			if (!FlxG.save.data.ogfreeplay)
-			{
-				text.x = 640 - text.width / 2;
-				opIcon.x = grpSongs.members[curSelected].x - opIcon.width - 10;
-				plIcon.x = grpSongs.members[curSelected].x + grpSongs.members[curSelected].width + 10;
-				scoreText.y = grpSongs.members[curSelected].y + grpSongs.members[curSelected].height + 5;
-			}
-			else
-			{
+		if (!FlxG.save.data.ogfreeplay) {
+			opIcon.x = grpSongs.members[curSelected].x - opIcon.width - 10;
+			plIcon.x = grpSongs.members[curSelected].x + grpSongs.members[curSelected].width + 10;
+			scoreText.y = grpSongs.members[curSelected].y + grpSongs.members[curSelected].height + 5;
+		} else {
+			for (text in grpSongs.members)
 				text.x -= 10;
-				opIcon.x = opIcon.x = grpSongs.members[curSelected].x + grpSongs.members[curSelected].width + 4;
-			}
+			opIcon.x = opIcon.x = grpSongs.members[curSelected].x + grpSongs.members[curSelected].width + 4;
+		}
 	}
 
 	function changeDiff(change:Int = 0)

@@ -1,296 +1,324 @@
 package menus;
 
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import openfl.Lib;
-import settings.Options;
-import settings.Controls.Control;
-import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.input.keyboard.FlxKey;
-import flixel.math.FlxMath;
+import flixel.group.FlxGroup;
 import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import lime.utils.Assets;
+import flixel.FlxSprite;
+import flixel.FlxG;
 
 import utils.HelperFunctions;
+import base.Conductor;
 import ui.Alphabet;
-import settings.*;
 
-class OptionsMenu extends base.MusicBeatState
-{
-	public static var instance:OptionsMenu;
+typedef RgOption = {
+    var name:String;
+    var desc:String;
 
-	var selector:FlxText;
-	var curSelected:Int = 0;
+    var ?onLeft:Void->Void;
+    var ?onRight:Void->Void;
+    var ?onEnter:Void->Void;
 
-	var options:Array<OptionCategory> = [
-		new OptionCategory("Gameplay", [
-			new DFJKOption(controls),
-			new DownscrollOption("Change the layout of the strumline."),
-			new GhostTapOption("Allow tappping a direction and not getting a miss."),
-			new Judgement("Customize your Hit Timings (LEFT or RIGHT)"),
-			#if desktop
-			new FPSCapOption("Cap your FPS"),
-			#end
-			new ScrollSpeedOption("Change your scroll speed (1 = Chart dependent)"),
-			new AccuracyDOption("Change how accuracy is calculated. (Accurate = Simple, Complex = Milisecond Based)"),
-			new ResetButtonOption("Toggle pressing R to gameover."),
-			// new OffsetMenu("Get a note offset based off of your inputs!"),
-			new CustomizeGameplay("Drag'n'Drop Gameplay Modules around to your preference")
-		]),
-		new OptionCategory("Appearance", [
-			new DistractionsAndEffectsOption("Toggles stage distractions that can hinder your gameplay."),
-			new CamZoomOption("Toggles the camera zoom in-game."),
-			new PsychUIOption("Makes the UI similar to Psych Engine."),
-			#if desktop
-			new RainbowFPSOption("Make the FPS Counter rainbow."),
-			new AccuracyOption("Display accuracy information on the hud score text."),
-			new NPSDisplayOption("Shows your current Notes Per Second on the hud score text."),
-			new SongPositionOption("Shows how much of the song you've completed as a secondary bar."),
-			new CpuStrums("CPU's strumline lights up when a note hits it."),
-			#end
-		]),
-		
-		new OptionCategory("Misc", [
-			#if desktop
-			new FPSOption("Toggle the FPS Counter"),
-			new ReplayOption("View replays"),
-			#end
-			new FlashingLightsOption("Toggle flashing lights that can cause epileptic seizures and strain."),
-			new WatermarkOption("Enable and disable all watermarks from the engine."),
-			new BotPlay("Showcase your charts and mods with autoplay."),
-			new ScoreScreen("Show the score screen after the end of a song."),
-			new OGFREEPLAYOption("Makes the freeplay look like base game.")
-		])
-		
-	];
+    var getValue:Void->{text:String, color:flixel.util.FlxColor};
+}
 
-	public var acceptInput:Bool = true;
+class OptionsMenu extends base.MusicBeatState {
+    var catagories:Array<String> = [];
+    var options:Array<Array<RgOption>> = [];
+    var optGroup:FlxTypedGroup<Alphabet>;
+    var curCatagory:Int = 0;
+    var curOption:Int = 0;
 
-	private var currentDescription:String = "";
-	private var grpControls:FlxTypedGroup<Alphabet>;
-	public static var versionShit:FlxText;
+    var descBG:FlxSprite;
+    var valueLabel:FlxText;
+    var descTxt:FlxText;
 
-	var currentSelectedCat:OptionCategory;
-	var blackBorder:FlxSprite;
-	override function create()
-	{
-		instance = this;
-		var menuBG:FlxSprite = new FlxSprite().loadGraphic(Paths.image("menu-side/menuDesat"));
+    var selcCataOverlay:FlxSprite;
+    var selcCataHover:FlxSprite;
 
-		menuBG.color = 0xFFea71fd;
-		menuBG.setGraphicSize(Std.int(menuBG.width * 1.1));
-		menuBG.updateHitbox();
-		menuBG.screenCenter();
-		menuBG.antialiasing = true;
-		add(menuBG);
+    function regenOpts() {
+        for (opt in optGroup.members)
+            opt.destroy();
+        optGroup.clear();
 
-		grpControls = new FlxTypedGroup<Alphabet>();
-		add(grpControls);
+        for (i in 0...options[curCatagory].length) {
+            var opt = new Alphabet(0, FlxG.height * 0.48, options[curCatagory][i].name, true, false, true);
+            opt.spacing = 90;
+            opt.alpha = 1 - 0.4 * Math.min(i, 1);
+            opt.x = FlxG.width / 2 - opt.width / 2;
+            opt.isMenuItem = opt.centerPos = true;
+			opt.targetY = i;
+			optGroup.add(opt);
+        }
 
-		for (i in 0...options.length)
-		{
-			var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, options[i].getName(), true, false, true);
-			controlLabel.isMenuItem = true;
-			controlLabel.targetY = i;
-			grpControls.add(controlLabel);
-			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-		}
+        updateLabel();
+    }
 
-		currentDescription = "none";
+    override public function create() {
+        super.create();
+        makeOptions();
 
-		versionShit = new FlxText(5, FlxG.height + 40, 0, "Offset (Left, Right, Shift for slow): " + HelperFunctions.truncateFloat(FlxG.save.data.offset,2) + " - Description - " + currentDescription, 12);
-		versionShit.scrollFactor.set();
-		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		
-		blackBorder = new FlxSprite(-30,FlxG.height + 40).makeGraphic((Std.int(versionShit.width + 900)),Std.int(versionShit.height + 600),FlxColor.BLACK);
-		blackBorder.alpha = 0.5;
+        FlxG.mouse.visible = true;
 
-		add(blackBorder);
+        var bg = new FlxSprite(0, 0, Paths.image("menu-side/menuBGMagenta"));
+        add(bg);
 
-		add(versionShit);
+        optGroup = new FlxTypedGroup<Alphabet>();
+        optGroup.active = false; //Updating this with tryUpdate so it can move in substates.
+        add(optGroup);
 
-		FlxTween.tween(versionShit,{y: FlxG.height - 18},2,{ease: FlxEase.elasticInOut});
-		FlxTween.tween(blackBorder,{y: FlxG.height - 18},2, {ease: FlxEase.elasticInOut});
+        descBG = new FlxSprite(0, 480).makeGraphic(FlxG.width, 1, 0x80000000);
+        add(descBG);
 
-		super.create();
-	}
+        valueLabel = new FlxText(0, 480, FlxG.width, "< Enabled >", 32);
+        valueLabel.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, CENTER, OUTLINE, 0xFF000000);
+        add(valueLabel);
 
-	var isCat:Bool = false;
-	
+        descTxt = new FlxText(0, 480 + valueLabel.height, FlxG.width, "Description Text", 16);
+        descTxt.setFormat(Paths.font("vcr.ttf"), 16, 0xFFFFFFFF, CENTER);
+        add(descTxt);
 
-	override function update(elapsed:Float)
-	{
-		super.update(elapsed);
+        var topBar = new FlxSprite().makeGraphic(FlxG.width, 40, 0x80000000);
+        topBar.active = false;
+        add(topBar);
 
-		if (acceptInput)
-		{
-			if (controls.BACK && !isCat)
-				FlxG.switchState(new MainMenuState());
-			else if (controls.BACK)
-			{
-				isCat = false;
-				grpControls.clear();
-				for (i in 0...options.length)
-				{
-					var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, options[i].getName(), true, false);
-					controlLabel.isMenuItem = true;
-					controlLabel.targetY = i;
-					grpControls.add(controlLabel);
-					// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-				}
-				
-				curSelected = 0;
-				
-				changeSelection(curSelected);
-			}
-			if (controls.UP_P)
-				changeSelection(-1);
-			if (controls.DOWN_P)
-				changeSelection(1);
-			
-			if (isCat)
-			{
-				if (currentSelectedCat.getOptions()[curSelected].getAccept())
-				{
-					if (FlxG.keys.pressed.SHIFT)
-						{
-							if (FlxG.keys.pressed.RIGHT)
-								currentSelectedCat.getOptions()[curSelected].right();
-							if (FlxG.keys.pressed.LEFT)
-								currentSelectedCat.getOptions()[curSelected].left();
-						}
-					else
-					{
-						if (FlxG.keys.justPressed.RIGHT)
-							currentSelectedCat.getOptions()[curSelected].right();
-						if (FlxG.keys.justPressed.LEFT)
-							currentSelectedCat.getOptions()[curSelected].left();
-					}
-				}
-				else
-				{
-					if (FlxG.keys.pressed.SHIFT)
-					{
-						if (FlxG.keys.justPressed.RIGHT)
-							FlxG.save.data.offset += 0.1;
-						else if (FlxG.keys.justPressed.LEFT)
-							FlxG.save.data.offset -= 0.1;
-					}
-					else if (FlxG.keys.pressed.RIGHT)
-						FlxG.save.data.offset += 0.1;
-					else if (FlxG.keys.pressed.LEFT)
-						FlxG.save.data.offset -= 0.1;
-					
-					versionShit.text = "Offset (Left, Right, Shift for slow): " + HelperFunctions.truncateFloat(FlxG.save.data.offset,2) + " - Description - " + currentDescription;
-				}
-				if (currentSelectedCat.getOptions()[curSelected].getAccept())
-					versionShit.text =  currentSelectedCat.getOptions()[curSelected].getValue() + " - Description - " + currentDescription;
-				else
-					versionShit.text = "Offset (Left, Right, Shift for slow): " + HelperFunctions.truncateFloat(FlxG.save.data.offset,2) + " - Description - " + currentDescription;
-			}
-			else
-			{
-				if (FlxG.keys.pressed.SHIFT)
-				{
-					if (FlxG.keys.justPressed.RIGHT)
-						FlxG.save.data.offset += 0.1;
-					else if (FlxG.keys.justPressed.LEFT)
-						FlxG.save.data.offset -= 0.1;
-				}
-				else if (FlxG.keys.pressed.RIGHT)
-					FlxG.save.data.offset += 0.1;
-				else if (FlxG.keys.pressed.LEFT)
-					FlxG.save.data.offset -= 0.1;
-				
-				versionShit.text = "Offset (Left, Right, Shift for slow): " + HelperFunctions.truncateFloat(FlxG.save.data.offset,2) + " - Description - " + currentDescription;
-			}
-		
+        var cataWidth = Std.int(FlxG.width / catagories.length);
+        selcCataOverlay = new FlxSprite().makeGraphic(cataWidth, 40, 0x90FFFFFF);
+        selcCataOverlay.active = false;
+        add(selcCataOverlay);
 
-			if (controls.RESET)
-					FlxG.save.data.offset = 0;
+        selcCataHover = new FlxSprite().makeGraphic(cataWidth, 40, 0x9000FF80);
+        selcCataHover.visible = selcCataOverlay.active = false;
+        add(selcCataHover);
 
-			if (controls.ACCEPT)
-			{
-				if (isCat)
-				{
-					if (currentSelectedCat.getOptions()[curSelected].press()) {
-						grpControls.remove(grpControls.members[curSelected], true);
-						var ctrl:Alphabet = new Alphabet(0, (70 * curSelected) + 30, currentSelectedCat.getOptions()[curSelected].getDisplay(), true, false);
-						var scaledY = FlxMath.remapToRange(0, 0, 1, 0, 1.3);
-						ctrl.y = (scaledY * 120) + (FlxG.height * 0.48);
-						ctrl.isMenuItem = true;
-						grpControls.insert(curSelected, ctrl);
-					}
-				}
-				else
-				{
-					currentSelectedCat = options[curSelected];
-					isCat = true;
-					grpControls.clear();
-					for (i in 0...currentSelectedCat.getOptions().length)
-						{
-							var controlLabel:Alphabet = new Alphabet(0, (70 * i) + 30, currentSelectedCat.getOptions()[i].getDisplay(), true, false);
-							controlLabel.isMenuItem = true;
-							controlLabel.targetY = i;
-							grpControls.add(controlLabel);
-							// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-						}
-					curSelected = 0;
-				}
-				
-				changeSelection();
-			}
-		}
-		FlxG.save.flush();
-	}
+        for (i=>cata in catagories) {
+            var txt = new FlxText(0 + cataWidth * i, 3, cataWidth, cata, 32);
+            txt.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, CENTER);
+            txt.active = false;
+            add(txt);
+        }
 
-	var isSettingControl:Bool = false;
+        regenOpts();
+    }
 
-	function changeSelection(change:Int = 0)
-	{
-		#if !switch
-		// NGio.logEvent("Fresh");
-		#end
-		
-		FlxG.sound.play(Paths.sound("scrollMenu"), 0.4);
+    function updateLabel() {
+        var optValue = options[curCatagory][curOption].getValue();
+        valueLabel.text = '< ${optValue.text} >';
+        valueLabel.color = optValue.color;
+        descTxt.y = 480 + valueLabel.height;
+        descTxt.text = options[curCatagory][curOption].desc;
+        descBG.scale.y = valueLabel.height + descTxt.height + 10;
+        descBG.y = 480 + (valueLabel.height + descTxt.height) / 2;
+    }
 
-		curSelected = (curSelected + grpControls.length + change) % grpControls.length;
+    override public function tryUpdate(elapsed:Float) {
+        super.tryUpdate(elapsed);
+        if (!overridden)
+            optGroup.update(elapsed);
+    }
 
-		if (isCat)
-			currentDescription = currentSelectedCat.getOptions()[curSelected].getDescription();
-		else
-			currentDescription = "Please select a category";
-		if (isCat)
-		{
-			if (currentSelectedCat.getOptions()[curSelected].getAccept())
-				versionShit.text =  currentSelectedCat.getOptions()[curSelected].getValue() + " - Description - " + currentDescription;
-			else
-				versionShit.text = "Offset (Left, Right, Shift for slow): " + HelperFunctions.truncateFloat(FlxG.save.data.offset,2) + " - Description - " + currentDescription;
-		}
-		else
-			versionShit.text = "Offset (Left, Right, Shift for slow): " + HelperFunctions.truncateFloat(FlxG.save.data.offset,2) + " - Description - " + currentDescription;
-		// selector.y = (70 * curSelected) + 30;
+    override public function update(elapsed:Float) {
+        super.update(elapsed);
 
-		var bullShit:Int = 0;
+        if (controls.BACK) {
+            FlxG.switchState(new menus.MainMenuState());
+            FlxG.mouse.visible = false;
+            return;
+        }
 
-		for (item in grpControls.members)
-		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
+        if (controls.UP_P || controls.DOWN_P) {
+            var inc = (controls.UP_P) ? -1 : 1;
+            curOption = (curOption + options[curCatagory].length + inc) % options[curCatagory].length;
 
-			item.alpha = 0.6;
-			// item.setGraphicSize(Std.int(item.width * 0.8));
+            updateLabel();
 
-			if (item.targetY == 0)
-			{
-				item.alpha = 1;
-				// item.setGraphicSize(Std.int(item.width));
-			}
-		}
-	}
+            FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+            for (bullShit => item in optGroup.members) {
+                item.targetY = bullShit - curOption;
+        
+                // nah we dont got if statements
+                item.alpha = 1 - 0.4 * Math.min(Math.abs(item.targetY), 1);
+            }
+        }
+
+        if (((FlxG.keys.pressed.SHIFT && controls.LEFT) || controls.LEFT_P) && options[curCatagory][curOption].onLeft != null) {
+            if (controls.LEFT_P)
+                FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+            options[curCatagory][curOption].onLeft();
+            optGroup.members[curOption].x -= 50;
+
+            updateLabel();
+        } else if (((FlxG.keys.pressed.SHIFT && controls.RIGHT) || controls.RIGHT_P) && options[curCatagory][curOption].onRight != null) {
+            if (controls.RIGHT_P)
+                FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+            options[curCatagory][curOption].onRight();
+            optGroup.members[curOption].x += 50;
+
+            updateLabel();
+        } else if (controls.ACCEPT && options[curCatagory][curOption].onEnter != null) {
+            FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+            options[curCatagory][curOption].onEnter();
+            optGroup.members[curOption].y += 50;
+
+            updateLabel();
+        }
+
+        selcCataHover.visible = (FlxG.mouse.screenY <= 40);
+        selcCataHover.x = FlxG.mouse.screenX - (FlxG.mouse.screenX % (FlxG.width / catagories.length));
+        var selctedCata = Std.int(selcCataHover.x / (FlxG.width / catagories.length));
+        if (FlxG.mouse.justPressed && selcCataHover.visible && curCatagory != selctedCata) {
+            FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+            curOption = 0;
+            curCatagory = selctedCata;
+            selcCataOverlay.x = selcCataHover.x;
+            regenOpts();
+        }
+    }
+
+
+
+
+    //Option Adding (Adds a lot of lines so at the bottom)
+    function toggleValue(jsonField:String)
+        Reflect.setField(FlxG.save.data, jsonField, !(Reflect.field(FlxG.save.data, jsonField)));
+
+    function incrementValue(jsonField:String, increment:Float, ?min:Float = -9999, ?max:Float = 9999) {
+        var value = Reflect.field(FlxG.save.data, jsonField);
+        value = Math.round((value + increment) * 10) / 10;
+        value = Math.max(Math.min(value, max), min);
+        Reflect.setField(FlxG.save.data, jsonField, value);
+    }
+
+    function makeBoolOption(name:String, desc:String, jsonField:String):RgOption {
+        return {
+            name: name,
+            desc: desc,
+            onLeft: () -> {toggleValue(jsonField);},
+            onRight: () -> {toggleValue(jsonField);},
+            onEnter: () -> {toggleValue(jsonField);},
+            getValue: () -> {return (Reflect.field(FlxG.save.data, jsonField)) ? {text: "Enabled", color: 0xFF00FF80} : {text: "Disabled", color: 0xFFFF0040};}
+        };
+    }
+
+    function makeOptions() {
+        catagories = ["Gameplay", "Apperance", "Misc"];
+        var regOptions:Array<Array<RgOption>> = [
+            [
+                {
+                    name: "Keybinds",
+                    desc: "Modify the keybinds used for LEFT, DOWN, UP, and RIGHT.",
+                    onEnter: function() {
+                        FlxG.state.persistentUpdate = false;
+                        FlxG.state.openSubState(new menus.KeyBindMenu());
+                    },
+                    getValue: () -> {return {text: "Modify Keybinds", color: 0xFFFFFFFF};}
+                },
+                {
+                    name: "Note Offset",
+                    desc: "Delay the notes position in the chart. (Higher = Later)",
+                    onLeft: () -> {incrementValue("offset", -0.1, -999, 999);},
+                    onRight: () -> {incrementValue("offset", 0.1, -999, 999);},
+                    getValue: () -> {return {text: FlxG.save.data.offset, color: 0xFFFFFFFF};}
+                },
+                makeBoolOption("Downscroll", "Make the notes move down instead of up.", "downscroll"),
+                makeBoolOption("Ghost Tapping", "Allow being able to press a key when a note is non-existent and not lose health.", "ghost"),
+                {
+                    name: "Safe Frames",
+                    desc: "Change the variable used for hit windows.",
+                    onLeft: () -> {incrementValue("frames", -1, 1, 20); base.Conductor.recalculateTimings();},
+                    onRight: () -> {incrementValue("frames", 1, 1, 20); base.Conductor.recalculateTimings();},
+                    getValue: () -> {
+                        return {
+                            text: 'Sick: ${HelperFunctions.truncateFloat(45 * Conductor.timeScale, 0)} || Good: ${HelperFunctions.truncateFloat(135 * Conductor.timeScale, 0)} || '
+                                + 'Bad: ${HelperFunctions.truncateFloat(155 * Conductor.timeScale, 0)} || Shit: ${HelperFunctions.truncateFloat(Conductor.safeZoneOffset, 0)}', 
+                            color: flixel.util.FlxColor.interpolate(0xFFFF0040, 0xFF00FF80, FlxG.save.data.frames / 20)
+                        }
+                    }
+                },
+                #if desktop
+                {
+                    name: "FPS Cap",
+                    desc: "Increase the amount of frames you can have.",
+                    onLeft: () -> {incrementValue("fpsCap", -10, 60, 500); (cast (openfl.Lib.current.getChildAt(0), base.Main)).setFPSCap(FlxG.save.data.fpsCap);},
+                    onRight: () -> {incrementValue("fpsCap", 10, 60, 500); (cast (openfl.Lib.current.getChildAt(0), base.Main)).setFPSCap(FlxG.save.data.fpsCap);},
+                    getValue: () -> {return {text: '${FlxG.save.data.fpsCap} FPS', color: 0xFFFFFFFF};}
+                },
+                #end
+                {
+                    name: "Custom Scroll Speed",
+                    desc: "Change how fast the arrows move. (1 = Chart dependent)",
+                    onLeft: () -> {incrementValue("scrollSpeed", -0.1, 1, 4);},
+                    onRight: () -> {incrementValue("scrollSpeed", 0.1, 1, 4);},
+                    getValue: () -> {return {text: FlxG.save.data.scrollSpeed, color: 0xFFFFFFFF};}
+                },
+                {
+                    name: "Accuracy Calculation",
+                    desc: "Change how the accuray is calcuated.",
+                    onLeft: () -> {FlxG.save.data.accuracyMod = 1 - FlxG.save.data.accuracyMod;},
+                    onRight: () -> {FlxG.save.data.accuracyMod = 1 - FlxG.save.data.accuracyMod;},
+                    onEnter: () -> {FlxG.save.data.accuracyMod = 1 - FlxG.save.data.accuracyMod;},
+                    getValue: () -> {return {text: (FlxG.save.data.accuracyMod == 0 ? "Rating Based" : "Milisecond Based"), color: 0xFFFFFFFF};}
+                },
+                makeBoolOption("Reset Key", "Allow being able to insta fail by pressing your kill bind. (Normally R)", "resetButton"),
+                {
+                    name: "Customize Gameplay",
+                    desc: "Change the position the ratings pop up at.",
+                    onEnter: () -> {
+                        FlxG.state.persistentUpdate = false;
+                        FlxG.state.openSubState(new menus.RatingPosMenu());
+                    },
+                    getValue: () -> {return {text: "Move Ratings", color: 0xFFFFFFFF};}
+                }
+            ],
+            [
+                makeBoolOption("Flashing Lights", "Toggles flashing lights **that can cause epileptic seizures and strain.**", "flashing"),
+                makeBoolOption("Distractions", "Toggles stage distractions that can hinder your gameplay.", "distractions"),
+                #if desktop
+                {
+                    name: "FPS Counter",
+                    desc: "Shows the counter for how many frames per second you have.",
+                    onLeft: () -> {FlxG.save.data.fps = !FlxG.save.data.fps; (cast (openfl.Lib.current.getChildAt(0), base.Main)).toggleFPS(FlxG.save.data.fps);},
+                    onRight: () -> {FlxG.save.data.fps = !FlxG.save.data.fps;(cast (openfl.Lib.current.getChildAt(0), base.Main)).toggleFPS(FlxG.save.data.fps);},
+                    onEnter: () -> {FlxG.save.data.fps = !FlxG.save.data.fps; (cast (openfl.Lib.current.getChildAt(0), base.Main)).toggleFPS(FlxG.save.data.fps);},
+                    getValue: () -> {return (FlxG.save.data.fps) ? {text: "Enabled", color: 0xFF00FF80} : {text: "Disabled", color: 0xFFFF0040};}
+                },
+                {
+                    name: "Rainbow FPS",
+                    desc: "Makes the FPS counter constantly change color.",
+                    onLeft: () -> {FlxG.save.data.fpsRain = !FlxG.save.data.fpsRain; (cast (openfl.Lib.current.getChildAt(0), base.Main)).changeFPSColor(0xFFFFFFFF);},
+                    onRight: () -> {FlxG.save.data.fpsRain = !FlxG.save.data.fpsRain;(cast (openfl.Lib.current.getChildAt(0), base.Main)).changeFPSColor(0xFFFFFFFF);},
+                    onEnter: () -> {FlxG.save.data.fpsRain = !FlxG.save.data.fpsRain; (cast (openfl.Lib.current.getChildAt(0), base.Main)).changeFPSColor(0xFFFFFFFF);},
+                    getValue: () -> {return (FlxG.save.data.fpsRain) ? {text: "Enabled", color: 0xFF00FF80} : {text: "Disabled", color: 0xFFFF0040};}
+                },
+                #end
+                makeBoolOption("Misses and Accuracy", "Toggles visibility of misses and accuracy on the score text.", "accuracyDisplay"),
+                makeBoolOption("Song Position Bar", "Toggles visibility of the bar that shows your song progress on the top.", "songPosition"),
+                makeBoolOption("NPS Counter", "Toggles visibility of notes hit per second on the score text.", "npsDisplay"),
+                makeBoolOption("CPU Strum Glow", "Makes the opponent's arrows glow when they're hit.", "cpuStrums"),
+                {
+                    name: "Watermarks",
+                    desc: "Toggles visiblity of watermarks that say that this is RG Engine.",
+                    onLeft: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
+                    onRight: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
+                    onEnter: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
+                    getValue: () -> {return (FlxG.save.data.watermark) ? {text: "Enabled", color: 0xFF00FF80} : {text: "Disabled", color: 0xFFFF0040};}
+                },
+                makeBoolOption("Camera Zooms", "Makes the camera zoom in a bit every measure.", "camzoom"),
+                makeBoolOption("Psych UI", "Makes the UI similar to the ui of Psych Engine.", "psychui"),
+            ],
+            [
+                #if sys
+                {
+                    name: "Replay Menu",
+                    desc: "Go and select replays of previous plays. (Not fully working.)",
+                    onEnter: () -> {FlxG.switchState(new menus.LoadReplayState());},
+                    getValue: () -> {return {text: "View Replays", color: 0xFFFFFFFF};}
+                },
+                #end
+                makeBoolOption("Botplay", "Have the songs be automatically played. Useful for showcases. (and skill issue)", "botplay"),
+                makeBoolOption("Results Screen", "At the end of a freeplay song or story week, A overlay will appear with results of the gameplay.", "scoreScreen"),
+                makeBoolOption("OG Freeplay", "Have the freeplay menu be the regular freeplay menu instead of the RG one.", "ogfreeplay")
+            ]
+        ];
+        script.callFunc("makeOptions", [regOptions]);
+        options = regOptions;
+    }
 }

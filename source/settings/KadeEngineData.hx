@@ -35,6 +35,8 @@ class KadeEngineData {
 			"cpuStrums" => false,
 			"strumline" => false,
 			"customStrumLine" => 0,
+			"ratingX" => FlxG.width * 0.55 - 125,
+			"ratingY" => FlxG.height * 0.5 - 50,
 			"camzoom" => true,
 			"scoreScreen" => true,
 			"psychui" => false,
@@ -46,14 +48,7 @@ class KadeEngineData {
 				Reflect.setField(FlxG.save.data, setting, defaults[setting]);
 		}
 
-		if (FlxG.save.data.changedHit == null)
-		{
-			FlxG.save.data.changedHitX = -1;
-			FlxG.save.data.changedHitY = -1;
-			FlxG.save.data.changedHit = false;
-		}
-
-		if (FlxG.save.data.fpsCap > 285 || FlxG.save.data.fpsCap < 60)
+		if (FlxG.save.data.fpsCap > 500 || FlxG.save.data.fpsCap < 60)
 			FlxG.save.data.fpsCap = 120; // baby proof so you can't hard lock ur copy of kade engine
 
 		base.Conductor.recalculateTimings();

@@ -39,6 +39,7 @@ class LuaScript extends scripts.BaseScript {
 		LuaL.newmetatable(luaState, "__scriptMetatable");
 		var metatableIndex = Lua.gettop(luaState); //The variable position of the table. Used for setting the functions inside this metatable.
 		Lua.pushvalue(luaState, metatableIndex);
+		Lua.setglobal(luaState, "__scriptMetatable");
 
 		Lua.pushstring(luaState, '__index'); //This is a function in the metatable that is called when you to get a var that doesn't exist.
         Lua.pushcfunction(luaState, Callable.fromStaticFunction(callIndex));
@@ -97,7 +98,21 @@ class LuaScript extends scripts.BaseScript {
 		};
 		specialVars[0] = script;
 
-        if (LuaL.dostring(luaState, openfl.Assets.getText(filePath)) != 0)
+		//Adding a suffix to the end of the lua file to attach a metatable to the global vars. (So you cant have to do `script.parent.this`)
+		var suffix =
+		'\nsetmetatable(_G, {
+			__call = function(notUsed, func, ...)
+				print("called call")
+				return __scriptMetatable.__call(script.parent, func, ...)
+			end,
+			__newindex = function (notUsed, name, value)
+				__scriptMetatable.__newindex(script.parent, name, value)
+		  	end,
+		  	__index = function (notUsed, name)
+			  	return __scriptMetatable.__index(script.parent, name)
+		  	end
+		})';
+        if (LuaL.dostring(luaState, openfl.Assets.getText(filePath) + suffix) != 0)
             lime.app.Application.current.window.alert('Lua file "$filePath" could not be ran.\n${Lua.tostring(luaState, -1)}\nThe game will not utilize this script.', "Lua Running Fail");
 
 		currentLua = lastLua;

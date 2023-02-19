@@ -19,6 +19,8 @@ local qMarks
 local lines
 
 function create()
+	FlxG.mouse.visible = true
+
 	static = FlxSprite:new(0, 0, Paths:image("menu-side/storymenu/staticBGOverlap"))
 	static:setGraphicSize(1280)
 	static.scrollFactor:set()
@@ -76,6 +78,7 @@ function update(e)
 	if openinWeek then return; end
 
 	if parent.controls.BACK then
+		FlxG.mouse.visible = false
 		parent:close()
 		return
 	end

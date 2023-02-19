@@ -72,6 +72,7 @@ class GameOverSubstate extends base.MusicBeatSubstate
 			PlayState.instance.gf.updateAnimation(elapsed);
 		}
 
+		checkSecretInput();
 		if (controls.ACCEPT)
 			endBullshit();
 		
@@ -104,14 +105,26 @@ class GameOverSubstate extends base.MusicBeatSubstate
 		}
 	}
 
+	var secretProgress = 0;
+	function checkSecretInput() {
+		var checks = [FlxG.keys.justPressed.S, FlxG.keys.justPressed.U, FlxG.keys.justPressed.C, FlxG.keys.justPressed.C, false];
+		var result = checks[secretProgress];
+		if (result) {
+			secretProgress++;
+			if (secretProgress >= 4)
+				FlxG.sound.play(Paths.soundRandom('unused-gf-sounds/GF_', 1, 4)); // technically they're used now lol
+		}
+	}
+
 	var isEnding:Bool = false;
 
 	function endBullshit():Void {
 		if (isEnding) return;
 
+		var doSecret = (FlxG.random.bool(1) || secretProgress >= 4);
+
 		isEnding = true;
 		bf.playAnim('deathConfirm', true);
-		PlayState.instance.gf.playAnim("cheer");
 		FlxG.sound.music.stop();
 		FlxG.sound.play(Paths.music(deadEnd));
 		new FlxTimer().start(0.7, function(tmr:FlxTimer) {
@@ -119,5 +132,16 @@ class GameOverSubstate extends base.MusicBeatSubstate
 				openSubState(new funkin.PreloadingSubState());
 			});
 		});
+		if (doSecret) {
+			PlayState.instance.gf.dance();
+
+			var bfMidpoint = bf.getMidpoint();
+			function customEase(t:Float) {
+				return Math.pow(t, 9);
+			}
+			FlxTween.tween(PlayState.instance.gf, {x: bfMidpoint.x, y: bfMidpoint.y}, 3, {ease: customEase});
+			bfMidpoint.put();
+		} else
+			PlayState.instance.gf.playAnim("cheer");
 	}
 }

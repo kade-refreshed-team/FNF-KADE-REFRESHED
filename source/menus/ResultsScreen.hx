@@ -5,7 +5,6 @@ import openfl.display.BitmapData;
 import flixel.system.FlxSound;
 import flixel.util.FlxAxes;
 import flixel.FlxSubState;
-import settings.Options.Option;
 import flixel.input.FlxInput;
 import flixel.input.keyboard.FlxKey;
 import flixel.FlxG;
@@ -24,7 +23,6 @@ import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.input.FlxKeyManager;
 
-import settings.Options;
 import funkin.SongClasses.Song;
 import funkin.PlayState;
 import funkin.Replay;

@@ -13,10 +13,6 @@ class CustomFlxGame extends flixel.FlxGame {
 		// Basic reset stuff
 		FlxG.cameras.reset();
 		FlxG.inputs.onStateSwitch();
-		#if FLX_SOUND_SYSTEM
-		FlxG.sound.destroy();
-		#end
-
 		FlxG.signals.preStateSwitch.dispatch();
 
 		#if FLX_RECORD
@@ -30,8 +26,13 @@ class CustomFlxGame extends flixel.FlxGame {
 		// we need to clear bitmap cache only after previous state is destroyed, which will reset useCount for FlxGraphic objects
         // doesn't if the requested state is playstate, it's to avoid getting rid of the graphic cache by preloading state.
         // plz don't judge the way i did the if statement.
-        if (!(_requestedState is funkin.PlayState))
+        if (!(_requestedState is funkin.PlayState)) {
 		    FlxG.bitmap.clearCache();
+			openfl.Assets.cache.clear();
+			#if FLX_SOUND_SYSTEM
+			FlxG.sound.destroy();
+			#end
+		}
 
 		// Finally assign and create the new state
 		_state = _requestedState;

@@ -65,13 +65,13 @@ class MusicBeatState extends FlxUIState
 
 
 	var array:Array<FlxColor> = [
-		FlxColor.fromRGB(148, 0, 211),
-		FlxColor.fromRGB(75, 0, 130),
-		FlxColor.fromRGB(0, 0, 255),
-		FlxColor.fromRGB(0, 255, 0),
-		FlxColor.fromRGB(255, 255, 0),
-		FlxColor.fromRGB(255, 127, 0),
-		FlxColor.fromRGB(255, 0 , 0)
+		FlxColor.fromRGB(148, 0, 211), // 0x9400d3
+		FlxColor.fromRGB(75, 0, 130), // 0x4b0082
+		FlxColor.fromRGB(0, 0, 255), // 0x0000ff
+		FlxColor.fromRGB(0, 255, 0), // 0x00ff00
+		FlxColor.fromRGB(255, 255, 0), // 0xffff00
+		FlxColor.fromRGB(255, 127, 0), // 0xff7f00
+		FlxColor.fromRGB(255, 0 , 0) // 0xff0000
 	];
 
 	public static var currentColor = 0;
@@ -81,14 +81,14 @@ class MusicBeatState extends FlxUIState
 	override public function tryUpdate(elapsed:Float) {
 		var main:Main = cast (Lib.current.getChildAt(0), Main);
 
-		if (FlxG.save.data.fpsRain && skippedFrames >= 6) {
+		/*if (FlxG.save.data.fpsRain && skippedFrames >= 6) {
 			if (currentColor >= array.length)
 				currentColor = 0;
 			main.changeFPSColor(array[currentColor]);
 			currentColor++;
 			skippedFrames = 0;
 		} else
-			skippedFrames++;
+			skippedFrames++;*/
 
 		if (main.getFPSCap() != FlxG.save.data.fpsCap && FlxG.save.data.fpsCap <= 290)
 			main.setFPSCap(FlxG.save.data.fpsCap);
@@ -112,6 +112,24 @@ class MusicBeatState extends FlxUIState
 				update(elapsed);
 
 			script.callFunc("updatePost", [elapsed]);
+		}
+
+		if (FlxG.save.data.fpsRain) {
+			var colors:Array<FlxColor> =[
+				0xFFFF0040,
+				0xFFFF9100,
+				0xFFFFFB00,
+				0xFF00FF80,
+				0xFF00B7FF,
+				0xFFAE00FF
+			];
+			var floatIndex = ((floatBeat / 4) % 1) / (1 / colors.length);
+
+			var floorIndex = (Math.floor(floatIndex) + colors.length) % colors.length;
+			var ceilIndex = (Math.ceil(floatIndex) + colors.length) % colors.length;
+
+			var color = FlxColor.interpolate(colors[floorIndex], colors[ceilIndex], floatIndex % 1);
+			main.changeFPSColor(color);
 		}
 
 		if (_requestSubStateReset) {

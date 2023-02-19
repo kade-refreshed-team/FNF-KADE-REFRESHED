@@ -62,6 +62,7 @@ class Character extends FlxSprite
 	};
 	public var curCharacter:String = '';
 	var leftRightDancer:Bool = false;
+	var normallyFlipped:Bool = false;
 
 	public var stunned:Bool = false;
 	public var holdTimer:Float = 0;
@@ -126,28 +127,9 @@ class Character extends FlxSprite
 
 		scale.set(data.scale, data.scale);
 		updateHitbox();
-		flipX = (data.flipX && !isPlayer);
+		flipX = (data.flipX != isPlayer);
+		normallyFlipped = (flipX != (data.commonSide == "bf") != isPlayer);
 		antialiasing = data.antialiasing;
-
-		if ((data.commonSide == "bf") != isPlayer) {
-			if (animation.getByName('singRIGHT') != null) {
-				var oldFrames = animation.getByName('singRIGHT').frames;
-				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-				animation.getByName('singLEFT').frames = oldFrames;
-				var oldOffsets = animOffsets['singRIGHT'];
-				animOffsets['singRIGHT'] = animOffsets['singLEFT'];
-				animOffsets['singLEFT'] = oldOffsets;
-			}
-
-			if (animation.getByName('singRIGHTmiss') != null) {
-				var oldMiss = animation.getByName('singRIGHTmiss').frames;
-				animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-				animation.getByName('singLEFTmiss').frames = oldMiss;
-				var oldOffsets = animOffsets['singRIGHTmiss'];
-				animOffsets['singRIGHTmiss'] = animOffsets['singLEFTmiss'];
-				animOffsets['singLEFTmiss'] = oldOffsets;
-			}
-		}
 
 		playAnim(leftRightDancer ? "danceRight" : "idle");
 		danced = false;
@@ -211,7 +193,7 @@ class Character extends FlxSprite
 			offset = offset.rotateByDegrees(angle % 360).scale(scaleX, scaleY);
 		}
 
-		offset.x += ((data.commonSide == "bf") != isPlayer) ? data.offsets.x : -data.offsets.x;
+		offset.x += (normallyFlipped != flipX) ? data.offsets.x : -data.offsets.x;
 		offset.y -= data.offsets.y;
 
 		super.draw();
@@ -223,6 +205,16 @@ class Character extends FlxSprite
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void {
+		if (normallyFlipped != flipX) {
+			AnimName = switch(AnimName) {
+				case "singLEFT": "singRIGHT";
+				case "singRIGHT": "singLEFT";
+				case "singLEFTmiss": "singRIGHTmiss";
+				case "singRIGHTmiss": "singLEFTmiss";
+				default: AnimName;
+			}
+		}
+
 		if (!animOffsets.exists(AnimName) || !animation.exists(AnimName))
 			return; //Prevent playing animation if unavailable.
 
