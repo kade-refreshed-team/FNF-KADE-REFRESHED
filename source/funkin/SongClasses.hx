@@ -77,7 +77,17 @@ class Song
 
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
-		var swagShit:SwagSong = cast Json.parse(rawJson).song;
+		var parsedJson = Json.parse(rawJson).song;
+		for (section in cast (parsedJson.notes, Array<Dynamic>)) {
+			if (Reflect.hasField(section, "sectionBeats")) //psych engine lol
+				section.lengthInSteps = section.sectionBeats * 4;
+			for (sn in cast (section.sectionNotes, Array<Dynamic>)) {
+				var note = cast (sn, Array<Dynamic>);
+				if (note.length < 4)
+					note.push("Default"); // for consistency in the json when saving.
+			}
+		}
+		var swagShit:SwagSong = cast parsedJson;
 		swagShit.validScore = true;
 		return swagShit;
 	}

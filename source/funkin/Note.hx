@@ -1,32 +1,58 @@
 package funkin;
 
+import openfl.display.BitmapData;
 import flixel.addons.effects.FlxSkewedSprite;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-#if polymod
-import polymod.format.ParseRules.TargetSignatureElement;
-#end
 import funkin.PlayState;
 import base.Conductor;
 
 using StringTools;
 
+typedef NoteStyleStruct = {
+	var strum:NoteStyleSection;
+	var glowOffsets:Array<Array<Float>>;
+	var regularArrow:NoteStyleSection;
+	var sustain:NoteStyleSection;
+}
+
+typedef NoteStyleSection = {
+	var asset:String;
+	var spritesheetType:String;
+	var ?gridX:Int;
+	var ?gridY:Int;
+	var antialiasing:Bool;
+	var scale:Float;
+	var fps:Int;
+
+	var animSets:Array<Array<Any>>;
+}
+
 class Note extends FlxSprite
 {
 	public var strumTime:Float = 0;
-
 	public var mustPress:Bool = false;
 	public var noteData:Int = 0;
+	public var jsonData:Array<Dynamic> = [];
+
+	public var sustainLength:Float = 0;
+	public var isSustainNote:Bool = false;
+	public var sustainArray:Array<Note> = [];
+
+	public var noteStyle:String = "normal";
+	public var styleJson:NoteStyleStruct;
+	public var styleSection:NoteStyleSection;
+	public var noteType:String = "Default";
+
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var hitByBot:Bool = false;
+
 	public var prevNote:Note;
-	public var sustainLength:Float = 0;
-	public var isSustainNote:Bool = false;
 
 	public var noteScore:Float = 1;
 
@@ -38,7 +64,7 @@ class Note extends FlxSprite
 
 	public var rating:String = "shit";
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?noteType:String = "Default")
 	{
 		super();
 
@@ -57,45 +83,13 @@ class Note extends FlxSprite
 			this.strumTime = 0;
 
 		this.noteData = noteData;
+		this.noteType = noteType;
 
-		var daStage:String = PlayState.curStage;
-
-		var noteTypeCheck:String = PlayState.SONG.noteStyle;
-
-		if (PlayState.SONG.noteStyle == null && PlayState.storyWeek == 6)
-			noteTypeCheck = 'pixel';
-
-		switch (noteTypeCheck) {
-			case 'pixel':
-				loadGraphic(Paths.image('game-side/pixelUI/arrows-pixels','week6'), true, 17, 17);
-
-				animation.add("scroll", [noteData + 4]);
-
-				if (isSustainNote) {
-					loadGraphic(Paths.image('game-side/pixelUI/arrowEnds','week6'), true, 7, 6);
-
-					animation.add("hold", [noteData]);
-					animation.add("tail", [noteData + 4]);
-				}
-
-				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-				updateHitbox();
-			default:
-				frames = Paths.getSparrowAtlas('game-side/NOTE_assets');
-
-				var noteColors = ["purple", "blue", "green", "red"];
-				animation.addByPrefix("scroll", noteColors[noteData] + "0");
-				animation.addByPrefix("hold", noteColors[noteData] + " hold piece");
-				noteColors = ['pruple end hold', 'blue hold end', 'green hold end', 'red hold end']; //remake the array because of PRUPLE
-				animation.addByPrefix("tail", noteColors[noteData]);
-
-				setGraphicSize(Std.int(width * 0.7));
-				updateHitbox();
-				antialiasing = true;
-		}
+		loadNoteStyle(noteTypes.get(noteType));
 
 		x += swagWidth * noteData;
-		animation.play('scroll');
+
+		moves = false;
 
 		// trace(prevNote);
 
@@ -113,9 +107,6 @@ class Note extends FlxSprite
 			animation.play("tail");
 			updateHitbox();
 			x -= width / 2;
-
-			if (noteTypeCheck == "pixel")
-				x += 30;
 
 			if (prevNote.isSustainNote) {
 				prevNote.animation.play('hold');
@@ -141,5 +132,68 @@ class Note extends FlxSprite
 
 		if (tooLate && alpha > 0.3)
 			alpha = 0.3;
+	}
+
+	//Json parsing can build up so cache.
+	static var jsonCache:Map<String, NoteStyleStruct> = [];
+	public static function getNoteStyle(style:String):NoteStyleStruct {
+		if (jsonCache.exists(style))
+			return jsonCache[style];
+
+		try {
+			var daJson = haxe.Json.parse(openfl.Assets.getText(Paths.json('noteStyles/$style')));
+			jsonCache.set(style, daJson);
+			return daJson;
+		} catch(e) {
+			lime.app.Application.current.window.alert('Note style "$style" could not be parsed.\n$e\nThe game will instead load the default style.', "Note Style Parsing Fail");
+			var daJson = haxe.Json.parse(openfl.Assets.getText(Paths.json('noteStyles/normal')));
+			jsonCache.set(style, daJson);
+			return daJson;
+		}
+	}
+
+	public function loadNoteStyle(style:String) {
+		var animToPlay = (animation.curAnim != null) ? animation.curAnim.name : "scroll";
+
+		noteStyle = style;
+		styleJson = getNoteStyle(style);
+		styleSection = isSustainNote ? styleJson.sustain : styleJson.regularArrow;
+
+		var addAnimFunc:Dynamic = animation.addByPrefix;
+		switch (styleSection.spritesheetType) {
+			case "packer":
+				frames = Paths.getPackerAtlas(styleSection.asset);
+			case "grid":
+				loadGraphic(Paths.image(styleSection.asset), true, styleSection.gridX, styleSection.gridY);
+				addAnimFunc = animation.add;
+			default:
+				frames = Paths.getSparrowAtlas(styleSection.asset);
+		}
+
+		if (isSustainNote) {
+			addAnimFunc("hold", styleSection.animSets[0][noteData], styleSection.fps);
+			addAnimFunc("tail", styleSection.animSets[1][noteData], styleSection.fps);
+		} else {
+			addAnimFunc("scroll", styleSection.animSets[0][noteData], styleSection.fps);
+		}
+
+		animation.play(animToPlay);
+
+		antialiasing = styleSection.antialiasing;
+		scale.set(styleSection.scale, styleSection.scale);
+		if (animToPlay == 'hold') {
+			var songSpeed = funkin.PlayStateChangeables.scrollSpeed == 1 ? PlayState.SONG.speed : funkin.PlayStateChangeables.scrollSpeed;
+			scale.y *= Conductor.stepCrochet / 100 * 1.5 * songSpeed;
+		}
+		updateHitbox();
+	}
+
+	public static var noteTypes:Map<String, String> = [];
+	public static function reparseNoteTypes() {
+		noteTypes = [];
+		for (line in utils.CoolUtil.coolTextFile(Paths.txt("lists/noteTypeList"))) {
+			var daVars = line.split(" | ");
+			noteTypes.set(daVars[0], daVars[1].replace("<CURRENT>", PlayState.SONG.noteStyle));
+		}
 	}
 }

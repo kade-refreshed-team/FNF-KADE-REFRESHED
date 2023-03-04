@@ -31,6 +31,7 @@ import utils.*;
 import base.*;
 import funkin.SongClasses;
 import funkin.GraphicBar;
+import funkin.Strum;
 import menus.*;
 #if windows
 import Discord.DiscordClient;
@@ -119,9 +120,9 @@ class PlayState extends MusicBeatState
 	var songLength:Float = 0;
 	var rgEngineWatermark:FlxText;
 
-	public var strumLineNotes:FlxTypedGroup<FlxSprite> = null;
-	public var playerStrums:Array<FlxSprite> = null;
-	public var cpuStrums:Array<FlxSprite> = null;
+	public var strumLineNotes:FlxTypedGroup<Strum> = null;
+	public var playerStrums:Array<Strum> = null;
+	public var cpuStrums:Array<Strum> = null;
 	public var notes:FlxTypedGroup<Note>;
 	private var unspawnNotes:Array<Note> = [];
 
@@ -326,20 +327,10 @@ class PlayState extends MusicBeatState
 		for (type in BaseScript.scriptTypes)
 			exts = exts.concat(type.exts);
 
-		var directoriesToRead:Array<String> = [];
-        if (FileSystem.exists(FileSystem.absolutePath('assets/data/gameScripts')) && FileSystem.isDirectory(FileSystem.absolutePath('assets/data/gameScripts')))
-            directoriesToRead.push(FileSystem.absolutePath('assets/data/gameScripts'));
-        @:privateAccess for (modDir in polymod.Polymod.prevParams.dirs) {
-            if (FileSystem.exists(FileSystem.absolutePath('$modDir/data/gameScripts')) && FileSystem.isDirectory(FileSystem.absolutePath('$modDir/data/gameScripts')))
-                directoriesToRead.push(FileSystem.absolutePath('$modDir/data/gameScripts'));
-        }
-
-		for (daDirectory in directoriesToRead) {
-            for (file in FileSystem.readDirectory(daDirectory)) {
-				if (exts.contains(haxe.io.Path.extension(file)))
-					scripts.push(BaseScript.makeScript('assets/data/gameScripts/${haxe.io.Path.withoutExtension(file)}'));
-			}
-        }
+		for (file in Paths.folderContents('data/gameScripts')) {
+			if (exts.contains(haxe.io.Path.extension(file)))
+				scripts.push(BaseScript.makeScript('assets/data/gameScripts/${haxe.io.Path.withoutExtension(file)}'));
+		}
 		#end
 
 		for (s in scripts) {
@@ -401,6 +392,7 @@ class PlayState extends MusicBeatState
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		FlxG.fixedTimestep = false;
+		
 		if (PlayState.SONG.notes[0] != null && SONG.notes[0].mustHitSection) {
 			var bfMidpoint = boyfriend.getMidpoint();
 			bfMidpoint.x = bfMidpoint.x - 100 + camOffsets.bfCamX + boyfriend.data.offsets.camX;
@@ -858,6 +850,11 @@ class PlayState extends MusicBeatState
 	public var stopUpdate = false;
 	public var removedVideo = false;
 
+	override public function tryUpdate(elapsed:Float) {
+		autoUpdateSongPos = !inCutscene;
+		super.tryUpdate(elapsed);
+	}
+
 	override public function update(elapsed:Float)
 	{
 		scripts_call("update", [elapsed]);
@@ -946,7 +943,10 @@ class PlayState extends MusicBeatState
 			#if windows
 			DiscordClient.changePresence("Chart Editor", null, null, true);
 			#end
-			FlxG.switchState(new debug.ChartingState());
+			if (FlxG.keys.pressed.SHIFT)
+				FlxG.switchState(new debug.ChartingState());
+			else
+				FlxG.switchState(new debug.RgCharter());
 		}
 
 		if (FlxG.keys.justPressed.FIVE)
@@ -997,7 +997,8 @@ class PlayState extends MusicBeatState
 
 		var iconOffset:Int = 26;
 
-		songPosBar.percent = Conductor.songPosition / songLength;
+		if (songPosBar != null)
+			songPosBar.percent = Conductor.songPosition / songLength;
 		healthBar.percent = health / 2;
 		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent * 100, 0, 100, 100, 0) * 0.01) - iconOffset);
 		iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent * 100, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
@@ -1012,26 +1013,6 @@ class PlayState extends MusicBeatState
 			iconP2.animation.curAnim.curFrame = 1;
 		else
 			iconP2.animation.curAnim.curFrame = 0;
-
-		/* if (FlxG.keys.justPressed.NINE)
-			FlxG.switchState(new Charting()); */
-
-		if (FlxG.keys.justPressed.FIVE)
-		{
-			if (useVideo)
-			{
-				GlobalVideo.get().stop();
-				remove(videoSprite);
-				FlxG.stage.window.onFocusOut.remove(focusOut);
-				FlxG.stage.window.onFocusIn.remove(focusIn);
-				removedVideo = true;
-			}
-
-			FlxG.switchState(new debug.AnimationDebug(SONG.player2));
-		}
-
-		if (FlxG.keys.justPressed.SIX)
-			FlxG.switchState(new debug.AnimationDebug(SONG.player1));
 
 		if (startingSong) {
 			if (startedCountdown && Conductor.songPosition >= 0)
@@ -1285,14 +1266,11 @@ class PlayState extends MusicBeatState
 					daNote.y = (strum.y + distance);
 
 					if (daNote.isSustainNote) {
-						distance = (Conductor.songPosition - (daNote.strumTime - Conductor.stepCrochet / 2)) * (0.45 * FlxMath.roundDecimal(songSpeed, 2));
-						daNote.y = (strum.y + distance);
+						var stepHeight = ((0.45 * Conductor.stepCrochet) * FlxMath.roundDecimal(songSpeed, 2));
+						var noteYOff = Math.round(-stepHeight + Note.swagWidth * 0.5);
 
-						if (daNote.animation.curAnim != null && daNote.animation.curAnim.name == "tail") {
-							var normNoteScale = daNote.scale.x * Conductor.stepCrochet / 100 * 1.5 * songSpeed;
-							daNote.y += daNote.frameHeight * normNoteScale - daNote.height;
-						}
-
+						daNote.y -= noteYOff + (daNote.height - stepHeight);
+						
 						if (canClip) {
 							// Clip to strumline
 							var swagRect = new FlxRect(0, 0, daNote.frameWidth * 2, daNote.frameHeight * 2);
@@ -1305,8 +1283,9 @@ class PlayState extends MusicBeatState
 				} else {
 					daNote.y = (strum.y - distance);
 					if (daNote.isSustainNote) {
-						distance = (Conductor.songPosition - (daNote.strumTime - Conductor.stepCrochet / 2)) * (0.45 * FlxMath.roundDecimal(songSpeed, 2));
-						daNote.y = (strum.y - distance);
+						var stepHeight = ((0.45 * Conductor.stepCrochet) * FlxMath.roundDecimal(songSpeed, 2));
+
+						daNote.y += Math.round(-stepHeight + Note.swagWidth * 0.5);
 
 						if (canClip) {
 							// Clip to strumline
@@ -1341,11 +1320,10 @@ class PlayState extends MusicBeatState
 						if (FlxG.save.data.cpuStrums) {
 							var spr = cpuStrums[daNote.noteData];
 							spr.animation.play('confirm', true);
-							if (!curStage.startsWith("school")) {
-								spr.centerOffsets();
-								spr.offset.x -= 13;
-								spr.offset.y -= 13;
-							}
+
+							spr.centerOffsets();
+							spr.offset.x += spr.styleJson.glowOffsets[spr.direction][0];
+							spr.offset.y += spr.styleJson.glowOffsets[spr.direction][1];
 						}
 					}
 					daNote.hitByBot = true;
@@ -1364,12 +1342,11 @@ class PlayState extends MusicBeatState
 
 				daNote.visible = strum.visible;
 				daNote.x = strum.x;
+				daNote.alpha = strum.alpha;
 				if (!daNote.isSustainNote)
 					daNote.angle = strum.angle;
-				daNote.alpha = strum.alpha;
-
-				if (daNote.isSustainNote)
-					daNote.x += daNote.width / 2 + 17;
+				else
+					daNote.x += strum.width / 2 - daNote.width / 2;
 
 				// trace(daNote.y);
 				// WIP interpolation shit? Need to fix the pause issue
@@ -1415,6 +1392,13 @@ class PlayState extends MusicBeatState
 					daNote.kill();
 					notes.remove(daNote, true);
 					daNote.destroy();
+					if (!daNote.wasGoodHit) {
+						for (sustain in daNote.sustainArray) {
+							sustain.kill();
+							notes.remove(sustain, true);
+							sustain.destroy();
+						}
+					}
 				}
 
 				if (daNote.strumTime < Conductor.songPosition - Conductor.safeZoneOffset * Conductor.timeScale) { //Delete notes that have possibly gotten too far without deletion.
@@ -1832,25 +1816,13 @@ class PlayState extends MusicBeatState
 		return Math.abs(FlxMath.roundDecimal(value1, 1) - FlxMath.roundDecimal(value2, 1)) < unimportantDifference;
 	}
 
-	var upHold:Bool = false;
-	var downHold:Bool = false;
-	var rightHold:Bool = false;
-	var leftHold:Bool = false;
-
 	private function keyShit():Void // I've invested in emma stocks
 	{
-		// control arrays, order L D R U
-		var holdArray:Array<Bool> = [controls.LEFT, controls.DOWN, controls.UP, controls.RIGHT];
-		var pressArray:Array<Bool> = [controls.LEFT_P, controls.DOWN_P, controls.UP_P, controls.RIGHT_P];
-		var releaseArray:Array<Bool> = [controls.LEFT_R, controls.DOWN_R, controls.UP_R, controls.RIGHT_R];
+		// control arrays, order depends on strums. (normally L D U R)
+		var holdArray:Array<Bool> = [for (strum in playerStrums) (strum.holding && !PlayStateChangeables.botPlay)];
+		var pressArray:Array<Bool> = [for (strum in playerStrums) (strum.pressed && !PlayStateChangeables.botPlay)];
+		var releaseArray:Array<Bool> = [for (strum in playerStrums) (strum.released && !PlayStateChangeables.botPlay)];
 
-		// Prevent player input if botplay is on
-		if (PlayStateChangeables.botPlay)
-		{
-			holdArray = [false, false, false, false];
-			pressArray = [false, false, false, false];
-			releaseArray = [false, false, false, false];
-		}
 		// HOLDS, check for sustain notes
 		if (holdArray.contains(true) && /*!boyfriend.stunned && */ generatedMusic)
 		{
@@ -1997,14 +1969,11 @@ class PlayState extends MusicBeatState
 			if (!holdArray[spr.ID])
 				spr.animation.play('static');
 
-			if (spr.animation.curAnim.name == 'confirm' && !curStage.startsWith('school'))
-			{
-				spr.centerOffsets();
-				spr.offset.x -= 13;
-				spr.offset.y -= 13;
+			spr.centerOffsets();
+			if (spr.animation.curAnim != null && spr.animation.curAnim.name == "confirm") {
+				spr.offset.x += spr.styleJson.glowOffsets[spr.direction][0];
+				spr.offset.y += spr.styleJson.glowOffsets[spr.direction][1];
 			}
-			else
-				spr.centerOffsets();
 		}
 	}
 

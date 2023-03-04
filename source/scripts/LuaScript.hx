@@ -201,9 +201,9 @@ class LuaScript extends scripts.BaseScript {
 			params[2] = params[2][0];
 
 		//Calling the function. If it catches something, will trace what went wrong.
-		var returned = null;
+		var returned:Dynamic = null;
 		try {
-            returned = functions[funcNum](params[0], params[1], params[2]);
+           	returned = functions[funcNum](params[0], params[1], params[2]);
         } catch(e) {
             trace("Lua Error: " + e.details());
         }
@@ -219,17 +219,25 @@ class LuaScript extends scripts.BaseScript {
 	}
 
 	//These three functions are the actual functions that the metatable use.
-	//Without these, object oriented lua woudln't work at all.
-	public function index(object:Dynamic, property:String, ?uselessValue:Any):Dynamic {
+	//Without these, object oriented lua wouldn't work at all.
+	public function index(object:Dynamic, property:Any, ?uselessValue:Any):Dynamic {
+		if (object is Array && property is Int)
+			return object[cast(property, Int)];
+
 		var grabbedProperty:Dynamic = null;
 
-		if (object != null && (grabbedProperty = Reflect.getProperty(object, property)) != null)
+		if (object != null && (grabbedProperty = Reflect.getProperty(object, cast(property, String))) != null)
             return grabbedProperty;
         return null;
 	}
-    public function newIndex(object:Dynamic, property:String, value:Dynamic) {
+    public function newIndex(object:Dynamic, property:Any, value:Dynamic) {
+		if (object is Array && property is Int) {
+			object[cast(property, Int)] = value;
+			return null;
+		}
+
 		if (object != null)
-			Reflect.setProperty(object, property, value);
+			Reflect.setProperty(object, cast(property, String), value);
         return null;
     }
 	public function metatableCall(func:Dynamic, object:Dynamic, ?params:Array<Any>) {
@@ -350,50 +358,47 @@ class LuaScript extends scripts.BaseScript {
 			case Type.ValueType.TClass(String):
 				Lua.pushstring(luaState, cast(val, String));
 			case Type.ValueType.TClass(Array):
-				var arr:Array<Any> = cast val;
-                var size:Int = arr.length;
-                Lua.createtable(luaState, size, 0);
+				var location = specialVars.indexOf(val);
+				if (location < 0) {
+					location = specialVars.length;
+					specialVars.push(val);
+				}
 
-                for (i in 0...size) {
-                    Lua.pushnumber(luaState, i + 1);
-                    toLua(arr[i]);
-                    Lua.settable(luaState, -3);
-                }
+				Lua.newtable(luaState);
+				var tableIndex = Lua.gettop(luaState); //The variable position of the table. Used for paring the metatable with this table and attaching variables.
+
+				Lua.pushstring(luaState, '__special_id'); //This is a helper var in the table that is used by the conversion functions to detect a special var.
+				Lua.pushinteger(luaState, location);
+				Lua.settable(luaState, tableIndex);
+
+                LuaL.getmetatable(luaState, "__scriptMetatable");
+				Lua.setmetatable(luaState, tableIndex);
 			case Type.ValueType.TObject:
+				var location = specialVars.indexOf(val);
+				if (location < 0) {
+					location = specialVars.length;
+					specialVars.push(val);
+				}
+	
+				Lua.newtable(luaState);
+				var tableIndex = Lua.gettop(luaState); //The variable position of the table. Used for paring the metatable with this table and attaching variables.
+	
+				Lua.pushstring(luaState, '__special_id'); //This is a helper var in the table that is used by the conversion functions to detect a special var.
+				Lua.pushinteger(luaState, location);
+				Lua.settable(luaState, tableIndex);
+
+				//Idk why it thinks static classes are objects but ok.
 				var className:String = Type.getClassName(val);
 				if (className != null) {
-					var location = specialVars.indexOf(val);
-					if (location < 0) {
-						location = specialVars.length;
-						specialVars.push(val);
-					}
-		
-					Lua.newtable(luaState);
-					var tableIndex = Lua.gettop(luaState); //The variable position of the table. Used for paring the metatable with this table and attaching variables.
-					Lua.pushvalue(luaState, tableIndex);
-		
-					Lua.pushstring(luaState, '__special_id'); //This is a helper var in the table that is used by the conversion functions to detect a special var.
-					Lua.pushinteger(luaState, location);
-					Lua.settable(luaState, tableIndex);
-		
 					Lua.pushstring(luaState, "new"); //This implements the work around function to create the class instance.
 					Lua.pushcfunction(luaState, workaroundCallable);
 					Lua.rawset(luaState, tableIndex);
-		
-					LuaL.getmetatable(luaState, "__scriptMetatable");
-					Lua.setmetatable(luaState, tableIndex);
-
-					return true;
 				}
+	
+				LuaL.getmetatable(luaState, "__scriptMetatable");
+				Lua.setmetatable(luaState, tableIndex);
 
-				var fields = Reflect.fields(val);
-
-				Lua.createtable(luaState, fields.length, 0);
-				for (field in fields) {
-					Lua.pushstring(luaState, field);
-					toLua(Reflect.field(val, field));
-					Lua.settable(luaState, -3);
-				}
+				return true;
 			default: //Didn't fit any of the var types. Assuming it's an instance/pointer, reating table, and attaching table to metatable.
 				var location = specialVars.indexOf(val);
 				if (location < 0) {

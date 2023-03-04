@@ -94,6 +94,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         curAsset = "Strumline";
         generateStrums();
         curAsset = "Song Notes";
+		Note.reparseNoteTypes();
         preloadedAssets.set("notes", generateNotes(PlayState.SONG.notes));
 
         curAsset = "Countdown";
@@ -158,53 +159,17 @@ class PreloadingSubState extends base.MusicBeatSubstate {
                     PlayState.SONG.noteStyle = 'normal';
 			}
 		}
-        var strumLineNotes = new FlxTypedGroup<FlxSprite>();
+        var strumLineNotes = new FlxTypedGroup<funkin.Strum>();
 		add(strumLineNotes);
 		var playerStrums = [];
 		var cpuStrums = [];
         for (i in 0...8) {
             var player = Math.floor(i / 4);
             var direction = (i - 4 * player);
-            var babyArrow:FlxSprite = new FlxSprite(100 + (FlxG.width / 2 * player) + (Note.swagWidth * direction), 100);
+
+			var babyArrow:funkin.Strum = new funkin.Strum(player, direction);
 			babyArrow.alpha = 0.0001;
-
-			var noteType:String = PlayState.SONG.noteStyle;
-
-			switch (noteType) {
-				case 'pixel':
-					babyArrow.loadGraphic(Paths.image('game-side/pixelUI/arrows-pixels'), true, 17, 17);
-					babyArrow.animation.add('green', [6]);
-					babyArrow.animation.add('red', [7]);
-					babyArrow.animation.add('blue', [5]);
-					babyArrow.animation.add('purplel', [4]);
-
-					babyArrow.setGraphicSize(Std.int(babyArrow.width * PlayState.daPixelZoom));
-					babyArrow.updateHitbox();
-					babyArrow.antialiasing = false;
-
-					babyArrow.animation.add('static', [direction]);
-					babyArrow.animation.add('pressed', [direction + 4, direction + 8], 12, false);
-					babyArrow.animation.add('confirm', [direction + 12, direction + 16], 12, false);
-
-				case 'normal' | _:
-					babyArrow.frames = Paths.getSparrowAtlas('game-side/NOTE_assets');
-					babyArrow.animation.addByPrefix('green', 'arrowUP');
-					babyArrow.animation.addByPrefix('blue', 'arrowDOWN');
-					babyArrow.animation.addByPrefix('purple', 'arrowLEFT');
-					babyArrow.animation.addByPrefix('red', 'arrowRIGHT');
-
-					babyArrow.antialiasing = true;
-					babyArrow.setGraphicSize(Std.int(babyArrow.width * 0.7));
-
-					var anims = ["left", "down", "up", "right"];
-					babyArrow.animation.addByPrefix('static', 'arrow${anims[direction].toUpperCase()}');
-					babyArrow.animation.addByPrefix('pressed', '${anims[direction]} press', 24, false);
-					babyArrow.animation.addByPrefix('confirm', '${anims[direction]} confirm', 24, false);
-			}
-
-			babyArrow.updateHitbox();
 			babyArrow.scrollFactor.set();
-
 			babyArrow.ID = direction;
 
 			var groups = [cpuStrums, playerStrums];
@@ -256,6 +221,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 				var daNoteData:Int = Std.int(songNotes[1] % 4);
 
 				var gottaHitNote:Bool = ((songNotes[1] > 3) != section.mustHitSection);
+				var daNoteType:String = songNotes[3];
 
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)
@@ -263,7 +229,8 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 				else
 					oldNote = null;
 
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, daNoteType);
+				swagNote.jsonData = songNotes;
 				swagNote.sustainLength = songNotes[2];
 				swagNote.scrollFactor.set(0, 0);
 
@@ -276,9 +243,13 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 				{
 					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-					var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true);
+					var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + Conductor.stepCrochet, daNoteData, oldNote, true, daNoteType);
+					sustainNote.jsonData = songNotes;
 					sustainNote.scrollFactor.set();
 					unspawnNotes.push(sustainNote);
+					for (sustain in swagNote.sustainArray)
+						sustain.sustainArray.push(sustainNote);
+					swagNote.sustainArray.push(sustainNote);
 
 					sustainNote.mustPress = gottaHitNote;
 

@@ -223,7 +223,6 @@ class ChartingState extends base.MusicBeatState
 		check_voices.callback = function()
 		{
 			_song.needsVoices = check_voices.checked;
-			trace('CHECKED!');
 		};
 
 		var check_mute_inst = new FlxUICheckBox(10, 200, null, null, "Mute Instrumental (in editor)", 100);
@@ -708,7 +707,6 @@ class ChartingState extends base.MusicBeatState
 				{
 					deleteNote(note);
 					delete = true;
-					trace('deelte note');
 				}
 			});
 		for (p in 0...pressArray.length)
@@ -813,9 +811,6 @@ class ChartingState extends base.MusicBeatState
 
 		if (curBeat % 4 == 0 && curStep >= 16 * (curSection + 1))
 		{
-			trace(curStep);
-			trace((_song.notes[curSection].lengthInSteps) * (curSection + 1));
-			trace('DUMBSHIT');
 
 			if (_song.notes[curSection + 1] == null)
 			{
@@ -968,13 +963,13 @@ class ChartingState extends base.MusicBeatState
 				var stepMs = curStep * Conductor.stepCrochet;
 
 
-				trace(Conductor.stepCrochet / snap);
+				//trace(Conductor.stepCrochet / snap);
 
 				if (doSnapShit)
 					FlxG.sound.music.time = stepMs - (FlxG.mouse.wheel * Conductor.stepCrochet / snap);
 				else
 					FlxG.sound.music.time -= (FlxG.mouse.wheel * Conductor.stepCrochet * 0.4);
-				trace(stepMs + " + " + Conductor.stepCrochet / snap + " -> " + FlxG.sound.music.time);
+				//trace(stepMs + " + " + Conductor.stepCrochet / snap + " -> " + FlxG.sound.music.time);
 
 				vocals.time = FlxG.sound.music.time;
 			}
@@ -1054,8 +1049,6 @@ class ChartingState extends base.MusicBeatState
 
 	override function beatHit() 
 	{
-		trace('beat');
-
 		super.beatHit();
 	}
 
@@ -1103,11 +1096,11 @@ class ChartingState extends base.MusicBeatState
 
 	function changeSection(sec:Int = 0, ?updateMusic:Bool = true):Void
 	{
-		trace('changing section' + sec);
+		//trace('changing section' + sec);
 
 		if (_song.notes[sec] != null)
 		{
-			trace('naw im not null');
+			//trace('naw im not null');
 			curSection = sec;
 
 			updateGrid();
@@ -1186,7 +1179,8 @@ class ChartingState extends base.MusicBeatState
 	function updateGrid():Void
 	{
 		remove(gridBG);
-		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 8, GRID_SIZE * _song.notes[curSection].lengthInSteps);
+		//var sectionLength = (_song.notes[curSection].lengthInSteps != null) ? _song.notes[curSection].lengthInSteps : 16;
+		gridBG = FlxGridOverlay.create(GRID_SIZE, GRID_SIZE, GRID_SIZE * 8, GRID_SIZE * 16);
         add(gridBG);
 
 		remove(gridBlackLine);
@@ -1444,11 +1438,6 @@ class ChartingState extends base.MusicBeatState
 			return daLength;
 	}*/
 	private var daSpacing:Float = 0.3;
-
-	function loadLevel():Void
-	{
-		trace(_song.notes);
-	}
 
 	function getNotes():Array<Dynamic>
 	{

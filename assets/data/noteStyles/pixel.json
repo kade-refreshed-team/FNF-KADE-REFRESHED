@@ -1,0 +1,47 @@
+{
+    "strum": {
+        "asset": "game-side/pixelUI/arrows-pixels",
+        "spritesheetType": "grid",
+        "gridX": 17,
+        "gridY": 17,
+        "antialiasing": false,
+        "scale": 6,
+        "fps": 12,
+
+        "animSets": [
+            [[0], [1], [2], [3]],
+            [[4, 8], [5, 9], [6, 10], [7, 11]],
+            [[12, 16], [13, 17], [14, 18], [15, 19]]
+        ]
+    },
+    "glowOffsets": [[0, 0], [0, 0], [0, 0], [0, 0]],
+
+    "regularArrow": {
+        "asset": "game-side/pixelUI/arrows-pixels",
+        "spritesheetType": "grid",
+        "gridX": 17,
+        "gridY": 17,
+        "antialiasing": false,
+        "scale": 6,
+        "fps": 12,
+
+        "animSets": [
+            [[4], [5], [6], [7]]
+        ]
+    },
+
+    "sustain": {
+        "asset": "game-side/pixelUI/arrowEnds",
+        "spritesheetType": "grid",
+        "gridX": 7,
+        "gridY": 6,
+        "antialiasing": false,
+        "scale": 6,
+        "fps": 12,
+
+        "animSets": [
+            [[0], [1], [2], [3]],
+            [[4], [5], [6], [7]]
+        ]
+    }
+}

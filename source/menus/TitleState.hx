@@ -36,7 +36,7 @@ class TitleState extends base.MusicBeatState
         polymod.Polymod.init({
             modRoot: "./mods/",
             dirs: utils.CoolUtil.coolStringFile(modList)
-           });
+        });
         #end
 
 		super.tryCreate();

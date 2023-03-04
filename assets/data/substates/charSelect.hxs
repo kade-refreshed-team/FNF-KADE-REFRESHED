@@ -1,0 +1,85 @@
+import flixel.group.FlxTypedGroup;
+import ui.Alphabet;
+import ui.HealthIcon;
+import utils.CoolUtil;
+import haxe.format.JsonParser;
+
+import openfl.utils.Assets;
+
+var curSelected:Int = 0;
+var icon:HealthIcon;
+var chrGroup:FlxTypedGroup;
+var curJson;
+
+function parseJson(name:String) {
+	//try {
+		curJson = new JsonParser(Assets.getText(Paths.json('characters/' + name))).doParse();
+	//} catch(e) {
+		//lime.app.Application.current.window.alert('Character file "$curCharacter" could not be parsed.\n$e\nThe game will instead load BF.', "Character Parsing Fail");
+		//curJson = JsonParser.parse(Assets.getText(Paths.json('characters/bf')));
+	//}
+}
+
+function createPost() {
+	var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+	bg.alpha = 0;
+	bg.scrollFactor.set();
+	add(bg);
+	FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
+
+	chrGroup = new FlxTypedGroup();
+	add(chrGroup);
+
+	for (i in 0...chars.length) {
+		var charText:Alphabet = new Alphabet(0, (70 * i) + 30, chars[i], true, false, true);
+		charText.x = FlxG.width / 2 - charText.width / 2;
+		charText.spacing = 90;
+		charText.alpha = 1 - 0.4 * Math.min(i, 1);
+		charText.isMenuItem = true;
+		charText.centerPos = true;
+		charText.targetY = i;
+		chrGroup.add(charText);
+	}
+	parseJson(chars[0]);
+	chrGroup.members[0].color = CoolUtil.stringColor(curJson.barColor);
+
+	icon = new HealthIcon(curJson.iconAsset);
+	icon.sprTracker = chrGroup.members[0];
+	add(icon);
+
+	FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+}
+
+function update() {
+	if (controls.UP_P)
+		changeSelection(-1);
+	else if (controls.DOWN_P)
+		changeSelection(1);
+	else if (controls.ACCEPT) {
+		selectChar(chars[curSelected], curJson.iconAsset);
+		close();
+	}
+}
+
+function changeSelection(change:Int) {
+	curSelected = (curSelected + chars.length + change) % chars.length;
+
+	var bullShit:Int = 0;
+	for (item in chrGroup.members) {
+		item.targetY = bullShit - curSelected;
+
+		// nah we dont got if statements
+		item.alpha = 0.6;
+		item.color = -1;
+		if (item.targetY == 0) {
+			item.alpha = 1;
+			parseJson(chars[curSelected]);
+			item.color = CoolUtil.stringColor(curJson.barColor);
+			icon.sprTracker = item;
+		}
+		bullShit++;
+	}
+	icon.changeIcon(curJson.iconAsset);
+
+	FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+}

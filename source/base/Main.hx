@@ -85,7 +85,7 @@ class Main extends Sprite
 		fpsCounter = new FPS(10, 3, 0xFFFFFF);
 		addChild(fpsCounter);
 		toggleFPS(FlxG.save.data.fps);
-
+		setFPSCap(FlxG.save.data.fpsCap);
 		#end
 	}
 
@@ -127,6 +127,8 @@ class Main extends Sprite
 			{asset: diamond, width: 32, height: 32},
 			new flixel.math.FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4)
 		);
+
+		scripts.HaxeScript.initParser();
 	}
 
 	var game:FlxGame;
@@ -145,6 +147,15 @@ class Main extends Sprite
 	public function setFPSCap(cap:Float)
 	{
 		openfl.Lib.current.stage.frameRate = cap;
+
+		var intCap = Std.int(cap);
+		if (intCap > FlxG.drawFramerate) {
+			FlxG.updateFramerate = intCap;
+			FlxG.drawFramerate = intCap;
+		} else {
+			FlxG.drawFramerate = intCap;
+			FlxG.updateFramerate = intCap;
+		}
 	}
 
 	public function getFPSCap():Float

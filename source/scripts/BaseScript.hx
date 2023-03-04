@@ -125,7 +125,8 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
     * All the types of scripts it can create.
     */
     public static var scriptTypes:Array<ScriptType> = [
-        {exts: ["lua"], scriptClass: scripts.LuaScript, extraParams: [false]}
+        {exts: ["lua"], scriptClass: scripts.LuaScript, extraParams: [false]},
+        {exts: ["hx", "hscript", "hxs"], scriptClass: scripts.HaxeScript, extraParams: []}
     ];
 
     /**
@@ -148,6 +149,11 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
         }
         return new BlankScript(path);
     }
+
+    /**
+     * A helpful map for storing variables statically.
+     */
+    public static var staticVars:Map<String, Dynamic> = [];
 }
 
 /**

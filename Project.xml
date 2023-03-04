@@ -55,8 +55,9 @@
 	<haxedev set='webgl' />
 
 	<haxelib name="scriptless-polymod"/>
-	<haxelib name="hscript" />
-	<haxelib name="linc_luajit" if="windows"/>
+	<haxelib name="hscript-improved" />
+	<haxedef name="hscriptPos" />
+	<haxelib name="linc_luajit" />
 
 	<haxelib name="actuate" />
 	<haxelib name="extension-webm"/> <!-- Make sure to use https://github.com/KadeDev/extension-webm/ -->
