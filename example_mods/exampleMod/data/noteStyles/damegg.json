@@ -1,4 +1,7 @@
 {
+    "note": "Shadow Mario, if you are not ok with others using your hurt note skin, please say so. It will be removed when the message is seen.",
+    "note2": "This is an example of how to make note styles with a json.",
+        
     "strum": {
         "asset": "game-side/HURTNOTE_assets",
         "spritesheetType": "sparrow",

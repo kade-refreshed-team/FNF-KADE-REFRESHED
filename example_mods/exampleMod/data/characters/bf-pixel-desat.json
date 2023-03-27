@@ -1,4 +1,6 @@
 {
+  "note": "This is an example of how to make characters with a json.",
+
   "asset": "characters/bfPixelDesat",
   "iconAsset": "bf-pixel-desat",
   "barColor": "#989898",
