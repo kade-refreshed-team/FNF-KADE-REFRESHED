@@ -47,7 +47,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 	}
 
     function preloadStuff() {
-		FlxG.bitmap.clearCache();
+		base.CustomFlxGame.clearBitmapCache();
 		Assets.cache.clear();
 		#if FLX_SOUND_SYSTEM
 		FlxG.sound.destroy();
@@ -94,6 +94,8 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         curAsset = "Strumline";
         generateStrums();
         curAsset = "Song Notes";
+		Conductor.changeBPM(PlayState.SONG.bpm);
+		PlayStateChangeables.scrollSpeed = FlxG.save.data.scrollSpeed;
 		Note.reparseNoteTypes();
         preloadedAssets.set("notes", generateNotes(PlayState.SONG.notes));
 
@@ -137,7 +139,6 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         PlayStateChangeables.useDownscroll = FlxG.save.data.downscroll;
 		PlayStateChangeables.PsychUI = FlxG.save.data.psychui;
 		PlayStateChangeables.safeFrames = FlxG.save.data.frames;
-		PlayStateChangeables.scrollSpeed = FlxG.save.data.scrollSpeed;
 		PlayStateChangeables.botPlay = FlxG.save.data.botplay;
 		preloadedAssets["strumLineNotes"].forEach((spr:FlxSprite) -> {
 			spr.alpha = 1;
@@ -188,30 +189,6 @@ class PreloadingSubState extends base.MusicBeatSubstate {
     }
 
     function generateNotes(sections:Array<funkin.SongClasses.SwagSection>) {
-		#if windows
-        // Per song offset check
-		var daDiff = utils.Highscore.diffArray[PlayState.storyDifficulty];
-		var songPath = Assets.getPath('assets/songs/${PlayState.songLowercase}/$daDiff.json');
-		songPath = songPath.substr(0, songPath.length - 5 - daDiff.length);
-
-		for (file in sys.FileSystem.readDirectory(songPath))
-		{
-			var path = haxe.io.Path.join([songPath, file]);
-			if (!sys.FileSystem.isDirectory(path))
-			{
-				if (path.endsWith('.offset'))
-				{
-					PlayState.songOffset = Std.parseFloat(file.substring(0, file.indexOf('.off')));
-					break;
-				}
-				else
-				{
-					sys.io.File.saveContent(songPath + PlayState.songOffset + '.offset', '');
-				}
-			}
-		}
-		#end
-
         var unspawnNotes:Array<Note> = [];
         for (section in sections) {
             for (songNotes in section.sectionNotes) {
@@ -283,17 +260,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
             var daVars:Array<String> = line.split(" | ");
             switch (daVars[1].toLowerCase().trim()) {
                 case "character" | "char":
-                    var defaultVars = ["newChar", "char", "bf", "100", "100", "false"];
-                    while (daVars.length < 6)
-                        daVars.push(defaultVars[daVars.length]);
-
-                    cacheChar(
-                        daVars[0],
-						daVars[2].trim(),
-                        Std.parseFloat(daVars[3].trim()),
-                        Std.parseFloat(daVars[4].trim()),
-                        daVars[5].trim() == "true"
-                    );
+					Character.preloadCharBitmap(daVars[2].trim());
                 case "image" | "graphic":
                     var imagePath = Paths.image(daVars[2].trim());
                     cacheImage(daVars[0], imagePath);

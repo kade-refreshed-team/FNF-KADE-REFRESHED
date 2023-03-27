@@ -110,7 +110,8 @@ class Paths
 	#if sys
 	public static function folderContents(path:String) {
 		var content = [];
-		@:privateAccess for (dir in ["./assets"].concat(polymod.Polymod.prevParams.dirs)) {
+		//@:privateAccess for (dir in ["./assets"].concat(polymod.Polymod.prevParams.dirs)) {
+		for (dir in OpenFlAssets.foldersToCheck) {
             if (FileSystem.exists(FileSystem.absolutePath('$dir/$path')) && FileSystem.isDirectory(FileSystem.absolutePath('$dir/$path')))
                content = content.concat(FileSystem.readDirectory('$dir/$path'));
         }

@@ -1,6 +1,6 @@
 package utils;
 
-import lime.utils.Assets;
+import openfl.utils.Assets;
 import flixel.util.FlxColor;
 
 import funkin.PlayState;

@@ -75,6 +75,39 @@ class Character extends FlxSprite
 		loadCharacter(character);
 	}
 
+	public static function preloadCharBitmap(charName:String) {
+		var json:CharJson = {
+			asset: "characters/BOYFRIEND",
+			iconAsset: "bf",
+			barColor: "#31D1B0",
+			commonSide: "bf",
+			offsets: {x: 0, y: 350, camX: 0, camY: 0},
+			animations: [{name: "idle", prefix: "bf idle dance", offsets: [-5, 0]}],
+			flipX: true
+		};
+
+		try {
+			json = Json.parse(Assets.getText(Paths.json('characters/$charName')));
+		} catch(e) {
+			lime.app.Application.current.window.alert('Character file "$charName" could not be parsed.\n$e', "Character Parsing Fail");
+		}
+
+		Assets.getBitmapData(Paths.image("game-side/" + json.asset));
+
+		//preload the icon cuz why not
+		//the bitmap isnt so big.
+		var dashIndex = json.iconAsset.indexOf("-");
+		var noDash:String = json.iconAsset.substring(0, (dashIndex > -1) ? dashIndex : json.iconAsset.length);
+
+		var iconPath = 'game-side/icons/icon-face';
+		if (Assets.exists(Paths.image('game-side/icons/icon-${json.iconAsset}')))
+			iconPath = 'game-side/icons/icon-${json.iconAsset}';
+		else if (Assets.exists(Paths.image('game-side/icons/icon-$noDash')))
+			iconPath = 'game-side/icons/icon-$noDash';
+
+		Assets.getBitmapData(Paths.image(iconPath));
+	}
+
 	public function loadCharacter(charName:String) {
 		if (curCharacter == charName) return; //No need to load if they're already loaded.
 
@@ -121,6 +154,10 @@ class Character extends FlxSprite
 			if (!animation.exists(anim.name))
 				trace(curCharacter + ": COULDN'T ADD ANIMATION: " + anim.name);
 
+			if (!data.scaleAffectsOffset) {
+				anim.offsets[0] /= data.scale;
+				anim.offsets[1] /= data.scale;
+			}
 			animOffsets.set(anim.name, anim.offsets);
 		}
 		leftRightDancer = (animation.exists("danceLeft") && animation.exists("danceRight"));
@@ -183,17 +220,11 @@ class Character extends FlxSprite
 
 	override public function draw() {
 		offset.set(daOffset[0], daOffset[1]);
-		if (daOffset[0] != 0 && daOffset[1] != 0) {
-			var scaleX = scale.x;
-			var scaleY = scale.y;
-			if (!data.scaleAffectsOffset) {
-				scaleX = scaleX / data.scale;
-				scaleY = scaleY / data.scale;
-			}
-			offset = offset.rotateByDegrees(angle % 360).scale(scaleX, scaleY);
-		}
+		var offsetMult = (normallyFlipped != flipX) ? -1 : 1;
+		if (daOffset[0] != 0 || daOffset[1] != 0)
+			offset = offset.rotateByDegrees(angle % 360).scale(scale.x, scale.y);
 
-		offset.x += (normallyFlipped != flipX) ? data.offsets.x : -data.offsets.x;
+		offset.x += -data.offsets.x * (-1 * offsetMult);
 		offset.y -= data.offsets.y;
 
 		super.draw();
@@ -222,15 +253,8 @@ class Character extends FlxSprite
 
 		daOffset = animOffsets.get(AnimName);
 		offset.set(daOffset[0], daOffset[1]);
-		if (daOffset[0] != 0 && daOffset[1] != 0) {
-			var scaleX = scale.x;
-			var scaleY = scale.y;
-			if (!data.scaleAffectsOffset) {
-				scaleX = scaleX / data.scale;
-				scaleY = scaleY / data.scale;
-			}
-			offset = offset.rotateByDegrees(angle % 360).scale(scaleX, scaleY);
-		}
+		if (daOffset[0] != 0 || daOffset[1] != 0)
+			offset = offset.rotateByDegrees(angle % 360).scale(scale.x, scale.y);
 
 		if (data.commonSide == "gf" && leftRightDancer) {
 			danced = switch(AnimName) {

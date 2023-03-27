@@ -9,7 +9,10 @@ import flixel.system.FlxSound;
 import flixel.text.FlxText;
 import flixel.FlxSprite;
 import flixel.FlxG;
+import openfl.Assets;
+import lime.media.AudioBuffer;
 
+import debug.WaveformSprite;
 import base.Conductor;
 import funkin.PlayState;
 import funkin.Note;
@@ -18,6 +21,8 @@ import utils.CoolUtil;
 
 class RgCharter extends base.MusicBeatState {
     var gridBG:FlxSprite;
+    var instWave:WaveformSprite;
+    var vocalWave:WaveformSprite;
     var notes:FlxTypedGroup<Note>;
     var sustains:FlxTypedGroup<Note>;
     var hoverArrow:FlxSprite;
@@ -39,6 +44,8 @@ class RgCharter extends base.MusicBeatState {
     var vocals:FlxSound;
     var curSection:Int = 0;
     var sectionStart:Float = 0.0;
+    var playPlHitsounds:Bool = true;
+    var playOpHitsounds:Bool = true;
 
     override public function create() {
         autoUpdateSongPos = false;
@@ -87,6 +94,16 @@ class RgCharter extends base.MusicBeatState {
         plIcon.setGraphicSize(75);
         plIcon.updateHitbox();
         add(plIcon);
+
+        instWave = new WaveformSprite(gridBG.x, gridBG.y, AudioBuffer.fromFile(Assets.getPath(Paths.inst(PlayState.SONG.song))), 320, 640);
+        instWave.color = 0xFFE06C6C;
+        instWave.visible = false;
+        instWave.origin.set();
+        add(instWave);
+        vocalWave = new WaveformSprite(gridBG.x, gridBG.y, AudioBuffer.fromFile(Assets.getPath(Paths.voices(PlayState.SONG.song))), 320, 640);
+        vocalWave.color = 0xFF8D0D0D;
+        vocalWave.origin.set();
+        add(vocalWave);
 
         sustains = new FlxTypedGroup<Note>();
         add(sustains);
@@ -178,6 +195,9 @@ class RgCharter extends base.MusicBeatState {
             plIcon.flipX = true;
         }
 
+        instWave.generateFlixel(sectionStart, sectionStart + Conductor.crochet * 4);
+        vocalWave.generateFlixel(sectionStart, sectionStart + Conductor.crochet * 4);
+
         for (data in section.sectionNotes) {
             var strumTime = Math.round(data[0] * 100) / 100;
             var noteType:String = data[3];
@@ -202,6 +222,8 @@ class RgCharter extends base.MusicBeatState {
 
             notes.add(note);
         }
+
+        script.callFunc("regenNotes");
     }
 
     function overlaps(sprite:FlxSprite)
@@ -276,14 +298,14 @@ class RgCharter extends base.MusicBeatState {
                 FlxG.sound.music.pause();
                 vocals.pause();
             } else {
-                FlxG.sound.music.time = Conductor.songPosition;
-                vocals.time = Conductor.songPosition;
-    
                 for (note in notes.members)
                     note.hitByBot = (note.strumTime < Conductor.songPosition);
 
                 FlxG.sound.music.play();
                 vocals.play();
+
+                FlxG.sound.music.time = Conductor.songPosition;
+                vocals.time = Conductor.songPosition;
             }
         }
 
@@ -319,9 +341,10 @@ class RgCharter extends base.MusicBeatState {
 
         if (FlxG.sound.music.playing) {
             for (note in notes.members) {
-                if (!note.hitByBot && note.strumTime < Conductor.songPosition) {
+                var isForPlayer = ((note.jsonData[1] % 8 > 3) != PlayState.SONG.notes[curSection].mustHitSection);
+                var playHitsound = (isForPlayer ? playPlHitsounds : playOpHitsounds);
+                if (!note.hitByBot && note.strumTime < Conductor.songPosition && playHitsound) {
                     note.hitByBot = true;
-                    var isForPlayer = ((note.jsonData[1] % 8 > 3) != PlayState.SONG.notes[curSection].mustHitSection);
                     FlxG.sound.play(Paths.sound(isForPlayer ? "hitsound1" : "hitsound2"));
                 }
             }

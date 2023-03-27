@@ -6,6 +6,22 @@ import flixel.FlxG;
  * This class is used to change the `switchState` function a little bit.
  */
 class CustomFlxGame extends flixel.FlxGame {
+	public static function clearBitmapCache(?ignoreUseCount:Bool = false) {
+		@:privateAccess if (FlxG.bitmap._cache == null) {
+			FlxG.bitmap._cache = new Map();
+			return;
+		}
+
+		@:privateAccess for (key in FlxG.bitmap._cache.keys()) {
+			var obj = FlxG.bitmap.get(key);
+			var isFileAsset = StringTools.startsWith(obj.key, "assets/");
+			if (obj != null && (!obj.persist || isFileAsset) && (obj.useCount <= 0 || ignoreUseCount)) {
+				FlxG.bitmap.removeKey(key);
+				obj.destroy();
+			}
+		}
+	}
+
     /**
      * Mainly the same as the regular `switchState`, but it accounts for `MusicBeatState`'s `tryCreate` function and the preloader for `PlayState`.
      */
@@ -27,7 +43,7 @@ class CustomFlxGame extends flixel.FlxGame {
         // doesn't if the requested state is playstate, it's to avoid getting rid of the graphic cache by preloading state.
         // plz don't judge the way i did the if statement.
         if (!(_requestedState is funkin.PlayState)) {
-		    FlxG.bitmap.clearCache();
+		    clearBitmapCache(true);
 			openfl.Assets.cache.clear();
 			#if FLX_SOUND_SYSTEM
 			FlxG.sound.destroy();

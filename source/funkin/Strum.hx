@@ -1,7 +1,8 @@
 package funkin;
 
+import flixel.input.keyboard.FlxKey;
+import flixel.FlxG;
 import funkin.Note;
-import settings.PlayerSettings;
 
 class Strum extends flixel.FlxSprite {
     public var direction:Int = 0;
@@ -11,17 +12,9 @@ class Strum extends flixel.FlxSprite {
 	public var styleJson:NoteStyleStruct;
 	public var styleSection:NoteStyleSection;
 
-    public var holding(get, null):Bool;
-    dynamic function get_holding()
-        return PlayerSettings.player1.controls.LEFT;
+    public var holding:Bool;
 
-    public var pressed(get, null):Bool;
-    dynamic function get_pressed()
-        return PlayerSettings.player1.controls.LEFT_P;
-
-    public var released(get, null):Bool;
-    dynamic function get_released()
-        return PlayerSettings.player1.controls.LEFT_R;
+    public var keybinds:Array<Int> = [];
 
     public function new(plr:Int, dir:Int) {
         direction = dir;
@@ -29,14 +22,13 @@ class Strum extends flixel.FlxSprite {
         super(100 + (flixel.FlxG.width / 2 * player) + (Note.swagWidth * direction), 100);
         loadNoteStyle(funkin.PlayState.SONG.noteStyle);
 
-        @:privateAccess {
-            var heldActions = [PlayerSettings.player1.controls._left, PlayerSettings.player1.controls._down, PlayerSettings.player1.controls._up, PlayerSettings.player1.controls._right];
-            var pressActions = [PlayerSettings.player1.controls._leftP, PlayerSettings.player1.controls._downP, PlayerSettings.player1.controls._upP, PlayerSettings.player1.controls._rightP];
-            var releaseActions = [PlayerSettings.player1.controls._leftR, PlayerSettings.player1.controls._downR, PlayerSettings.player1.controls._upR, PlayerSettings.player1.controls._rightR];
-            get_holding = heldActions[direction].check;
-            get_pressed = pressActions[direction].check;
-            get_released = releaseActions[direction].check;
-        }
+        var keys = [
+            [FlxKey.fromString(FlxG.save.data.leftBind), FlxKey.LEFT],
+            [FlxKey.fromString(FlxG.save.data.downBind), FlxKey.DOWN],
+            [FlxKey.fromString(FlxG.save.data.upBind), FlxKey.UP],
+            [FlxKey.fromString(FlxG.save.data.rightBind), FlxKey.RIGHT]
+        ];
+        keybinds = keys[direction];
     }
 
     public function loadNoteStyle(style:String) {

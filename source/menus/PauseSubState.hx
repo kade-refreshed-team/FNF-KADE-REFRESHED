@@ -153,8 +153,6 @@ class PauseSubState extends base.MusicBeatSubstate
 						FlxG.save.data.downscroll = false;
 					}
 					PlayState.loadRep = false;
-					if (FlxG.save.data.fpsCap > 290)
-						(cast (Lib.current.getChildAt(0), base.Main)).setFPSCap(290);
 					
 					FlxG.switchState(new MainMenuState());
 			}

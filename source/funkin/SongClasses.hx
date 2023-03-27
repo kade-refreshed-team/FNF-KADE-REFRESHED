@@ -1,7 +1,7 @@
 package funkin;
 
 import haxe.Json;
-import lime.utils.Assets;
+import openfl.utils.Assets;
 
 using StringTools;
 

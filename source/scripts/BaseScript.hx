@@ -115,6 +115,7 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
             "Paths" => utils.Paths,
             "Conductor" => base.Conductor,
             "PlayState" => funkin.PlayState,
+            "Character" => funkin.Character,
             "KadeEngineData" => settings.KadeEngineData,
     
             "Assets" => Assets

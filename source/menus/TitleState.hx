@@ -33,10 +33,12 @@ class TitleState extends base.MusicBeatState
 	override public function tryCreate() {
 		#if sys
 		var modList = sys.io.File.getContent(sys.FileSystem.absolutePath('mods/modList.txt'));
-        polymod.Polymod.init({
-            modRoot: "./mods/",
-            dirs: utils.CoolUtil.coolStringFile(modList)
-        });
+        // polymod.Polymod.init({
+        //     modRoot: "./mods/",
+        //     dirs: utils.CoolUtil.coolStringFile(modList)
+        // });
+		Assets.foldersToCheck = [for (line in utils.CoolUtil.coolStringFile(modList)) './mods/$line'];
+		Assets.foldersToCheck.push('./assets');
         #end
 
 		super.tryCreate();

@@ -90,6 +90,8 @@ class Main extends Sprite
 	}
 
 	function initStuff() {
+		flixel.graphics.FlxGraphic.defaultPersist = true;
+
 		#if sys
 		if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))
 			sys.FileSystem.createDirectory(Sys.getCwd() + "/assets/replays");

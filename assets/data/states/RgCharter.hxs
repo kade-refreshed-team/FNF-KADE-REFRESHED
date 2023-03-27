@@ -53,7 +53,7 @@ function updatePost(e) {
 			songGroup.visible = true;
 			sectionGroup.visible = false;
 
-			settingsBG.resize(200, 400);
+			settingsBG.resize(200, 600);
 			settingsBG.y = songIcon.height + 5;
 			settingsBG.x = FlxG.width - settingsBG.width + 20;
 			if (curSettingTween != null && !curSettingTween.finished)
@@ -62,6 +62,18 @@ function updatePost(e) {
 			curTweenFor = "songSettings";
 		}
 	}
+
+	if (FlxG.keys.justPressed.ENTER) {
+		openSubState(new MusicBeatSubstate("chartTest"));
+	}
+}
+
+function regenNotes() {
+	sectionGroup.members[0].checked = PlayState.SONG.notes[curSection].mustHitSection;
+	sectionGroup.members[1].checked = PlayState.SONG.notes[curSection].changeBPM;
+	sectionGroup.members[2].value = (PlayState.SONG.notes[curSection].bpm == null || !PlayState.SONG.notes[curSection].changeBPM) ? Conductor.bpm : PlayState.SONG.notes[curSection].bpm;
+	PlayState.SONG.notes[curSection].bpm = sectionGroup.members[2].value;
+	sectionGroup.members[4].checked = PlayState.SONG.notes[curSection].altAnim;
 }
 
 function createPost() {
@@ -390,6 +402,31 @@ function generateSongUI() {
 	noteDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 	customizeDropdown(noteDrop, "Note Style", songGroup);
 	customizeDropdown(stageDrop, "Song Stage", songGroup);
+
+	var songHalfs = FlxUIDropDownMenu.makeStrIdLabelArray(["Vocals", "Instrumental", "Both", "None"], false);
+	var muteDrop = new FlxUIDropDownMenu(1085, saveButton.y + 80, songHalfs, function(name:String) {
+		FlxG.sound.music.volume = (name == "Both" || name == "Instrumental") ? 0 : 1;
+		vocals.volume = (name == "Both" || name == "Vocals") ? 0 : 1;
+	});
+	muteDrop.selectedLabel = "None";
+	muteDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+
+	var waveDrop = new FlxUIDropDownMenu(1085, muteDrop.y + 35, songHalfs, function(name:String) {
+		instWave.visible = (name == "Both" || name == "Instrumental");
+		vocalWave.visible = (name == "Both" || name == "Vocals");
+	});
+	waveDrop.selectedLabel = "Vocals";
+	waveDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+
+	var soundDrop = new FlxUIDropDownMenu(1085, waveDrop.y + 35, FlxUIDropDownMenu.makeStrIdLabelArray(["Both", "Player", "Opponent", "None"], false), function(name:String) {
+		playPlHitsounds = (name == "Both" || name == "Player");
+		playOpHitsounds = (name == "Both" || name == "Opponent");
+	});
+	soundDrop.selectedLabel = "Both";
+	soundDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(soundDrop, "Hitsounds For", songGroup);
+	customizeDropdown(waveDrop, "Waveform For", songGroup);
+	customizeDropdown(muteDrop, "Muted Tracks", songGroup);
 }
 
 function generateNoteUI() {
@@ -458,6 +495,7 @@ function generateNoteUI() {
 import Reflect;
 
 var copiedNotes = [];
+var copiedStart = 0.0;
 function generateSectionUI() {
 	var mhsBox = new FlxUICheckBox(gridBG.x - 200, 80, null, null, "Camera On Player", 100);
 	mhsBox.checked = PlayState.SONG.notes[curSection].mustHitSection;
@@ -527,11 +565,12 @@ function generateSectionUI() {
 
 	var copyButton:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 200, 205, new FlxSprite(), function() {
 		copiedNotes = Reflect.copy(PlayState.SONG.notes[curSection].sectionNotes);
+		copiedStart = sectionStart;
 	});
 	customizeButton(copyButton, "Copy", -1, sectionGroup);
 
 	var pasteButton:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 90, 205, new FlxSprite(), function() {
-		PlayState.SONG.notes[curSection].sectionNotes = Reflect.copy(copiedNotes);
+		PlayState.SONG.notes[curSection].sectionNotes = [for (note in copiedNotes) [note[0] - copiedStart + sectionStart, note[1], note[2], note[3]]];
 		regenNotes();
 	});
 	customizeButton(pasteButton, "Paste", -1, sectionGroup);
@@ -540,25 +579,15 @@ function generateSectionUI() {
 	customizeStepper(lastInput, "back", sectionGroup, lastInput.button_plus.onUp.callback, lastInput.button_minus.onUp.callback);
 
 	var copyLast:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 200, 245, new FlxSprite(), function() {
-		var newSection = Reflect.copy(PlayState.SONG.notes[Math.max(curSection - lastInput.value, 0)]);
-		var crochet = 1600.0;
-		if (newSection.changeBPM && newSection.bpm > 0)
-            crochet = 60 / newSection.bpm * 4000;
-        else {
-            var bpm = PlayState.SONG.bpm;
-            var sections/*:Array<funkin.SongClasses.SwagSection>*/ = [for (i in 0...(curSection - lastInput.value + 1)) PlayState.SONG.notes[i]];
-            sections.reverse();
-            for (section in sections) {
-                if (section.changeBPM && section.bpm > 0){
-                    bpm = section.bpm;
-                    break;
-                }
-            }
-            crochet = 60 / bpm * 4000;
-        }
-		for (note in newSection.sectionNotes)
-			note[0] += crochet * lastInput.value;
-		PlayState.SONG.notes[curSection].sectionNotes = newSection.sectionNotes;
+		var daBPM:Float = PlayState.SONG.bpm;
+		var daSectionStart = 0.0;
+		for (i in 0...Math.max(curSection - lastInput.value, 0)) {
+			if (PlayState.SONG.notes[i].changeBPM)
+				daBPM = PlayState.SONG.notes[i].bpm;
+			daSectionStart += 60 / daBPM * 4000;
+		}
+
+		PlayState.SONG.notes[curSection].sectionNotes = [for (note in PlayState.SONG.notes[Math.max(curSection - lastInput.value, 0)].sectionNotes) [note[0] - daSectionStart + sectionStart, note[1], note[2], note[3]]];
 		regenNotes();
 	});
 	customizeButton(copyLast, "Copy Last", -1, sectionGroup);
