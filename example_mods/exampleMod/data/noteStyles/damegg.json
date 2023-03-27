@@ -1,0 +1,41 @@
+{
+    "strum": {
+        "asset": "game-side/HURTNOTE_assets",
+        "spritesheetType": "sparrow",
+        "antialiasing": true,
+        "scale": 0.7,
+        "fps": 24,
+
+        "animSets": [
+            ["purple0", "blue0", "green0", "red0"],
+            ["purple0", "blue0", "green0", "red0"],
+            ["purple0", "blue0", "green0", "red0"]
+        ]
+    },
+    "glowOffsets": [[0, 0], [0, 0], [0, 0], [0, 0]],
+
+    "regularArrow": {
+        "asset": "game-side/HURTNOTE_assets",
+        "spritesheetType": "sparrow",
+        "antialiasing": true,
+        "scale": 0.7,
+        "fps": 24,
+
+        "animSets": [
+            ["purple0", "blue0", "green0", "red0"]
+        ]
+    },
+
+    "sustain": {
+        "asset": "game-side/HURTNOTE_assets",
+        "spritesheetType": "sparrow",
+        "antialiasing": true,
+        "scale": 0.7,
+        "fps": 24,
+
+        "animSets": [
+            ["purple hold piece", "blue hold piece", "green hold piece", "red hold piece"],
+            ["pruple end hold", "blue hold end", "green hold end", "red hold end"]
+        ]
+    }
+}

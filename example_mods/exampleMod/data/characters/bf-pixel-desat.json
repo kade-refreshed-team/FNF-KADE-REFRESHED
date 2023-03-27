@@ -1,0 +1,62 @@
+{
+  "asset": "characters/bfPixelDesat",
+  "iconAsset": "bf-pixel-desat",
+  "barColor": "#989898",
+  "commonSide": "bf",
+  "offsets": {
+    "x": 0,
+    "y": 350,
+    "camX": 50,
+    "camY": -60
+  },
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "BF IDLE",
+      "offsets": [7, 0]
+    },
+    {
+      "name": "singLEFTmiss",
+      "prefix": "BF LEFT MISS",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "BF LEFT NOTE",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singUPmiss",
+      "prefix": "BF UP MISS",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singUP",
+      "prefix": "BF UP NOTE",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "BF RIGHT NOTE",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singRIGHTmiss",
+      "prefix": "BF RIGHT MISS",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "BF DOWN NOTE",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singDOWNmiss",
+      "prefix": "BF DOWN MISS",
+      "offsets": [0, 0]
+    }
+  ],
+  "scale": 6,
+  "flipX": true,
+  "antialiasing": false
+}
