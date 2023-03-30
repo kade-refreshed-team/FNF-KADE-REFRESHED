@@ -396,14 +396,14 @@ class Assets
 		var text:String = null;
 		var toAppend:String = '';
 		for (folder in foldersToCheck) {
-			if (FileSystem.exists('$folder/$sysPath'))
+			if (FileSystem.exists('$folder/$sysPath') && text == null)
 				text = File.getContent('$folder/$sysPath');
 			else if (FileSystem.exists('$folder/_append/$sysPath'))
-				toAppend += File.getContent('$folder/_append/$sysPath');
+				toAppend += "\n" + File.getContent('$folder/_append/$sysPath');
 		}
 		
 		if (text != null)
-			return text + "\n" + toAppend;
+			return text + toAppend;
 		#end
 
 		#if lime
