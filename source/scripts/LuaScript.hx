@@ -5,8 +5,9 @@ import cpp.Callable;
 import llua.Lua;
 import llua.LuaL;
 import llua.State;
-import llua.Convert;
 import llua.Macro.*;
+
+import scripts.LuaAppend;
 
 /**
  * The class used for making lua scripts.
@@ -96,23 +97,10 @@ class LuaScript extends scripts.BaseScript {
 			"filePath": filePath,
 			"parent": parent
 		};
+		curSpecialID = lastSpecialID = 0;
 		specialVars[0] = script;
 
-		//Adding a suffix to the end of the lua file to attach a metatable to the global vars. (So you cant have to do `script.parent.this`)
-		var suffix =
-		'\nsetmetatable(_G, {
-			__call = function(notUsed, func, ...)
-				print("called call")
-				return __scriptMetatable.__call(script.parent, func, ...)
-			end,
-			__newindex = function (notUsed, name, value)
-				__scriptMetatable.__newindex(script.parent, name, value)
-		  	end,
-		  	__index = function (notUsed, name)
-			  	return __scriptMetatable.__index(script.parent, name)
-		  	end
-		})';
-        if (LuaL.dostring(luaState, openfl.Assets.getText(filePath) + suffix) != 0)
+        if (LuaL.dostring(luaState, openfl.Assets.getText(filePath) + LuaAppend.LUA_SUFFIX) != 0)
             lime.app.Application.current.window.alert('Lua file "$filePath" could not be ran.\n${Lua.tostring(luaState, -1)}\nThe game will not utilize this script.', "Lua Running Fail");
 
 		currentLua = lastLua;
@@ -131,9 +119,7 @@ class LuaScript extends scripts.BaseScript {
 		currentLua = lastLua;
     }
 
-	var curFunc = '';
     override public function callFunc(name:String, ?params:Array<Dynamic>):Dynamic {
-		curFunc = name;
 		var lastLua:LuaScript = currentLua;
 		currentLua = this;
 
@@ -142,6 +128,7 @@ class LuaScript extends scripts.BaseScript {
 			"filePath": filePath,
 			"parent": parent
 		};
+		curSpecialID = lastSpecialID = 0;
 		specialVars[0] = script;
 
         Lua.settop(luaState, 0);
@@ -192,22 +179,28 @@ class LuaScript extends scripts.BaseScript {
 		//Making the params for the function.
 		var nparams:Int = Lua.gettop(state);
 		var params:Array<Dynamic> = [for(i in 0...nparams) currentLua.fromLua(-nparams + i)];
-		
-		var funcParams = [for (i in 2...params.length) params[i]];
-		params.splice(2, params.length);
-		params.push(funcParams);
+		Lua.settop(state, 0);
 
-		if (funcNum == 1)
-			params[2] = params[2][0];
+		if (funcNum == 2) {
+			var funcParams = [for (i in 1...params.length) params[i]];
+			params.splice(1, params.length);
+			params.push(funcParams);
+
+			//trace('${params[1][0]} | ${currentLua.curSpecialID} | ${currentLua.lastSpecialID}');
+			//if (params[1][0] == currentLua.specialVars[currentLua.curSpecialID])
+				params.insert(1, params[1].shift());
+			//else
+				//params.insert(1, currentLua.specialVars[currentLua.curSpecialID]);
+			currentLua.curSpecialID = currentLua.lastSpecialID;
+		}
 
 		//Calling the function. If it catches something, will trace what went wrong.
 		var returned:Dynamic = null;
 		try {
            	returned = functions[funcNum](params[0], params[1], params[2]);
         } catch(e) {
-            trace("Lua Error: " + e.details());
+            trace('Lua Metatable Error: $params | ${e.details()}');
         }
-		Lua.settop(state, 0);
 
 		//Pushes the result of the function into the array used to return 1 or 0 and to the lua script itself.
         if (returnVars.length <= 0 && returned != null)
@@ -259,6 +252,9 @@ class LuaScript extends scripts.BaseScript {
 
 	//The lua conversion functions.
 
+
+	var curSpecialID:Int = 0;
+	var lastSpecialID:Int = 0;
 	/**
 	 * The array containing the special vars so lua can utilize them by getting the location used in the `__special_id` field.
 	 */
@@ -333,8 +329,14 @@ class LuaScript extends scripts.BaseScript {
 		}
 
 		//This is to check if the object has a special field and converts it back if so.
-		if (ret is Dynamic && Reflect.hasField(ret, "__special_id")) //Special Var.
-            return specialVars[Reflect.field(ret, "__special_id")];
+		if (ret is Dynamic && Reflect.hasField(ret, "__special_id")) {//Special Var. 
+			var specID = Reflect.field(ret, "__special_id");
+			if (!Reflect.isFunction(specialVars[specID])) {
+				lastSpecialID = curSpecialID;
+				curSpecialID = specID;
+			}
+            return specialVars[specID];
+		}
         return ret;
     }
 

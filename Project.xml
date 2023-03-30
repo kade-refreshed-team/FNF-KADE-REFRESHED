@@ -49,9 +49,10 @@
 	<!-- <assets path="CHANGELOG.md" rename='changelog.txt'/> -->
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" />
+	<haxelib name="flixel-leather" rename="flixel"/>
+	<!-- <haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
-	<haxelib name="flixel-ui" />
+	<haxelib name="flixel-ui" /> -->
 	<haxedev set='webgl' />
 
 	<!-- <haxelib name="scriptless-polymod"/> -->

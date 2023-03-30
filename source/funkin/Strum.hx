@@ -57,6 +57,19 @@ class Strum extends flixel.FlxSprite {
 		scale.set(styleSection.scale, styleSection.scale);
 		updateHitbox();
 
-		animation.play(animToPlay);
+		playAnim(animToPlay);
+	}
+
+	public function playAnim(animName:String, ?forced:Bool = false) {
+		animation.play(animName, forced);
+
+		centerOffsets();
+		centerOrigin();
+
+		if (animation.curAnim != null && animation.curAnim.name == "confirm") {
+			rotOffset.x = styleJson.glowOffsets[direction][0];
+			rotOffset.y = styleJson.glowOffsets[direction][1];
+		} else
+			rotOffset.set();
 	}
 }

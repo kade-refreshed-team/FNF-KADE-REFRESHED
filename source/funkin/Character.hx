@@ -216,18 +216,30 @@ class Character extends FlxSprite
 		playAnim(danceAnim);
 	}
 
-	var daOffset = [0.0, 0.0];
+	var __invertBounds:Bool = false;
+	public override function getScreenBounds(?newRect:flixel.math.FlxRect, ?camera:flixel.FlxCamera):flixel.math.FlxRect {
+		if (__invertBounds) {
+			scale.x *= -1;
+			var bounds = super.getScreenBounds(newRect, camera);
+			scale.x *= -1;
+			return bounds;
+		} else
+			return super.getScreenBounds(newRect, camera);
+	}
 
 	override public function draw() {
-		offset.set(daOffset[0], daOffset[1]);
-		var offsetMult = (normallyFlipped != flipX) ? -1 : 1;
-		if (daOffset[0] != 0 || daOffset[1] != 0)
-			offset = offset.rotateByDegrees(angle % 360).scale(scale.x, scale.y);
+		if (normallyFlipped != flipX) {
+			__invertBounds = true;
+			flipX = !flipX;
+			scale.x *= -1;
 
-		offset.x += -data.offsets.x * (-1 * offsetMult);
-		offset.y -= data.offsets.y;
+			super.draw();
 
-		super.draw();
+			flipX = !flipX;
+			scale.x *= -1;
+			__invertBounds = false;
+		} else
+			super.draw();
 	}
 
 	override public function getMidpoint(?point:flixel.math.FlxPoint) {
@@ -251,11 +263,12 @@ class Character extends FlxSprite
 
 		animation.play(AnimName, Force, Reversed, Frame);
 
-		daOffset = animOffsets.get(AnimName);
-		offset.set(daOffset[0], daOffset[1]);
-		if (daOffset[0] != 0 || daOffset[1] != 0)
-			offset = offset.rotateByDegrees(angle % 360).scale(scale.x, scale.y);
+		var xOffset = (normallyFlipped != flipX) ? data.offsets.x : -data.offsets.x;
+		offset.set(xOffset, -data.offsets.y);
 
+		var daOffset = animOffsets.get(AnimName);
+		rotOffset.set(daOffset[0], daOffset[1]);
+		
 		if (data.commonSide == "gf" && leftRightDancer) {
 			danced = switch(AnimName) {
 				case "singLEFT": true;
