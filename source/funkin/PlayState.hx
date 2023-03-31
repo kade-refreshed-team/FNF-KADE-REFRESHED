@@ -375,7 +375,6 @@ class PlayState extends MusicBeatState
 		FlxG.camera.follow(camFollow, LOCKON, 0.04 * (30 / (cast(Lib.current.getChildAt(0), Main)).getFPS()));
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
-		FlxG.fixedTimestep = false;
 		
 		if (PlayState.SONG.notes[0] != null && SONG.notes[0].mustHitSection) {
 			var bfMidpoint = boyfriend.getMidpoint();

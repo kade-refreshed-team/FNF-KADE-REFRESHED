@@ -12,7 +12,7 @@
             ["left confirm", "down confirm", "up confirm", "right confirm"]
         ]
     },
-    "glowOffsets": [[-13, -13], [-20, -13], [-13, -13], [-13, -13]],
+    "glowOffsets": [[-13, -13], [-18, -13], [-13, -13], [-13, -13]],
 
     "regularArrow": {
         "asset": "game-side/NOTE_assets",

@@ -216,18 +216,54 @@ class Character extends FlxSprite
 		playAnim(danceAnim);
 	}
 
-	var daOffset = [0.0, 0.0];
+	var __invertBounds:Bool = false;
+	public override function getScreenBounds(?newRect:flixel.math.FlxRect, ?camera:flixel.FlxCamera):flixel.math.FlxRect {
+		if (__invertBounds) {
+			scale.x *= -1;
+			var bounds = super.getScreenBounds(newRect, camera);
+			scale.x *= -1;
+			return bounds;
+		} else
+			return super.getScreenBounds(newRect, camera);
+	}
 
 	override public function draw() {
+		if (normallyFlipped != flipX) {
+			__invertBounds = true;
+			flipX = !flipX;
+			scale.x *= -1;
+
+			calcOffset();
+			super.draw();
+
+			flipX = !flipX;
+			scale.x *= -1;
+			__invertBounds = false;
+		} else {
+			calcOffset();
+			super.draw();
+		}
+	}
+
+	var daOffset = [0.0, 0.0];
+	function calcOffset() {
 		offset.set(daOffset[0], daOffset[1]);
-		var offsetMult = (normallyFlipped != flipX) ? -1 : 1;
-		if (daOffset[0] != 0 || daOffset[1] != 0)
-			offset = offset.rotateByDegrees(angle % 360).scale(scale.x, scale.y);
 
-		offset.x += -data.offsets.x * (-1 * offsetMult);
+		if (daOffset[0] != 0 || daOffset[1] != 0) {
+			offset = offset.scale(scale.x, scale.y);
+
+			var sin:Float = Math.sin((angle % 360) / -180 * Math.PI);
+			var cos:Float = Math.cos((angle % 360) / 180 * Math.PI);
+			var ogOffsetX = offset.x;
+			var ogOffsetY = offset.y; //Technically don't need it for y but keeps it consistent.
+
+			offset.x = ogOffsetX * cos + ogOffsetY * sin;
+			offset.y = ogOffsetX * -sin + ogOffsetY * cos;
+		}
+
+		var offsetMult = (normallyFlipped != flipX) ? 1 : -1;
+		offset.x += -data.offsets.x * offsetMult;
 		offset.y -= data.offsets.y;
-
-		super.draw();
 	}
 
 	override public function getMidpoint(?point:flixel.math.FlxPoint) {
@@ -252,9 +288,7 @@ class Character extends FlxSprite
 		animation.play(AnimName, Force, Reversed, Frame);
 
 		daOffset = animOffsets.get(AnimName);
-		offset.set(daOffset[0], daOffset[1]);
-		if (daOffset[0] != 0 || daOffset[1] != 0)
-			offset = offset.rotateByDegrees(angle % 360).scale(scale.x, scale.y);
+		calcOffset();
 
 		if (data.commonSide == "gf" && leftRightDancer) {
 			danced = switch(AnimName) {

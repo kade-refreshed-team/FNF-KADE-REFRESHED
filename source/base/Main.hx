@@ -91,6 +91,7 @@ class Main extends Sprite
 
 	function initStuff() {
 		flixel.graphics.FlxGraphic.defaultPersist = true;
+		flixel.FlxG.fixedTimestep = false;
 
 		#if sys
 		if (!sys.FileSystem.exists(Sys.getCwd() + "/assets/replays"))

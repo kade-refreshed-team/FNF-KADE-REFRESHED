@@ -191,6 +191,7 @@ class Note extends FlxSprite
 	public static var noteTypes:Map<String, String> = [];
 	public static function reparseNoteTypes() {
 		noteTypes = [];
+		jsonCache = [];
 		for (line in utils.CoolUtil.coolTextFile(Paths.txt("lists/noteTypeList"))) {
 			var daVars = line.split(" | ");
 			noteTypes.set(daVars[0], daVars[1].replace("<CURRENT>", PlayState.SONG.noteStyle));
