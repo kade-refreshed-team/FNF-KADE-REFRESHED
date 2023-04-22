@@ -16,6 +16,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
     var preloadedAssets:Map<String, Dynamic> = [];
 
     var preloadingText:FlxText;
+	var spinnyYay:FlxSprite;
 	var curAsset:String = "Player";
 
     public function new() {
@@ -37,12 +38,24 @@ class PreloadingSubState extends base.MusicBeatSubstate {
         add(preloadingText);
         preloadingText.scrollFactor.set();
 
+		spinnyYay = new FlxSprite(0, 0, Paths.image("menu-side/KadeRefreshedArrowThingy"));
+		spinnyYay.screenCenter();
+		spinnyYay.y -= 100;
+		spinnyYay.antialiasing = true;
+		add(spinnyYay);
+
         sys.thread.Thread.create(preloadStuff);
     }
+
+	var spinnyElapsed:Float = 0;
 
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
+		spinnyYay.angle -= elapsed * 50;
+		spinnyElapsed = (spinnyElapsed + elapsed) % Math.PI;
+		spinnyYay.scale.x = 1 + 0.1 * Math.sin(spinnyElapsed);
+		spinnyYay.scale.y = spinnyYay.scale.x;
 		preloadingText.text = 'Preloading Assets for "${PlayState.SONG.song}"...\nCurrent: $curAsset';
 	}
 
@@ -93,6 +106,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 
         curAsset = "Strumline";
         generateStrums();
+
         curAsset = "Song Notes";
 		Conductor.changeBPM(PlayState.SONG.bpm);
 		PlayStateChangeables.scrollSpeed = FlxG.save.data.scrollSpeed;
@@ -198,7 +212,7 @@ class PreloadingSubState extends base.MusicBeatSubstate {
 				var daNoteData:Int = Std.int(songNotes[1] % 4);
 
 				var gottaHitNote:Bool = ((songNotes[1] > 3) != section.mustHitSection);
-				var daNoteType:String = songNotes[3];
+				var daNoteType:String = (songNotes[3] != null && Note.noteTypes.exists(songNotes[3])) ? songNotes[3] : "Default";
 
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)

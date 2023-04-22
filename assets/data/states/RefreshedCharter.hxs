@@ -1,0 +1,663 @@
+import flixel.group.FlxTypedGroup;
+import flixel.ui.FlxSpriteButton;
+import flixel.addons.ui.FlxUI9SliceSprite;
+import flixel.addons.ui.FlxUIInputText;
+import flixel.addons.ui.FlxUINumericStepper;
+import flixel.addons.ui.FlxUICheckBox;
+import flixel.addons.ui.FlxUIDropDownMenu;
+import flixel.addons.ui.FlxUIDropDownMenuDropDirection;
+import flixel.text.FlxTextBorderStyle;
+import flixel.util.FlxStringUtil;
+import openfl.net.FileReference;
+import haxe.io.Path;
+
+import haxe.format.JsonPrinter;
+
+import funkin.Song;
+import funkin.Note;
+import base.MusicBeatSubstate;
+import utils.CoolUtil;
+
+function selectNote() {
+	noteGroup.members[0].value = selectedNote.strumTime;
+	noteGroup.members[0].min = Conductor.crochet * (curSection * 4);
+	noteGroup.members[0].max = Conductor.crochet * ((curSection + 1) * 4) - Conductor.stepCrochet;
+	noteGroup.members[2].value = selectedNote.sustainLength;
+	noteGroup.members[4].selectedLabel = selectedNote.noteType;
+
+	songGroup.visible = false;
+	sectionGroup.visible = false;
+
+	settingsBG.resize(150, 100);
+	settingsBG.y = 75;
+	settingsBG.x = gridBG.x + gridBG.width - 20;
+	if (curSettingTween != null && !curSettingTween.finished)
+		curSettingTween.cancel();
+	curSettingTween = FlxTween.tween(settingsBG, {x: gridBG.x + gridBG.width + 5, alpha: 1}, 0.1);
+	curTweenFor = "selectNote";
+}
+
+function updatePost(e) {
+	//noteGroup.visible = (curTweenFor == "selectNote");
+	noteGroup.visible = (selectedNote != null);
+	if (overlaps(songIcon) && FlxG.mouse.justPressed) {
+		if (curTweenFor == "songSettings") {
+			songGroup.visible = false;
+
+			curSettingTween.cancel();
+			curSettingTween = FlxTween.tween(settingsBG, {x: FlxG.width - settingsBG.width + 20, alpha: 0}, 0.1);
+			curTweenFor = "exitSongSettings";
+		} else {
+			for (note in notes.members)
+				note.color = 0xFFFFFFFF;
+			selectedNote = null;
+
+			songGroup.visible = true;
+			sectionGroup.visible = false;
+
+			settingsBG.resize(200, 600);
+			settingsBG.y = songIcon.height + 5;
+			settingsBG.x = FlxG.width - settingsBG.width + 20;
+			if (curSettingTween != null && !curSettingTween.finished)
+				curSettingTween.cancel();
+			curSettingTween = FlxTween.tween(settingsBG, {x: FlxG.width - settingsBG.width - 5, alpha: 1}, 0.1);
+			curTweenFor = "songSettings";
+		}
+	}
+
+	if (FlxG.keys.justPressed.ENTER) {
+		openSubState(new MusicBeatSubstate("chartTest"));
+	}
+}
+
+function regenNotes() {
+	sectionGroup.members[0].checked = PlayState.SONG.notes[curSection].mustHitSection;
+	sectionGroup.members[1].checked = PlayState.SONG.notes[curSection].changeBPM;
+	sectionGroup.members[2].value = (PlayState.SONG.notes[curSection].bpm == null || !PlayState.SONG.notes[curSection].changeBPM) ? Conductor.bpm : PlayState.SONG.notes[curSection].bpm;
+	PlayState.SONG.notes[curSection].bpm = sectionGroup.members[2].value;
+	sectionGroup.members[4].checked = PlayState.SONG.notes[curSection].altAnim;
+}
+
+function createPost() {
+	sectionButton = new FlxSpriteButton(gridBG.x + gridBG.width / 2 - 20, gridBG.y - 45, new FlxSprite(), function() {
+		if (curTweenFor == "sectionSettings") {
+			sectionGroup.visible = false;
+
+			curSettingTween.cancel();
+			curSettingTween = FlxTween.tween(settingsBG, {x: settingsBG.x + 25, alpha: 0}, 0.1);
+			curTweenFor = "exitSectionSettings";
+		} else {
+			sectionGroup.members[0].checked = PlayState.SONG.notes[curSection].mustHitSection;
+			sectionGroup.members[1].checked = PlayState.SONG.notes[curSection].changeBPM;
+			sectionGroup.members[2].value = (PlayState.SONG.notes[curSection].bpm == null || !PlayState.SONG.notes[curSection].changeBPM) ? Conductor.bpm : PlayState.SONG.notes[curSection].bpm;
+			PlayState.SONG.notes[curSection].bpm = sectionGroup.members[2].value;
+			sectionGroup.members[4].checked = PlayState.SONG.notes[curSection].altAnim;
+
+			for (note in notes.members)
+				note.color = 0xFFFFFFFF;
+			selectedNote = null;
+
+			sectionGroup.visible = true;
+			songGroup.visible = false;
+
+			settingsBG.resize(200, 200);
+			settingsBG.y = 75;
+			settingsBG.x = gridBG.x - settingsBG.width + 20;
+			if (curSettingTween != null && !curSettingTween.finished)
+				curSettingTween.cancel();
+			curSettingTween = FlxTween.tween(settingsBG, {x: settingsBG.x - 25, alpha: 1}, 0.1);
+			curTweenFor = "sectionSettings";
+		}
+	});
+
+	//i have to do all of this just for a sprite button outline.
+	var text:FlxText = new FlxText(0, 0, 80, "Section\nSettings");
+	text.setFormat(null, 8, 0xFFFFFFFF, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+	text.drawFrame(true);
+	sectionButton.label.frames = text.frames;
+	text.destroy();
+
+	sectionButton.loadGraphic(Paths.image("menu-side/debug/sectionButton"), true, 40, 40);
+	sectionButton.labelAlphas = [0, 1, 1];
+	for (i in 0...3) {
+		sectionButton.labelOffsets[i].x -= 19;
+		sectionButton.labelOffsets[i].y += 5;
+	}
+	sectionButton.label.alpha = 0;
+	add(sectionButton);
+
+	sustains = new FlxTypedGroup();
+	insert(members.indexOf(notes), sustains);
+
+	noteGroup = new FlxTypedGroup();
+	noteGroup.visible = false;
+	add(noteGroup);
+
+	sectionGroup = new FlxTypedGroup();
+	sectionGroup.visible = false;
+	add(sectionGroup);
+
+	songGroup = new FlxTypedGroup();
+	songGroup.visible = false;
+	add(songGroup);
+
+	generateNoteUI();
+	generateSongUI();
+	generateSectionUI();
+}
+
+var sectionButton:FlxSpriteButton;
+var sectionGroup:FlxTypedGroup;
+var sustains:FlxTypedGroup;
+var noteGroup:FlxTypedGroup;
+var songGroup:FlxTypedGroup;
+
+function customizeStepper(stepper:FlxUINumericStepper, labelText:String, group, plusCallback, minusCallback) {
+	stepper.button_plus.onUp.callback = function() {
+		if (!group.visible) return;
+		plusCallback();
+		stepper.button_plus.label.color = 0xFF000000;
+	}
+	stepper.button_minus.onUp.callback = function() {
+		if (!group.visible) return;
+		minusCallback();
+		stepper.button_minus.label.color = 0xFF000000;
+	};
+	stepper.button_plus.onOut.callback = function() {stepper.button_plus.label.color = -1;}
+	stepper.button_minus.onOut.callback = function() {stepper.button_minus.label.color = -1;};
+
+	stepper.button_plus.over_color = stepper.button_plus.down_color = 0xFF000000;
+	stepper.button_minus.over_color = stepper.button_minus.down_color = 0xFF000000;
+
+	var btnSize = 1 + stepper.text_field.height;
+	stepper.button_plus.loadGraphicSlice9([Paths.image("menu-side/debug/sideButton")], btnSize, btnSize, [[2, 2, 15, 15]], FlxUI9SliceSprite.TILE_NONE, -1, false, 18, 18);
+	stepper.button_minus.loadGraphicSlice9([Paths.image("menu-side/debug/sideButton")], btnSize, btnSize, [[2, 2, 15, 15]], FlxUI9SliceSprite.TILE_NONE, -1, false, 18, 18);
+	stepper.button_plus.label.loadGraphic(Paths.image("menu-side/debug/plus_mark"));
+	stepper.button_minus.label.loadGraphic(Paths.image("menu-side/debug/minus_mark"));
+
+	group.add(stepper);
+
+	var label = new FlxText(stepper.x + stepper.width + 5, stepper.y, 0, labelText, 8);
+	group.add(label);
+}
+
+function customizeDropdown(dropdown:FlxUIDropDownMenu, labelText:String, group) {
+	var oldCallback = dropdown.header.button.onUp.callback;
+	dropdown.header.button.onUp.callback = function() {
+		if (!group.visible) return;
+		oldCallback();
+		dropdown.header.button.label.color = 0xFF000000;
+	}
+	dropdown.header.button.onOut.callback = function() {dropdown.header.button.label.color = -1;}
+
+	dropdown.header.button.loadGraphicSlice9([Paths.image("menu-side/debug/sideButton")], 20, 20, [[6, 6, 11, 11]], FlxUI9SliceSprite.TILE_NONE, -1, false, 18, 18);
+	dropdown.header.button.width = 120;
+	dropdown.header.button.label.loadGraphic(Paths.image("menu-side/debug/dropdown_mark"));
+	dropdown.header.button.over_color = dropdown.header.button.down_color = 0xFF000000;
+	dropdown.header.button.up_color = null;
+
+	dropdown.header.background._slice9 = [4, 4, 7, 7];
+	dropdown.header.background._asset_id = Paths.image("menu-side/debug/textBG");
+	dropdown.header.background.resize(100, 20);
+	dropdown.header.text.color = -1;
+
+	dropdown.dropPanel._slice9 = [4, 4, 7, 7];
+	dropdown.dropPanel._asset_id = Paths.image("menu-side/debug/uiBG");
+	dropdown.dropPanel.resize(dropdown.header.background.width + 20, dropdown.getPanelHeight());
+
+	for (button in dropdown.list) {
+		button.x--;
+
+		button.up_color = button.label.color = -1;
+		button.over_color = button.down_color = 0xFF000000;
+
+		button.loadGraphicSlice9(["flixel/flixel-ui/img/invis.png", Paths.image("menu-side/debug/uiButton"), Paths.image("menu-side/debug/uiButton")], Std.int(dropdown.header.background.width + 20),
+			Std.int(dropdown.header.background.height), [[4, 4, 7, 7], [4, 4, 7, 7], [4, 4, 7, 7]], FlxUI9SliceSprite.TILE_NONE);
+	}
+
+	group.add(dropdown);
+
+	var label = new FlxText(dropdown.x, dropdown.y - 12, 0, labelText, 8);
+	group.add(label);
+}
+
+function customizeButton(button:FlxSpriteButton, label:String, color, group) {
+	var oldOnUp = button.onUp.callback;
+	button.onUp.callback = function() {
+		if (!group.visible) return;
+		button.label.color = 0xFF000000;
+		oldOnUp();
+	}
+	button.onOver.callback = function() {button.label.color = 0xFF000000;}
+	button.onOut.callback = function() {button.label.color = color;}
+	button.createTextLabel(label, null, 8, color, "center");
+	button.loadGraphic(Paths.image("menu-side/debug/uiButton"), true, 80, 20);
+	button.color = color;
+	button.labelAlphas[0] = 1;
+	button.labelAlphas[2] = 0.65;
+
+	group.add(button);
+}
+
+function generateSongUI() {
+	var songNameLabel = new FlxText(1085, songIcon.height + 10, 0, "Song Name", 8);
+	songGroup.add(songNameLabel);
+
+	var songName = new FlxUIInputText(1085, songNameLabel.y + 15, 180, PlayState.SONG.song, 8);
+	songName.callback = function(text, action) {PlayState.SONG.song = songName.text;}
+	songGroup.add(songName);
+
+	var voicesBox = new FlxUICheckBox(1085, songName.y + 20, null, null, "Uses voice track", 100);
+	voicesBox.checked = PlayState.SONG.needsVoices;
+	voicesBox.callback = function() {
+		PlayState.SONG.needsVoices = voicesBox.checked;
+	};
+	songGroup.add(voicesBox);
+	voicesBox.textY += 4;
+
+	var bpmInput = new FlxUINumericStepper(1085, voicesBox.y + 40, 10, PlayState.SONG.bpm, 60, 9999, 1);
+	function bpmPlus() {
+		bpmInput.value += 10;
+		PlayState.SONG.bpm = bpmInput.value;
+		FlxG.state.regenNotes();
+	}
+	function bpmMinus() {
+		bpmInput.value -= 10;
+		PlayState.SONG.bpm = bpmInput.value;
+		FlxG.state.regenNotes();
+	}
+	customizeStepper(bpmInput, "BPM", songGroup, bpmPlus, bpmMinus);
+
+	var speedInput = new FlxUINumericStepper(1085, bpmInput.y + 20, 0.1, PlayState.SONG.speed, 1, 10, 1);
+	function speedPlus() {
+		speedInput.value += 0.1;
+		PlayState.SONG.speed = speedInput.value;
+	}
+	function speedMinus() {
+		speedInput.value -= 0.1;
+		PlayState.SONG.speed = speedInput.value;
+	}
+	customizeStepper(speedInput, "Scroll Speed", songGroup, speedPlus, speedMinus);
+
+	var saveButton:FlxSpriteButton = new FlxSpriteButton(1085, songIcon.height + 5 + 400 - 60, new FlxSprite(), function() {
+		new FileReference().save(JsonPrinter.print({song: PlayState.SONG}, null, '    '), CoolUtil.difficultyString().toLowerCase() + '.json');
+	});
+	customizeButton(saveButton, "Save JSON", 0xFF00FF80, songGroup);
+
+	function reloadAudio() {
+        FlxG.sound.music.stop();
+		vocals.stop();
+        FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0.6);
+    
+        if (PlayState.SONG.needsVoices)
+            vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
+    
+        FlxG.sound.music.pause();
+        vocals.pause();
+    
+        FlxG.sound.music.onComplete = function() {
+            Conductor.songPosition = Conductor.crochet * (curSection * 4);
+            vocals.pause();
+            vocals.time = Conductor.songPosition;
+            FlxG.sound.music.pause();
+            FlxG.sound.music.time = Conductor.songPosition;
+            updateCurStep();
+            updateBeat();
+        }
+	}
+
+	var reloadButton:FlxSpriteButton = new FlxSpriteButton(1185, saveButton.y, new FlxSprite(), function() {
+		PlayState.SONG = Song.loadFromJson(CoolUtil.difficultyString().toLowerCase(), PlayState.SONG.song);
+		reloadAudio();
+		FlxG.state.regenNotes();
+	});
+	customizeButton(reloadButton, "Reload JSON", -1, songGroup);
+
+	var audioButton:FlxSpriteButton = new FlxSpriteButton(1185, reloadButton.y + 25, new FlxSprite(), function() {
+		reloadAudio();
+		FlxG.state.regenNotes();
+	});
+	customizeButton(audioButton, "Reload Audio", -1, songGroup);
+	
+	var chars = [for (file in Paths.folderContents('data/characters')) if (Path.extension(file) == "json") Path.withoutExtension(file)];
+	var charArray = FlxUIDropDownMenu.makeStrIdLabelArray(chars, false);
+	var noteStyles = [for (file in Paths.folderContents('data/noteStyles')) if (Path.extension(file) == "json") Path.withoutExtension(file)];
+	var stages = [for (file in Paths.folderContents('data/stages')) if (Path.extension(file) == "txt") Path.withoutExtension(file)];
+
+	var plDrop = new FlxUIDropDownMenu(1085, speedInput.y + 50, charArray);
+	plDrop.header.button.onUp.callback = function() {
+		persistentUpdate = false;
+		var daSubstate = new MusicBeatSubstate("charSelect");
+		openSubState(daSubstate);
+		daSubstate.script.setVar("chars", chars);
+		daSubstate.script.setVar("selectChar", function(name:String, icon:String) {
+			PlayState.SONG.player1 = name;
+			plDrop.selectedLabel = name;
+			plIcon.changeIcon(icon);
+		});
+		var updateFunc = daSubstate.script.getVar("update");
+		daSubstate.script.setVar("update", function(e:Float) {
+			if (daSubstate.controls.BACK) {
+				daSubstate.close();
+				return;
+			}
+			if (updateFunc != null)
+				updateFunc(e);
+		});
+	}
+	plDrop.selectedLabel = PlayState.SONG.player1;
+	plDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(plDrop, "Current Player", songGroup);
+
+	var spDrop = new FlxUIDropDownMenu(1085, plDrop.y + 35, charArray);
+	spDrop.header.button.onUp.callback = function() {
+		persistentUpdate = false;
+		var daSubstate = new MusicBeatSubstate("charSelect");
+		openSubState(daSubstate);
+		daSubstate.script.setVar("chars", chars);
+		daSubstate.script.setVar("selectChar", function(name:String, icon:String) {
+			PlayState.SONG.gfVersion = name;
+			spDrop.selectedLabel = name;
+		});
+		var updateFunc = daSubstate.script.getVar("update");
+		daSubstate.script.setVar("update", function(e:Float) {
+			if (daSubstate.controls.BACK) {
+				daSubstate.close();
+				return;
+			}
+			if (updateFunc != null)
+				updateFunc(e);
+		});
+	}
+	spDrop.selectedLabel = PlayState.SONG.gfVersion;
+	spDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(spDrop, "Current Specator", songGroup);
+
+	var opDrop = new FlxUIDropDownMenu(1085, spDrop.y + 35, charArray);
+	opDrop.header.button.onUp.callback = function() {
+		persistentUpdate = false;
+		var daSubstate = new MusicBeatSubstate("charSelect");
+		openSubState(daSubstate);
+		daSubstate.script.setVar("chars", chars);
+		daSubstate.script.setVar("selectChar", function(name:String, icon:String) {
+			PlayState.SONG.player2 = name;
+			opDrop.selectedLabel = name;
+			opIcon.changeIcon(icon);
+		});
+		var updateFunc = daSubstate.script.getVar("update");
+		daSubstate.script.setVar("update", function(e:Float) {
+			if (daSubstate.controls.BACK) {
+				daSubstate.close();
+				return;
+			}
+			if (updateFunc != null)
+				updateFunc(e);
+		});
+	}
+	opDrop.selectedLabel = PlayState.SONG.player2;
+	opDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(opDrop, "Current Opponent", songGroup);
+
+	var stageDrop = new FlxUIDropDownMenu(1085, opDrop.y + 35, FlxUIDropDownMenu.makeStrIdLabelArray(stages, false), function(name:String) {
+		PlayState.SONG.stage = name;
+	});
+	stageDrop.selectedLabel = PlayState.SONG.stage;
+	stageDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+
+	var noteDrop = new FlxUIDropDownMenu(1085, stageDrop.y + 35, FlxUIDropDownMenu.makeStrIdLabelArray(noteStyles, false), function(name:String) {
+		PlayState.SONG.noteStyle = name;
+		Note.reparseNoteTypes();
+		FlxG.state.regenNotes();
+	});
+	noteDrop.selectedLabel = PlayState.SONG.noteStyle;
+	noteDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(noteDrop, "Note Style", songGroup);
+	customizeDropdown(stageDrop, "Song Stage", songGroup);
+
+	var songHalfs = FlxUIDropDownMenu.makeStrIdLabelArray(["Vocals", "Instrumental", "Both", "None"], false);
+	var muteDrop = new FlxUIDropDownMenu(1085, saveButton.y + 80, songHalfs, function(name:String) {
+		FlxG.sound.music.volume = (name == "Both" || name == "Instrumental") ? 0 : 1;
+		vocals.volume = (name == "Both" || name == "Vocals") ? 0 : 1;
+	});
+	muteDrop.selectedLabel = "None";
+	muteDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+
+	var waveDrop = new FlxUIDropDownMenu(1085, muteDrop.y + 35, songHalfs, function(name:String) {
+		instWave.visible = (name == "Both" || name == "Instrumental");
+		vocalWave.visible = (name == "Both" || name == "Vocals");
+	});
+	waveDrop.selectedLabel = "Vocals";
+	waveDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+
+	var soundDrop = new FlxUIDropDownMenu(1085, waveDrop.y + 35, FlxUIDropDownMenu.makeStrIdLabelArray(["Both", "Player", "Opponent", "None"], false), function(name:String) {
+		playPlHitsounds = (name == "Both" || name == "Player");
+		playOpHitsounds = (name == "Both" || name == "Opponent");
+	});
+	soundDrop.selectedLabel = "Both";
+	soundDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(soundDrop, "Hitsounds For", songGroup);
+	customizeDropdown(waveDrop, "Waveform For", songGroup);
+	customizeDropdown(muteDrop, "Muted Tracks", songGroup);
+}
+
+function generateNoteUI() {
+	var strumInput = new FlxUINumericStepper(gridBG.x + gridBG.width + 10, 80, 1, 0, 0, 999999999999);
+	function strumPlus() {
+		strumInput.value += Conductor.stepCrochet;
+		if (selectedNote != null) {
+			selectedNote.strumTime = strumInput.value;
+			PlayState.SONG.notes[curSection].sectionNotes[selectedIndex][0] = selectedNote.strumTime;
+			selectedNote.y = 70 + (selectedNote.strumTime % (Conductor.crochet * 4)) / (Conductor.stepCrochet) * 40;
+		}
+	}
+	function strumMinus() {
+		strumInput.value -= Conductor.stepCrochet;
+		if (selectedNote != null) {
+			selectedNote.strumTime = strumInput.value;
+			PlayState.SONG.notes[curSection].sectionNotes[selectedIndex][0] = selectedNote.strumTime;
+			selectedNote.y = 70 + (selectedNote.strumTime % (Conductor.crochet * 4)) / (Conductor.stepCrochet) * 40;
+		}
+	}
+	customizeStepper(strumInput, "Strum Time", noteGroup, strumPlus, strumMinus);
+
+	// sus is dead but sus
+	var susInput = new FlxUINumericStepper(gridBG.x + gridBG.width + 10, 100, 1, 0, 0, 999999999999);
+
+	function regenSustain() {
+		var holdNote:Note = selectedNote.sustainArray[0];
+
+		if (holdNote.visible = selectedNote.sustainLength > 0)
+			holdNote.setGraphicSize(15, 40 * (selectedNote.sustainLength / Conductor.stepCrochet));
+		holdNote.updateHitbox();
+	}
+
+	function susPlus() {
+		susInput.value += Conductor.stepCrochet;
+		if (selectedNote != null) {
+			selectedNote.sustainLength = susInput.value;
+			PlayState.SONG.notes[curSection].sectionNotes[selectedIndex][2] = selectedNote.sustainLength;
+			regenSustain();
+		}
+	}
+	function susMinus() {
+		susInput.value -= Conductor.stepCrochet;
+		if (selectedNote != null) {
+			selectedNote.sustainLength = susInput.value;
+			PlayState.SONG.notes[curSection].sectionNotes[selectedIndex][2] = selectedNote.sustainLength;
+			regenSustain();
+		}
+	}
+	customizeStepper(susInput, "Sustain Length", noteGroup, susPlus, susMinus);
+
+	var noteTypes = [for (key in Note.noteTypes.keys()) key];
+	var noteDrop = new FlxUIDropDownMenu(gridBG.x + gridBG.width + 10, 135, FlxUIDropDownMenu.makeStrIdLabelArray(noteTypes, false), function(name:String) {
+		if (selectedNote == null) return;
+		selectedNote.noteType = name;
+		selectedNote.loadNoteStyle(Note.noteTypes[name]);
+		selectedNote.sustainArray[0].loadNoteStyle(Note.noteTypes[name]);
+		regenSustain();
+		selectedNote.setGraphicSize(40);
+		selectedNote.updateHitbox();
+		PlayState.SONG.notes[curSection].sectionNotes[selectedIndex][3] = name;
+	});
+	noteDrop.selectedLabel = "Default";
+	noteDrop.dropDirection = FlxUIDropDownMenuDropDirection.Down;
+	customizeDropdown(noteDrop, "Note Type", noteGroup);
+}
+
+var copiedNotes = [];
+function generateSectionUI() {
+	var mhsBox = new FlxUICheckBox(gridBG.x - 200, 80, null, null, "Camera On Player", 100);
+	mhsBox.checked = PlayState.SONG.notes[curSection].mustHitSection;
+	mhsBox.callback = function() {
+		PlayState.SONG.notes[curSection].mustHitSection = mhsBox.checked;
+		if (PlayState.SONG.notes[curSection].mustHitSection) {
+            plIcon.x = 525;
+            plIcon.flipX = false;
+            opIcon.x = 675;
+            opIcon.flipX = true;
+        } else {
+            opIcon.x = 525;
+            opIcon.flipX = false;
+            plIcon.x = 675;
+            plIcon.flipX = true;
+        }
+	};
+	sectionGroup.add(mhsBox);
+	mhsBox.textY += 4;
+
+	var cbpmBox = new FlxUICheckBox(gridBG.x - 200, 105, null, null, "Change BPM To", 85);
+	cbpmBox.checked = PlayState.SONG.notes[curSection].changeBPM;
+	cbpmBox.callback = function() {
+		PlayState.SONG.notes[curSection].changeBPM = cbpmBox.checked;
+		FlxG.state.regenNotes();
+	};
+	sectionGroup.add(cbpmBox);
+	cbpmBox.textY--;
+
+	var bpmInput = new FlxUINumericStepper(gridBG.x - 100, 107, 10, PlayState.SONG.bpm, 60, 9999, 1);
+	function bpmPlus() {
+		bpmInput.value += 10;
+		if (!PlayState.SONG.notes[curSection].changeBPM) return;
+		PlayState.SONG.notes[curSection].bpm = bpmInput.value;
+		Conductor.mapBPMChanges(PlayState.SONG);
+		FlxG.state.regenNotes();
+	}
+	function bpmMinus() {
+		bpmInput.value -= 10;
+		if (!PlayState.SONG.notes[curSection].changeBPM) return;
+		PlayState.SONG.notes[curSection].bpm = bpmInput.value;
+		Conductor.mapBPMChanges(PlayState.SONG);
+		FlxG.state.regenNotes();
+	}
+	customizeStepper(bpmInput, "BPM", sectionGroup, bpmPlus, bpmMinus);
+
+	var altBox = new FlxUICheckBox(gridBG.x - 200, 130, null, null, "Enemy Plays Alt Anims", 120);
+	altBox.checked = PlayState.SONG.notes[curSection].altAnim;
+	altBox.callback = function() {
+		PlayState.SONG.notes[curSection].altAnim = altBox.checked;
+	};
+	sectionGroup.add(altBox);
+	altBox.textY += 4;
+
+	var swapButton:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 200, 180, new FlxSprite(), function() {
+		for (note in PlayState.SONG.notes[curSection].sectionNotes)
+			note[1] = (note[1] + 4) % 8;
+		FlxG.state.regenNotes();
+	});
+	customizeButton(swapButton, "Swap", -1, sectionGroup);
+
+	var clearButton:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 90, 180, new FlxSprite(), function() {
+		PlayState.SONG.notes[curSection].sectionNotes = [];
+		FlxG.state.regenNotes();
+	});
+	customizeButton(clearButton, "Clear", 0xFFFF0080, sectionGroup);
+
+	var copyButton:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 200, 205, new FlxSprite(), function() {
+		copiedNotes = [for (note in PlayState.SONG.notes[curSection].sectionNotes) [note[0] - sectionStart, note[1], note[2], note[3]]];
+	});
+	customizeButton(copyButton, "Copy", -1, sectionGroup);
+
+	var pasteButton:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 90, 205, new FlxSprite(), function() {
+		PlayState.SONG.notes[curSection].sectionNotes = copiedNotes;
+		FlxG.state.regenNotes();
+	});
+	customizeButton(pasteButton, "Paste", -1, sectionGroup);
+
+	var lastInput = new FlxUINumericStepper(gridBG.x - 115, 248, 1, 1, 1, 9999);
+	customizeStepper(lastInput, "back", sectionGroup, lastInput.button_plus.onUp.callback, lastInput.button_minus.onUp.callback);
+
+	var copyLast:FlxSpriteButton = new FlxSpriteButton(gridBG.x - 200, 245, new FlxSprite(), function() {
+		var daBPM:Float = PlayState.SONG.bpm;
+		var daSectionStart = 0.0;
+		for (i in 0...Math.max(curSection - lastInput.value, 0)) {
+			if (PlayState.SONG.notes[i].changeBPM)
+				daBPM = PlayState.SONG.notes[i].bpm;
+			daSectionStart += 60 / daBPM * 4000;
+		}
+
+		PlayState.SONG.notes[curSection].sectionNotes = [for (note in PlayState.SONG.notes[Math.max(curSection - lastInput.value, 0)].sectionNotes) [note[0] - daSectionStart + sectionStart, note[1], note[2], note[3]]];
+		FlxG.state.regenNotes();
+	});
+	customizeButton(copyLast, "Copy Last", -1, sectionGroup);
+}
+
+import String;
+
+//This was too laggy. :(
+function createJSON() {
+	var json = PlayState.SONG;
+	var text = '{"song": {\n';
+	text += '    "song": "'+ json.song + '",\n';
+	text += '    "bpm": '+ json.bpm + ',\n';
+	text += '    "needsVoices": '+ json.needsVoices + ',\n';
+	text += '    "speed": '+ json.speed + ',\n\n';
+
+	text += '    "player1": "'+ json.player1 + '",\n';
+	text += '    "player2": "'+ json.player2 + '",\n';
+	text += '    "gfVersion": "'+ json.gfVersion + '",\n';
+	text += '    "stage": "'+ json.stage + '",\n';
+	text += '    "noteStyle": "'+ json.noteStyle + '",\n\n';
+	text += '    "notes": [\n';
+
+	for (i in 0...json.notes.length) {
+		var section = json.notes[i];
+		text += '        {\n';
+		text += '            "mustHitSection": ' + Std.string(section.mustHitSection) + ",\n";
+		if (section.changeBPM != null && section.changeBPM) {
+			text += '            "changeBPM": true,\n';
+			text += '            "bpm": ' + section.bpm + ",\n";
+		}
+		if (section.altAnim != null && section.altAnim)
+			text += '            "altAnim": true,\n';
+		text += '            "lengthInSteps": ' + Std.string(section.lengthInSteps) + ',\n';
+
+		//There would be "typeOfSection" but who the fucc uses that?
+		if (section.sectionNotes.length <= 0)
+			text += '            "sectionNotes": []\n        }';
+		else {
+			text += '            "sectionNotes": [\n';
+			for (i in 0...section.sectionNotes.length) {
+				var toJoin = [];
+				for (thing in section.sectionNotes[i]) {
+					if (Std.isOfType(thing, String))
+						toJoin.push("\"" + thing + "\"");
+					else
+						toJoin.push(thing);
+				}
+
+				text += '                [' + toJoin.join(", ") + ']';
+				if (i < section.sectionNotes.length - 1)
+					text += ",";
+				text += "\n";
+			}
+			text += '            ]\n        }';
+		}
+		if (i < json.notes.length - 1)
+			text += ",";
+		text += "\n";
+	}
+	text += "    ]\n}}";
+
+	return text;
+}

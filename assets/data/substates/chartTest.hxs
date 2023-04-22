@@ -44,8 +44,6 @@ function create() {
     FlxG.stage.addEventListener("keyDown", keyDown);
     FlxG.stage.addEventListener("keyUp", keyUp);
     startCountdown();
-
-	trace(Type.resolveClass("__ASSET__assets_fonts_pixel_otf"));
 }
 
 function update(elapsed) {
@@ -388,7 +386,7 @@ function generateNotes(sections:Array<funkin.SongClasses.SwagSection>) {
             else
                 oldNote = null;
 
-            var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, daNoteType);
+            var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, daNoteType);
             swagNote.jsonData = songNotes;
             swagNote.sustainLength = songNotes[2];
             swagNote.scrollFactor.set(0, 0);

@@ -1,5 +1,6 @@
 package ui;
 
+import utils.CoolUtil;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.FlxG;
@@ -234,9 +235,10 @@ class Alphabet extends FlxSpriteGroup
 		{
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
 			var targetX = centerPos ? FlxG.width / 2 - width / 2 : (targetY * 20) + 90;
+			var lerpRatio = CoolUtil.adjustToFramerate(0.3);
 
-			y = FlxMath.lerp(y, (scaledY * spacing) + (FlxG.height * 0.48), 0.30);
-			x = FlxMath.lerp(x, targetX, 0.30);
+			y = FlxMath.lerp(y, (scaledY * spacing) + (FlxG.height * 0.48), lerpRatio);
+			x = FlxMath.lerp(x, targetX, lerpRatio);
 		}
 
 		super.update(elapsed);

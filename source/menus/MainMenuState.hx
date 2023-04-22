@@ -32,13 +32,10 @@ class MainMenuState extends base.MusicBeatState
 	var optionShit:Array<String> = ['story mode', 'freeplay'];
 	#end
 
-	var newGaming:FlxText;
-	var newGaming2:FlxText;
 	public static var firstStart:Bool = true;
 
-	public static var nightly:String = "";
-
-	public static var kadeEngineVer:String = "1.5.3" + nightly;
+	public static var lastUpdate:Int = 1; //I wanna do versions diffently.
+	public static var updateName:String = "Rebrand Update";
 	public static var gameVer:String = "0.2.7.1";
 
 	var magenta:FlxSprite;
@@ -113,18 +110,14 @@ class MainMenuState extends base.MusicBeatState
 
 		FlxG.camera.follow(camFollow, null, 0.60 * (60 / FlxG.save.data.fpsCap));
 
-		var versionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, gameVer +  (base.Main.watermarks ? " FNF - " + kadeEngineVer + " Kade Engine" : ""), 12);
+		var versionShit:FlxText = new FlxText(5, FlxG.height - 5, 0, '$gameVer FNF - 1.5.3 Kade Engine\nKade Refreshed - $updateName', 12);
+		versionShit.y -= versionShit.height;
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(versionShit);
+		if (base.Main.watermarks)
+			add(versionShit);
 
 		// NG.core.calls.event.logEvent('swag').send();
-
-
-		if (FlxG.save.data.dfjk)
-			controls.setKeyboardScheme(KeyboardScheme.Solo, true);
-		else
-			controls.setKeyboardScheme(KeyboardScheme.Duo(true), true);
 
 		changeItem();
 

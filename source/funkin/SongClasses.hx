@@ -21,6 +21,17 @@ typedef SwagSong =
 	var validScore:Bool;
 }
 
+typedef SwagSection =
+{
+	var sectionNotes:Array<Dynamic>;
+	var lengthInSteps:Int;
+	var typeOfSection:Int;
+	var mustHitSection:Bool;
+	var bpm:Float;
+	var changeBPM:Bool;
+	var altAnim:Bool;
+}
+
 class Song
 {
 	public var song:String;
@@ -44,33 +55,8 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		trace('loading ' + folder + '/' + jsonInput.toLowerCase());
-
 		var rawJson = Assets.getText(Paths.songFile(jsonInput + ".json", folder)).trim();
-
 		rawJson.substr(0, rawJson.lastIndexOf("}")); //better end scrubbing
-
-		/*while (!rawJson.endsWith("}"))
-		{
-			rawJson = rawJson.substr(0, rawJson.length - 1);
-			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
-		}*/
-
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// trace(songData);
-
-		// trace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
-			{
-				trace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
-			}
-
-				daNotes = songData.notes;
-				daSong = songData.song;
-				daBpm = songData.bpm; */
 
 		return parseJSONshit(rawJson);
 	}
@@ -87,38 +73,12 @@ class Song
 					note.push("Default"); // for consistency in the json when saving.
 			}
 		}
+
+		if (parsedJson.noteStyle == null)
+			parsedJson.noteStyle = "normal";
+
 		var swagShit:SwagSong = cast parsedJson;
 		swagShit.validScore = true;
 		return swagShit;
-	}
-}
-
-typedef SwagSection =
-{
-	var sectionNotes:Array<Dynamic>;
-	var lengthInSteps:Int;
-	var typeOfSection:Int;
-	var mustHitSection:Bool;
-	var bpm:Float;
-	var changeBPM:Bool;
-	var altAnim:Bool;
-}
-
-class Section
-{
-	public var sectionNotes:Array<Dynamic> = [];
-
-	public var lengthInSteps:Int = 16;
-	public var typeOfSection:Int = 0;
-	public var mustHitSection:Bool = true;
-
-	/**
-	 *	Copies the first section into the second section!
-	 */
-	public static var COPYCAT:Int = 0;
-
-	public function new(lengthInSteps:Int = 16)
-	{
-		this.lengthInSteps = lengthInSteps;
 	}
 }

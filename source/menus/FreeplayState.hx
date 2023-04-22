@@ -44,13 +44,8 @@ class FreeplayState extends base.MusicBeatState
 	{
 		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('lists/freeplaySonglist')));
 
-		/* 
-			if (FlxG.sound.music != null)
-			{
-				if (!FlxG.sound.music.playing)
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			}
-		 */
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 
 		#if windows
 		// Updating Discord Rich Presence
@@ -67,16 +62,15 @@ class FreeplayState extends base.MusicBeatState
 		grpSongs = new FlxTypedGroup<Alphabet>();
 		add(grpSongs);
 
-		for (i in 0...songs.length)
-		{
+		for (i in 0...songs.length) {
 			var songText:Alphabet = new Alphabet(0, (70 * i) + 30, songs[i].songName, true, false, true);
 			songText.x = FlxG.width / 2 - songText.width / 2;
 			songText.isMenuItem = true;
 			songText.centerPos = !FlxG.save.data.ogfreeplay;
 			songText.targetY = i;
 			grpSongs.add(songText);
-			if (!FlxG.save.data.ogfreeplay)
-			{
+
+			if (!FlxG.save.data.ogfreeplay) {
 				var scaledY = FlxMath.remapToRange(i, 0, 1, 0, 1.3);
 				songText.y = (scaledY * 120) + (FlxG.height * 0.48);
 			}
@@ -98,8 +92,7 @@ class FreeplayState extends base.MusicBeatState
 		if (!FlxG.save.data.ogfreeplay)
 			add(scoreText);
 
-		if (FlxG.save.data.ogfreeplay)
-		{
+		if (FlxG.save.data.ogfreeplay) {
 			scoreText.setPosition(FlxG.width * 0.7, 5);
 			scoreText.alignment = LEFT;
 
@@ -130,29 +123,24 @@ class FreeplayState extends base.MusicBeatState
 		bg.color = FlxColor.interpolate(lastColor, songs[curSelected].color, sinceLastSelect);
 
 		if (FlxG.sound.music.volume < 0.7)
-		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
-		}
 
-		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.4));
+		lerpScore = Math.floor(CoolUtil.adjustedLerp(lerpScore, intendedScore, 0.4));
 
 		if (Math.abs(lerpScore - intendedScore) <= 10)
 			lerpScore = intendedScore;
 
 		if (combo.trim() == "")
 			combo = (intendedScore == 0) ? "UNFINISHED" : "CLEARED";
+
 		if (!FlxG.save.data.ogfreeplay)
 			scoreText.text = '[${songs[curSelected].diffs[curDifficulty].toUpperCase()}] - High Score: $lerpScore ($combo)';
 		else
-			scoreText.text = 'Score: $lerpScore ($combo)\n[${songs[curSelected].diffs[curDifficulty].toUpperCase()}]';
+			scoreText.text = 'PERSONAL BEST: $lerpScore\n${songs[curSelected].diffs[curDifficulty].toUpperCase()}    $combo';
 
-		var upP = controls.UP_P;
-		var downP = controls.DOWN_P;
-		var accepted = controls.ACCEPT;
-
-		if (upP)
+		if (controls.UP_P)
 			changeSelection(-1);
-		else if (downP)
+		else if (controls.DOWN_P)
 			changeSelection(1);
 
 		if (controls.LEFT_P)
@@ -162,8 +150,11 @@ class FreeplayState extends base.MusicBeatState
 
 		if (controls.BACK)
 			FlxG.switchState(new menus.MainMenuState());
+
+		if (FlxG.keys.justPressed.SPACE)
+			FlxG.sound.playMusic(Paths.inst(songs[curSelected].songName), 0);
 		
-		if (accepted) {
+		if (FlxG.keys.justPressed.ENTER) {
 			Highscore.diffArray = songs[curSelected].diffs;
 			PlayState.SONG = funkin.SongClasses.Song.loadFromJson(Highscore.diffArray[curDifficulty].toLowerCase(), songs[curSelected].songName);
 			PlayState.isStoryMode = false;
@@ -233,14 +224,6 @@ class FreeplayState extends base.MusicBeatState
 			case 'Philly-Nice':
 				songHighscore = 'Philly';
 		}
-
-		#if !switch
-		intendedScore = Highscore.getScore(songHighscore, curDifficulty);
-		combo = Highscore.getCombo(songHighscore, curDifficulty);
-		// lerpScore = 0;
-		#end
-
-		FlxG.sound.playMusic(Paths.inst(songs[curSelected].songName), 0);
 
 		for (bullShit => item in grpSongs.members)
 		{

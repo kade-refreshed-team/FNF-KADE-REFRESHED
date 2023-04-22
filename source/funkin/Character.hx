@@ -262,7 +262,7 @@ class Character extends FlxSprite
 		}
 
 		var offsetMult = (normallyFlipped != flipX) ? 1 : -1;
-		offset.x += -data.offsets.x * offsetMult;
+		offset.x += data.offsets.x * offsetMult;
 		offset.y -= data.offsets.y;
 	}
 

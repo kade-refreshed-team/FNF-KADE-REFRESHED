@@ -28,13 +28,10 @@ jobs:
           haxelib install flixel
           haxelib run lime setup flixel
           haxelib run lime setup
-          haxelib install flixel-tools
           haxelib install flixel-addons
           haxelib install flixel-ui
           haxelib git hscript-improved https://www.github.com/YoshiCrafter29/hscript-improved
-          haxelib install flixel-addons
           haxelib git faxe https://github.com/uhrobots/faxe
-          haxelib git scriptless-polymod https://github.com/SrtHero278/scriptless-polymod
           haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
           haxelib git extension-webm https://github.com/KadeDev/extension-webm
           haxelib run lime rebuild extension-webm windows
@@ -48,5 +45,5 @@ jobs:
           
       - uses: actions/upload-artifact@v2
         with:
-          name: RG-Engine (Windows)
+          name: Kade-Refreshed (Windows)
           path: export/release/windows/bin

@@ -116,7 +116,7 @@ class PlayState extends MusicBeatState
 	public var songPosBar:GraphicBar;
 	var songName:FlxText;
 	var songLength:Float = 0;
-	var rgEngineWatermark:FlxText;
+	var engineWatermark:FlxText;
 
 	public var strumLineNotes:FlxTypedGroup<Strum> = null;
 	public var playerStrums:Array<Strum> = null;
@@ -236,7 +236,7 @@ class PlayState extends MusicBeatState
 		#end
 
 		// var gameCam:FlxCamera = FlxG.camera;
-		camGame = new FlxCamera();
+		camGame = new CustomCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 
@@ -372,7 +372,7 @@ class PlayState extends MusicBeatState
 		FlxG.camera.zoom = defaultCamZoom;
 
 		add(camFollow);
-		FlxG.camera.follow(camFollow, LOCKON, 0.04 * (30 / (cast(Lib.current.getChildAt(0), Main)).getFPS()));
+		FlxG.camera.follow(camFollow, LOCKON, 0.04);
 		FlxG.camera.zoom = defaultCamZoom;
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		
@@ -427,12 +427,12 @@ class PlayState extends MusicBeatState
 		add(healthBar);
 
 		// Add Kade Engine watermark
-		rgEngineWatermark = new FlxText(5, FlxG.height - 5, 0, 'RG Engine v${MainMenuState.kadeEngineVer}', 16);
-		rgEngineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		rgEngineWatermark.scrollFactor.set();
-		rgEngineWatermark.visible = (Main.watermarks && !PlayStateChangeables.PsychUI);
-		add(rgEngineWatermark);
-		rgEngineWatermark.y -= rgEngineWatermark.height;
+		engineWatermark = new FlxText(5, FlxG.height - 5, 0, 'Kade Refreshed\n${MainMenuState.updateName}', 16);
+		engineWatermark.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		engineWatermark.scrollFactor.set();
+		engineWatermark.visible = (Main.watermarks && !PlayStateChangeables.PsychUI);
+		add(engineWatermark);
+		engineWatermark.y -= engineWatermark.height;
 
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
 		scoreTxt.scrollFactor.set();
@@ -481,7 +481,7 @@ class PlayState extends MusicBeatState
 		iconP2.cameras = [camHUD];
 		scoreTxt.cameras = [camHUD];
 		doof.cameras = [camHUD];
-		rgEngineWatermark.cameras = [camHUD];
+		engineWatermark.cameras = [camHUD];
 		currentTimingShown.cameras = [camHUD];
 
 		// if (SONG.song == 'South')
@@ -1014,7 +1014,7 @@ class PlayState extends MusicBeatState
 			if (FlxG.keys.pressed.SHIFT)
 				FlxG.switchState(new debug.ChartingState());
 			else
-				FlxG.switchState(new debug.RgCharter());
+				FlxG.switchState(new debug.RefreshedCharter());
 		} else if (FlxG.keys.justPressed.FIVE) {
 			if (useVideo) {
 				GlobalVideo.get().stop();
@@ -1061,19 +1061,20 @@ class PlayState extends MusicBeatState
 		if (songPosBar != null)
 			songPosBar.percent = Conductor.songPosition / songLength;
 		healthBar.percent = health / 2;
-		iconP1.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent * 100, 0, 100, 100, 0) * 0.01) - iconOffset);
-		iconP2.x = healthBar.x + (healthBar.width * (FlxMath.remapToRange(healthBar.percent * 100, 0, 100, 100, 0) * 0.01)) - (iconP2.width - iconOffset);
+		iconP1.x = healthBar.x + (healthBar.width * (1 - healthBar.percent) - iconOffset);
+		iconP2.x = healthBar.x + (healthBar.width * (1 - healthBar.percent) - (iconP2.width - iconOffset));
 		iconP1.y = iconP2.y = healthBar.y + healthBar.height / 2 - iconP2.height / 2;
 
-		if (healthBar.percent < 0.2)
-			iconP1.animation.curAnim.curFrame = 1;
-		else
+		if (healthBar.percent > 0.8)  {
 			iconP1.animation.curAnim.curFrame = 0;
-
-		if (healthBar.percent > 0.8)
 			iconP2.animation.curAnim.curFrame = 1;
-		else
+		} else if (healthBar.percent < 0.2) {
+			iconP1.animation.curAnim.curFrame = 1;
 			iconP2.animation.curAnim.curFrame = 0;
+		} else {
+			iconP1.animation.curAnim.curFrame = 0;
+			iconP2.animation.curAnim.curFrame = 0;
+		}
 
 		if (startingSong) {
 			if (startedCountdown && Conductor.songPosition >= 0)
@@ -1118,8 +1119,8 @@ class PlayState extends MusicBeatState
 		}
 
 		if (camZooming) {
-			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, 0.95);
-			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, 0.95);
+			FlxG.camera.zoom = CoolUtil.adjustedLerp(FlxG.camera.zoom, defaultCamZoom, 0.05);
+			camHUD.zoom = CoolUtil.adjustedLerp(camHUD.zoom, 1, 0.05);
 		}
 
 		FlxG.watch.addQuick("beatShit", curBeat);

@@ -2,6 +2,7 @@ package utils;
 
 import openfl.utils.Assets;
 import flixel.util.FlxColor;
+import flixel.FlxG;
 
 import funkin.PlayState;
 
@@ -51,6 +52,22 @@ class CoolUtil
 		PlayState.storyDifficulty = diffToLoad;
 		PlayState.storyWeek = num;
 		PlayState.SONG = funkin.SongClasses.Song.loadFromJson(Highscore.diffArray[diffToLoad].toLowerCase(), PlayState.storyPlaylist[0]);
-		flixel.FlxG.state.openSubState(new funkin.PreloadingSubState());
+		FlxG.state.openSubState(new funkin.PreloadingSubState());
 	}
+
+	/**
+	* Taken from Week 7
+	* 
+	* Adjusts a value to the current time elapsed.
+	*/
+	public static function adjustToFramerate(lerp:Float):Float
+		return Math.min(lerp * (FlxG.elapsed / (1 / 60)), 1);
+	
+	/**
+	* Taken from Week 7
+	* 
+	* Like `FlxMath.lerp()` but adjusts the ratio to the current time elapsed.
+	*/
+	public static function adjustedLerp(a:Float, b:Float, ratio:Float):Float
+		return flixel.math.FlxMath.lerp(a, b, adjustToFramerate(ratio));
 }

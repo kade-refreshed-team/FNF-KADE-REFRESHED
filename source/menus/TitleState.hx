@@ -8,6 +8,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.math.FlxMath;
 import openfl.Assets;
 
 import ui.Alphabet;
@@ -54,8 +55,10 @@ class TitleState extends base.MusicBeatState
 
 	var logoBl:FlxSprite;
 	var gfDance:FlxSprite;
-	var danceLeft:Bool = false;
 	var titleText:FlxSprite;
+	
+	var kadeText:FlxSprite;
+	var kadeSpin:FlxSprite;
 
 	function startIntro()
 	{
@@ -78,39 +81,32 @@ class TitleState extends base.MusicBeatState
 		Conductor.changeBPM(102);
 		persistentUpdate = true;
 
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
-		// bg.antialiasing = true;
-		// bg.setGraphicSize(Std.int(bg.width * 0.6));
-		// bg.updateHitbox();
-		add(bg);
-
-		if(Main.watermarks) {
-			logoBl = new FlxSprite(-150, -100);
-			logoBl.frames = Paths.getSparrowAtlas('menu-side/gameStart/KadeEngineLogoBumpin');
-			logoBl.antialiasing = true;
-			logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
-			logoBl.animation.play('bump');
-			logoBl.updateHitbox();
-			// logoBl.screenCenter();
-			// logoBl.color = FlxColor.BLACK;
-		} else {
-			logoBl = new FlxSprite(-150, -100);
-			logoBl.frames = Paths.getSparrowAtlas('menu-side/gameStart/logoBumpin');
-			logoBl.antialiasing = true;
-			logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
-			logoBl.animation.play('bump');
-			logoBl.updateHitbox();
-			// logoBl.screenCenter();
-			// logoBl.color = FlxColor.BLACK;
-		}
-
-		gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
+		gfDance = new FlxSprite(FlxG.width * 0.4 + 50, FlxG.height * 0.07);
 		gfDance.frames = Paths.getSparrowAtlas('menu-side/gameStart/gfDanceTitle');
 		gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
 		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		gfDance.antialiasing = true;
 		add(gfDance);
+
+		logoBl = new FlxSprite(-100, -100);
+		logoBl.frames = Paths.getSparrowAtlas('menu-side/gameStart/logoBumpin');
+		logoBl.antialiasing = true;
+		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
+		logoBl.animation.play('bump');
+		logoBl.updateHitbox();
 		add(logoBl);
+
+		kadeText = new FlxSprite(logoBl.x + 120, logoBl.y + logoBl.height - 200, Paths.image("menu-side/KadeRefreshedText"));
+		kadeText.scale.set(0.85, 0.85);
+		kadeText.updateHitbox();
+		kadeText.antialiasing = true;
+		add(kadeText);
+	
+		kadeSpin = new FlxSprite(kadeText.x + kadeText.width - 20, kadeText.y, Paths.image("menu-side/KadeRefreshedArrowThingy"));
+		kadeSpin.scale.set(0.33, 0.33);
+		kadeSpin.updateHitbox();
+		kadeSpin.antialiasing = true;
+		add(kadeSpin);
 
 		titleText = new FlxSprite(100, FlxG.height * 0.8);
 		titleText.frames = Paths.getSparrowAtlas('menu-side/gameStart/titleEnter');
@@ -176,11 +172,19 @@ class TitleState extends base.MusicBeatState
 	override function update(elapsed:Float)	{
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
-		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
 
 		if (FlxG.keys.justPressed.F)
-		{
 			FlxG.fullscreen = !FlxG.fullscreen;
+
+		if (kadeText != null) {
+			var mainRatio = (floatBeat % 2 < 0.5) ? FlxEase.circIn(1 - (floatBeat % 2) * 2) : 0;
+			kadeText.scale.x = FlxMath.lerp(0.85, 0.95, mainRatio);
+			kadeText.scale.y = kadeText.scale.x;
+		
+			kadeSpin.scale.x = FlxMath.lerp(0.33, 0.4, mainRatio);
+			kadeSpin.scale.y = kadeSpin.scale.x;
+			var spinRatio = FlxEase.circIn((1 - floatBeat % 1) * (1 - curBeat % 2));
+			kadeSpin.angle = FlxMath.lerp(0, 360, spinRatio);
 		}
 
 		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER;
@@ -303,15 +307,11 @@ class TitleState extends base.MusicBeatState
 	{
 		super.beatHit();
 
-		logoBl.animation.play('bump');
-		danceLeft = !danceLeft;
+		if (logoBl != null)
+			logoBl.animation.play('bump');
 
-		if (danceLeft)
-			gfDance.animation.play('danceRight');
-		else
-			gfDance.animation.play('danceLeft');
-
-		FlxG.log.add(curBeat);
+		if (gfDance != null)
+			gfDance.animation.play((curBeat % 2 == 0) ? 'danceLeft' : 'danceRight');
 
 		switch (curBeat)
 		{

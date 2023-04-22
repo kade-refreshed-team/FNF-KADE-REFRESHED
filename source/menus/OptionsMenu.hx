@@ -9,7 +9,7 @@ import utils.HelperFunctions;
 import base.Conductor;
 import ui.Alphabet;
 
-typedef RgOption = {
+typedef RefreshedOption = {
     var name:String;
     var desc:String;
 
@@ -22,8 +22,9 @@ typedef RgOption = {
 
 class OptionsMenu extends base.MusicBeatState {
     var catagories:Array<String> = [];
-    var options:Array<Array<RgOption>> = [];
+    var options:Array<Array<RefreshedOption>> = [];
     var optGroup:FlxTypedGroup<Alphabet>;
+    var initialOptX:Array<Float> = [];
     var curCatagory:Int = 0;
     var curOption:Int = 0;
 
@@ -43,7 +44,7 @@ class OptionsMenu extends base.MusicBeatState {
             var opt = new Alphabet(0, FlxG.height * 0.48, options[curCatagory][i].name, true, false, true);
             opt.spacing = 90;
             opt.alpha = 1 - 0.4 * Math.min(i, 1);
-            opt.x = FlxG.width / 2 - opt.width / 2;
+            initialOptX.push(opt.x = FlxG.width / 2 - opt.width / 2);
             opt.isMenuItem = opt.centerPos = true;
 			opt.targetY = i;
 			optGroup.add(opt);
@@ -143,14 +144,14 @@ class OptionsMenu extends base.MusicBeatState {
             if (controls.LEFT_P)
                 FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
             options[curCatagory][curOption].onLeft();
-            optGroup.members[curOption].x -= 50;
+            optGroup.members[curOption].x = (FlxG.keys.pressed.SHIFT) ? initialOptX[curOption] - 75 : initialOptX[curOption] - 50;
 
             updateLabel();
         } else if (((FlxG.keys.pressed.SHIFT && controls.RIGHT) || controls.RIGHT_P) && options[curCatagory][curOption].onRight != null) {
             if (controls.RIGHT_P)
                 FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
             options[curCatagory][curOption].onRight();
-            optGroup.members[curOption].x += 50;
+            optGroup.members[curOption].x = (FlxG.keys.pressed.SHIFT) ? initialOptX[curOption] + 75 : initialOptX[curOption] + 50;
 
             updateLabel();
         } else if (controls.ACCEPT && options[curCatagory][curOption].onEnter != null) {
@@ -187,7 +188,7 @@ class OptionsMenu extends base.MusicBeatState {
         Reflect.setField(FlxG.save.data, jsonField, value);
     }
 
-    function makeBoolOption(name:String, desc:String, jsonField:String):RgOption {
+    function makeBoolOption(name:String, desc:String, jsonField:String):RefreshedOption {
         return {
             name: name,
             desc: desc,
@@ -200,7 +201,7 @@ class OptionsMenu extends base.MusicBeatState {
 
     function makeOptions() {
         catagories = ["Gameplay", "Apperance", "Misc"];
-        var regOptions:Array<Array<RgOption>> = [
+        var regOptions:Array<Array<RefreshedOption>> = [
             [
                 {
                     name: "Keybinds",
@@ -295,7 +296,7 @@ class OptionsMenu extends base.MusicBeatState {
                 makeBoolOption("CPU Strum Glow", "Makes the opponent's arrows glow when they're hit.", "cpuStrums"),
                 {
                     name: "Watermarks",
-                    desc: "Toggles visiblity of watermarks that say that this is RG Engine.",
+                    desc: "Toggles visiblity of watermarks that say that this is Kade Freshed.",
                     onLeft: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
                     onRight: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
                     onEnter: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
@@ -315,7 +316,7 @@ class OptionsMenu extends base.MusicBeatState {
                 #end
                 makeBoolOption("Botplay", "Have the songs be automatically played. Useful for showcases. (and skill issue)", "botplay"),
                 makeBoolOption("Results Screen", "At the end of a freeplay song or story week, A overlay will appear with results of the gameplay.", "scoreScreen"),
-                makeBoolOption("OG Freeplay", "Have the freeplay menu be the regular freeplay menu instead of the RG one.", "ogfreeplay")
+                makeBoolOption("OG Freeplay", "Have the freeplay menu be the regular freeplay menu instead of the Refreshed one.", "ogfreeplay")
             ]
         ];
         script.callFunc("makeOptions", [regOptions]);

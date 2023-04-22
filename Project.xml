@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': Rg Engine" file="Rg Engine" packageName="com.rg.rgsengine" package="com.rg.rgsengine" main="base.Main" version="0.2.7.1" company="rg" />
+	<app title="Friday Night Funkin': Kade Refreshed" file="Kade Refreshed" packageName="com.kade-refreshed.kade-refreshed" package="com.kade-refreshed.kade-refreshed" main="base.Main" version="0.2.7.1" company="kade-refreshed" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />

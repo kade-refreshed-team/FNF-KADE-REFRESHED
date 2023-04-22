@@ -63,6 +63,8 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
+		scripts.HaxeScript.initParser(); // Init the parser for hscript before creating the game because TitleState.
+
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 
@@ -130,8 +132,6 @@ class Main extends Sprite
 			{asset: diamond, width: 32, height: 32},
 			new flixel.math.FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4)
 		);
-
-		scripts.HaxeScript.initParser();
 	}
 
 	var game:FlxGame;
