@@ -1,36 +1,36 @@
 setZoom | 0.8
 
 newSprite | bg, -1000, -500
-setGraphic | stages/mall/bgWalls
-setScroll | 0.2, 0.2
-setScale | 0.8, 0.8, true
+    setGraphic | stages/mall/bgWalls
+    setScroll | 0.2, 0.2
+    setScale | 0.8, 0.8, true
 
 newSprite | upperBoppers, -240, -90
-setFrames | stages/mall/upperBop
-addAnim | bop, Upper Crowd Bob, 24, beat
-setScroll | 0.33, 0.33
-setScale | 0.85, 0.85, true
+    setFrames | stages/mall/upperBop
+    addAnim | bop, Upper Crowd Bob, 24, beat
+    setScroll | 0.33, 0.33
+    setScale | 0.85, 0.85, true
 
 newSprite | bgEscalator, -1100, -600
-setGraphic | stages/mall/bgEscalator
-setScroll | 0.3, 0.3
-setScale | 0.9, 0.9, true
+    setGraphic | stages/mall/bgEscalator
+    setScroll | 0.3, 0.3
+    setScale | 0.9, 0.9, true
 
 newSprite | tree, 370, -250
-setGraphic | stages/mall/christmasTree
-setScroll | 0.4, 0.4
+    setGraphic | stages/mall/christmasTree
+    setScroll | 0.4, 0.4
 
 newSprite | bottomBoppers, -300, 140
-setFrames | stages/mall/bottomBop
-addAnim | bop, Bottom Level Boppers, 24, beat
-setScroll | 0.9, 0.9
+    setFrames | stages/mall/bottomBop
+    addAnim | bop, Bottom Level Boppers, 24, beat
+    setScroll | 0.9, 0.9
 
 newSprite | fgSnow, -600, 700
-setGraphic | stages/mall/fgSnow
+    setGraphic | stages/mall/fgSnow
 
 newSprite | santa, -840, 150
-setFrames | stages/mall/santa
-addAnim | idle, santa idle in fear, 24, beat
+    setFrames | stages/mall/santa
+    addAnim | idle, santa idle in fear, 24, beat
 
 camOffsets | bf, 0, -100
 addChar | gf, setPos, 400, 130

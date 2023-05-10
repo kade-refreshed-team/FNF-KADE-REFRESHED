@@ -24,7 +24,6 @@ class TitleState extends base.MusicBeatState
 	var blackScreen:FlxSprite;
 	var credGroup:FlxGroup;
 	var credTextShit:Alphabet;
-	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
 
 	var curWacky:Array<String> = [];
@@ -60,21 +59,9 @@ class TitleState extends base.MusicBeatState
 	var kadeText:FlxSprite;
 	var kadeSpin:FlxSprite;
 
-	function startIntro()
-	{
-		if (!initialized)
-		{
-
-			// HAD TO MODIFY SOME BACKEND SHIT
-			// IF THIS PR IS HERE IF ITS ACCEPTED UR GOOD TO GO
-			// https://github.com/HaxeFlixel/flixel-addons/pull/348
-
-			// var music:FlxSound = new FlxSound();
-			// music.loadStream(Paths.music('freakyMenu'));
-			// FlxG.sound.list.add(music);
-			// music.play();
+	function startIntro() {
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing) {
 			FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
-
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		}
 
@@ -120,7 +107,6 @@ class TitleState extends base.MusicBeatState
 
 		credGroup = new FlxGroup();
 		add(credGroup);
-		textGroup = new FlxGroup();
 
 		blackScreen = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		credGroup.add(blackScreen);
@@ -142,8 +128,6 @@ class TitleState extends base.MusicBeatState
 
 		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
-		FlxG.mouse.visible = false;
-
 		if (initialized)
 			skipIntro();
 		else
@@ -152,17 +136,11 @@ class TitleState extends base.MusicBeatState
 		// credGroup.add(credTextShit);
 	}
 
-	function getIntroTextShit():Array<Array<String>>
-	{
+	function getIntroTextShit():Array<Array<String>> {
 		var fullText:String = Assets.getText(Paths.txt('introText'));
 
 		var firstArray:Array<String> = fullText.split('\n');
-		var swagGoodArray:Array<Array<String>> = [];
-
-		for (i in firstArray)
-		{
-			swagGoodArray.push(i.split('--'));
-		}
+		var swagGoodArray:Array<Array<String>> = [for (i in firstArray) i.split("--")];
 
 		return swagGoodArray;
 	}
@@ -191,29 +169,20 @@ class TitleState extends base.MusicBeatState
 
 		#if mobile
 		for (touch in FlxG.touches.list)
-		{
-			if (touch.justPressed)
-			{
-				pressedEnter = true;
-			}
-		}
+			pressedEnter = pressedEnter || touch.justPressed;
 		#end
 
 		var gamepad:FlxGamepad = FlxG.gamepads.lastActive;
 
-		if (gamepad != null)
-		{
-			if (gamepad.justPressed.START)
-				pressedEnter = true;
+		if (gamepad != null) {
+			pressedEnter = pressedEnter || gamepad.justPressed.START;
 
 			#if switch
-			if (gamepad.justPressed.B)
-				pressedEnter = true;
+			pressedEnter = pressedEnter || gamepad.justPressed.B;
 			#end
 		}
 
-		if (pressedEnter && !transitioning && skippedIntro)
-		{
+		if (pressedEnter && !transitioning && skippedIntro) {
 			if (Date.now().getDay() == 5)
 				trace('yoooo its friday');
 
@@ -228,8 +197,7 @@ class TitleState extends base.MusicBeatState
 
 			MainMenuState.firstStart = true;
 
-			new FlxTimer().start(2, function(tmr:FlxTimer)
-			{
+			new FlxTimer().start(2, function(tmr:FlxTimer) {
 				//Dont want the outdated thingy.
 				FlxG.switchState(new MainMenuState());
 
@@ -266,45 +234,36 @@ class TitleState extends base.MusicBeatState
 		}
 
 		if (pressedEnter && !skippedIntro && initialized)
-		{
 			skipIntro();
-		}
 
 		super.update(elapsed);
 	}
 
-	function createCoolText(textArray:Array<String>)
-	{
-		for (i in 0...textArray.length)
-		{
+	function createCoolText(textArray:Array<String>) {
+		for (i in 0...textArray.length) {
 			var money:Alphabet = new Alphabet(0, 0, textArray[i], true, false);
 			money.screenCenter(X);
 			money.y += (i * 60) + 200;
 			credGroup.add(money);
-			textGroup.add(money);
 		}
 	}
 
-	function addMoreText(text:String)
-	{
+	function addMoreText(text:String) {
 		var coolText:Alphabet = new Alphabet(0, 0, text, true, false);
 		coolText.screenCenter(X);
-		coolText.y += (textGroup.length * 60) + 200;
+		coolText.y += (credGroup.length * 60) + 200;
 		credGroup.add(coolText);
-		textGroup.add(coolText);
 	}
 
-	function deleteCoolText()
-	{
-		while (textGroup.members.length > 0)
-		{
-			credGroup.remove(textGroup.members[0], true);
-			textGroup.remove(textGroup.members[0], true);
+	function deleteCoolText() {
+		while (credGroup.length > 1) {
+			var member = credGroup.members[1];
+			member.destroy();
+			credGroup.remove(member, true);
 		}
 	}
 
-	override function beatHit()
-	{
+	override function beatHit() {
 		super.beatHit();
 
 		if (logoBl != null)
@@ -313,61 +272,33 @@ class TitleState extends base.MusicBeatState
 		if (gfDance != null)
 			gfDance.animation.play((curBeat % 2 == 0) ? 'danceLeft' : 'danceRight');
 
-		switch (curBeat)
-		{
+		switch (curBeat) {
 			case 1:
 				createCoolText(['ninjamuffin99', 'phantomArcade', 'kawaisprite', 'evilsk8er']);
-			// credTextShit.visible = true;
 			case 3:
 				addMoreText('present');
-			// credTextShit.text += '\npresent...';
-			// credTextShit.addText();
 			case 4:
 				deleteCoolText();
-			// credTextShit.visible = false;
-			// credTextShit.text = 'In association \nwith';
-			// credTextShit.screenCenter();
 			case 5:
-				if (Main.watermarks)
-					createCoolText(['Kade Engine', 'by']);
-				else
-					createCoolText(['In Partnership', 'with']);
+				createCoolText((Main.watermarks) ? ['Kade Engine', 'by'] : ['In Partnership', 'with']);
 			case 7:
-				if (Main.watermarks)
-					addMoreText('KadeDeveloper');
-				else
-				{
-					addMoreText('Newgrounds');
-					ngSpr.visible = true;
-				}
-			// credTextShit.text += '\nNewgrounds';
+				addMoreText((Main.watermarks) ? 'KadeDeveloper' : 'Newgrounds');
+				ngSpr.visible = !Main.watermarks;
 			case 8:
 				deleteCoolText();
 				ngSpr.visible = false;
-			// credTextShit.visible = false;
-
-			// credTextShit.text = 'Shoutouts Tom Fulp';
-			// credTextShit.screenCenter();
 			case 9:
 				createCoolText([curWacky[0]]);
-			// credTextShit.visible = true;
 			case 11:
 				addMoreText(curWacky[1]);
-			// credTextShit.text += '\nlmao';
 			case 12:
 				deleteCoolText();
-			// credTextShit.visible = false;
-			// credTextShit.text = "Friday";
-			// credTextShit.screenCenter();
 			case 13:
 				addMoreText('Friday');
-			// credTextShit.visible = true;
 			case 14:
 				addMoreText('Night');
-			// credTextShit.text += '\nNight';
 			case 15:
-				addMoreText('Funkin'); // credTextShit.text += '\nFunkin';
-
+				addMoreText('Funkin');
 			case 16:
 				skipIntro();
 		}
@@ -375,10 +306,8 @@ class TitleState extends base.MusicBeatState
 
 	var skippedIntro:Bool = false;
 
-	function skipIntro():Void
-	{
-		if (!skippedIntro)
-		{
+	function skipIntro():Void {
+		if (!skippedIntro) {
 			remove(ngSpr);
 
 			FlxG.camera.flash(FlxColor.WHITE, 4);

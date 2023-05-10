@@ -1,25 +1,25 @@
 newSprite | bg, -100, 0
-setGraphic | stages/philly/sky
-setScroll | 0.1, 0.1
+    setGraphic | stages/philly/sky
+    setScroll | 0.1, 0.1
 
 newSprite | city, -10, 0
-setGraphic | stages/philly/city
-setScroll | 0.3, 0.3
-setScale | 0.85, 0.85, true
+    setGraphic | stages/philly/city
+    setScroll | 0.3, 0.3
+    setScale | 0.85, 0.85, true
 
 newSprite | light, -10, 0
-setGraphic | stages/philly/win
-setScroll | 0.3, 0.3
-setScale | 0.85, 0.85, true
+    setGraphic | stages/philly/win
+    setScroll | 0.3, 0.3
+    setScale | 0.85, 0.85, true
 
 newSprite | streetBehind, -40, 50
-setGraphic | stages/philly/behindTrain
+    setGraphic | stages/philly/behindTrain
 
 newSprite | phillyTrain, 2000, 360
-setGraphic | stages/philly/train
+    setGraphic | stages/philly/train
 
 newSprite | street, -40, 50
-setGraphic | stages/philly/street
+    setGraphic | stages/philly/street
 
 camOffsets | bf, 0, 0
 addChar | gf, setPos, 400, 130

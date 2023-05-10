@@ -1,14 +1,14 @@
 newSprite | bg, -400, -500
-setGraphic | stages/mall/evilBG
-setScroll | 0.2, 0.2
-setScale | 0.8, 0.8, true
+    setGraphic | stages/mall/evilBG
+    setScroll | 0.2, 0.2
+    setScale | 0.8, 0.8, true
 
 newSprite | evilTree, 300, -300
-setGraphic | stages/mall/evilTree
-setScroll | 0.2, 0.2
+    setGraphic | stages/mall/evilTree
+    setScroll | 0.2, 0.2
 
 newSprite | evilSnow, -200, 700
-setGraphic | stages/mall/evilSnow
+    setGraphic | stages/mall/evilSnow
 
 addChar | gf, setPos, 400, 130
 addChar | bf, offsetPos, 320, 0

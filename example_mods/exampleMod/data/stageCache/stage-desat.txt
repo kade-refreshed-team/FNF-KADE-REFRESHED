@@ -1,0 +1,16 @@
+// These graphics only have names because of how song/stage specific preloading works.
+
+// The first parameter allows you to store the path into the preloadedAssets.
+// these can be accessed through `parent.preloadedAssets`.
+// NOTE: EXCEPTION IS CHAR PRELOADING. IT ONLY PRELOADS THE CHAR BITMAP.
+
+// The second parameter is the asset type. (pick from "char", "image", and "sound")
+
+// The last parameter is the path to get the asset.
+// For images: Image path starting from the "images" folder.
+// For sounds: Sound path starting from the "sounds" folder.
+// For characters: The name of the character json.
+
+wall | image | stages/stage-desat/stageback
+floor | image | stages/stage-desat/stagefront
+curtains | image | stages/stage-desat/stagecurtains

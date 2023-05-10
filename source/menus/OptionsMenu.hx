@@ -105,7 +105,7 @@ class OptionsMenu extends base.MusicBeatState {
         valueLabel.text = '< ${optValue.text} >';
         valueLabel.color = optValue.color;
         descTxt.y = 480 + valueLabel.height;
-        descTxt.text = options[curCatagory][curOption].desc;
+        descTxt.text = "[Clicking tabs or [TAB]] - Switch Catagories\n\n" + options[curCatagory][curOption].desc;
         descBG.scale.y = valueLabel.height + descTxt.height + 10;
         descBG.y = 480 + (valueLabel.height + descTxt.height) / 2;
     }
@@ -170,6 +170,10 @@ class OptionsMenu extends base.MusicBeatState {
             curOption = 0;
             curCatagory = selctedCata;
             selcCataOverlay.x = selcCataHover.x;
+            regenOpts();
+        } else if (FlxG.keys.justPressed.TAB) {
+            curCatagory = (curCatagory + catagories.length + 1) % catagories.length;
+            selcCataOverlay.x = FlxG.width / catagories.length * curCatagory;
             regenOpts();
         }
     }

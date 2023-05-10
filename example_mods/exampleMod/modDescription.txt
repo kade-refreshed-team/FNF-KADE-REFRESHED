@@ -1,0 +1,2 @@
+A mod used to showcase the moddability of Kade Refreshed!
+Helpful as an example for modding with this engine.

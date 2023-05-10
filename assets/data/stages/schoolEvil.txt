@@ -1,11 +1,11 @@
 setZoom | 1
 
 newSprite | bgSky, 400, 200
-setFrames | stages/school/animatedEvilSchool
-addAnim | idle, background 2, 24, loop
-setScroll | 0.8, 0.9
-setScale | 6, 6, false
-setAntialiasing | false
+    setFrames | stages/school/animatedEvilSchool
+    addAnim | idle, background 2, 24, loop
+    setScroll | 0.8, 0.9
+    setScale | 6, 6, false
+    setAntialiasing | false
 
 camOffsets | bf, -100, -100
 addChar | gf, offsetPos, 180, 300

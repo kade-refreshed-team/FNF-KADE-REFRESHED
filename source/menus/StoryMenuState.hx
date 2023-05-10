@@ -1,5 +1,6 @@
 package menus;
 
+import utils.CoolUtil;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.addons.transition.FlxTransitionableState;
@@ -47,6 +48,8 @@ class StoryMenuState extends base.MusicBeatState
 
 	var txtTracklist:FlxText;
 
+	var modButton:FlxSprite;
+
 	var grpWeekText:FlxTypedGroup<MenuItem>;
 	var grpWeekCharacters:FlxTypedGroup<MenuCharacter>;
 
@@ -57,8 +60,7 @@ class StoryMenuState extends base.MusicBeatState
 	var leftArrow:FlxSprite;
 	var rightArrow:FlxSprite;
 
-	override function create()
-	{
+	override function create() {
 		#if windows
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Story Mode Menu", null);
@@ -78,11 +80,8 @@ class StoryMenuState extends base.MusicBeatState
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
 
-		if (FlxG.sound.music != null)
-		{
-			if (!FlxG.sound.music.playing)
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
-		}
+		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
+			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 
 		persistentUpdate = persistentDraw = true;
 
@@ -113,8 +112,7 @@ class StoryMenuState extends base.MusicBeatState
 		//grpLocks = new FlxTypedGroup<FlxSprite>();
 		//add(grpLocks);
 
-		for (i in 0...weekArray.length)
-		{
+		for (i in 0...weekArray.length) {
 			var weekThing:MenuItem = new MenuItem(0, yellowBG.y + yellowBG.height + 10, i);
 			weekThing.y += ((weekThing.height + 20) * i);
 			weekThing.targetY = i;
@@ -179,13 +177,21 @@ class StoryMenuState extends base.MusicBeatState
 
 		updateText();
 
+		modButton = new FlxSprite(FlxG.width - 10, FlxG.height - 10, Paths.image("menu-side/KadeRefreshedModSwitch"));
+		modButton.scale.scale(0.3);
+		modButton.scrollFactor.set();
+		modButton.updateHitbox();
+		modButton.x -= modButton.width;
+		modButton.y -= modButton.height;
+		modButton.antialiasing = true;
+		add(modButton);
+
 		super.create();
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		// scoreText.setFormat('VCR OSD Mono', 32);
-		lerpScore = Math.floor(FlxMath.lerp(lerpScore, intendedScore, 0.5));
+		lerpScore = Math.floor(CoolUtil.adjustedLerp(lerpScore, intendedScore, 0.5));
 
 		scoreText.text = "WEEK SCORE:" + lerpScore;
 
@@ -198,29 +204,33 @@ class StoryMenuState extends base.MusicBeatState
 			lock.y = grpWeekText.members[lock.ID].y;
 		});*/
 
-		if (!movedBack)
-		{
-			if (!selectedWeek)
-			{
-				if (controls.UP_P)
-				{
-					changeWeek(-1);
+		if (!movedBack) {
+			if (!selectedWeek) {
+				modButton.colorTransform.redOffset = 0;
+				modButton.colorTransform.greenOffset = 0;
+				modButton.colorTransform.blueOffset = 0;
+				modButton.alpha = 0.7;
+				var overlapsButton = (
+					FlxG.mouse.screenX >= modButton.x && FlxG.mouse.screenX <= modButton.x + modButton.width &&
+					FlxG.mouse.screenY >= modButton.y && FlxG.mouse.screenY <= modButton.y + modButton.height
+				);
+				if (overlapsButton) {
+					modButton.colorTransform.redOffset = modButton.colorTransform.greenOffset = modButton.colorTransform.blueOffset = (FlxG.mouse.pressed) ? -50 : 40;
+					modButton.alpha = 1;
+					if (FlxG.mouse.justReleased) {
+						persistentUpdate = false;
+						openSubState(new menus.ModSelectMenu());
+					}
 				}
+
+				if (controls.UP_P)
+					changeWeek(-1);
 
 				if (controls.DOWN_P)
-				{
 					changeWeek(1);
-				}
 
-				if (controls.RIGHT)
-					rightArrow.animation.play('press')
-				else
-					rightArrow.animation.play('idle');
-
-				if (controls.LEFT)
-					leftArrow.animation.play('press');
-				else
-					leftArrow.animation.play('idle');
+				rightArrow.animation.play((controls.RIGHT) ? 'press' : 'idle');
+				leftArrow.animation.play((controls.LEFT) ? 'press' : 'idle');
 
 				if (controls.RIGHT_P)
 					changeDifficulty(1);
@@ -229,13 +239,10 @@ class StoryMenuState extends base.MusicBeatState
 			}
 
 			if (controls.ACCEPT)
-			{
 				selectWeek();
-			}
 		}
 
-		if (controls.BACK && !movedBack && !selectedWeek)
-		{
+		if (controls.BACK && !movedBack && !selectedWeek) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
 			FlxG.switchState(new MainMenuState());
@@ -251,8 +258,7 @@ class StoryMenuState extends base.MusicBeatState
 	function selectWeek()
 	{
 		//if (weekUnlocked[curWeek]) {
-			if (stopspamming == false)
-			{
+			if (stopspamming == false) {
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 
 				grpWeekText.members[curWeek].startFlashing();
@@ -290,8 +296,7 @@ class StoryMenuState extends base.MusicBeatState
 		//}
 	}
 
-	function changeDifficulty(change:Int = 0):Void
-	{
+	function changeDifficulty(change:Int = 0):Void {
 		curDifficulty = (curDifficulty + weekArray[curWeek].diffs.length + change) % weekArray[curWeek].diffs.length;
 
 		sprDifficulty.loadGraphic(Paths.image('menu-side/storymenu/difficulties/${weekArray[curWeek].diffs[curDifficulty]}'));
@@ -322,16 +327,11 @@ class StoryMenuState extends base.MusicBeatState
 		txtWeekTitle.text = weekArray[curWeek].name.toUpperCase();
 		txtWeekTitle.x = FlxG.width - (txtWeekTitle.width + 10);
 
-		var bullShit:Int = 0;
-
-		for (item in grpWeekText.members)
-		{
+		for (bullShit => item in grpWeekText.members) {
 			item.targetY = bullShit - curWeek;
-			if (item.targetY == Std.int(0) /*&& weekUnlocked[curWeek]*/)
-				item.alpha = 1;
-			else
-				item.alpha = 0.6;
-			bullShit++;
+
+			// nah we dont got if statements
+			item.alpha = 1 - 0.4 * Math.min(Math.abs(item.targetY), 1);
 		}
 
 		FlxG.sound.play(Paths.sound('scrollMenu'));
@@ -340,8 +340,7 @@ class StoryMenuState extends base.MusicBeatState
 		updateText();
 	}
 
-	function updateText()
-	{
+	function updateText() {
 		var weekCharacters:Array<String> = weekArray[curWeek].characters;
 		grpWeekCharacters.members[0].setCharacter(weekCharacters[0]);
 		grpWeekCharacters.members[1].setCharacter(weekCharacters[1]);

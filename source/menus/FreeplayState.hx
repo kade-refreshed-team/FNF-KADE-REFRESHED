@@ -21,7 +21,6 @@ class FreeplayState extends base.MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
 
-	var selector:FlxText;
 	var curSelected:Int = 0;
 	var curDifficulty:Int = 1;
 
@@ -31,6 +30,7 @@ class FreeplayState extends base.MusicBeatState
 	var combo:String = '';
 
 	var bg:FlxSprite;
+	var modButton:FlxSprite;
 	var grpSongs:FlxTypedGroup<Alphabet>;
 	var opIcon:HealthIcon;
 	var plIcon:HealthIcon;
@@ -40,8 +40,7 @@ class FreeplayState extends base.MusicBeatState
 
 	// private var iconArray:Array<HealthIcon> = [];
 
-	override function create()
-	{
+	override function create() {
 		songs = SongMetadata.createSongs(utils.CoolUtil.coolTextFile(Paths.txt('lists/freeplaySonglist')));
 
 		if (FlxG.sound.music == null || !FlxG.sound.music.playing)
@@ -105,19 +104,19 @@ class FreeplayState extends base.MusicBeatState
 		changeSelection();
 		changeDiff();
 
-		// FlxG.sound.playMusic(Paths.music('title'), 0);
-		// FlxG.sound.music.fadeIn(2, 0, 0.8);
-		selector = new FlxText();
-
-		selector.size = 40;
-		selector.text = ">";
-		// add(selector);
+		modButton = new FlxSprite(FlxG.width - 10, FlxG.height - 10, Paths.image("menu-side/KadeRefreshedModSwitch"));
+		modButton.scale.scale(0.3);
+		modButton.scrollFactor.set();
+		modButton.updateHitbox();
+		modButton.x -= modButton.width;
+		modButton.y -= modButton.height;
+		modButton.antialiasing = true;
+		add(modButton);
 
 		super.create();
 	}
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		super.update(elapsed);
 		sinceLastSelect = Math.min(sinceLastSelect + elapsed * 2, 1);
 		bg.color = FlxColor.interpolate(lastColor, songs[curSelected].color, sinceLastSelect);
@@ -137,6 +136,23 @@ class FreeplayState extends base.MusicBeatState
 			scoreText.text = '[${songs[curSelected].diffs[curDifficulty].toUpperCase()}] - High Score: $lerpScore ($combo)';
 		else
 			scoreText.text = 'PERSONAL BEST: $lerpScore\n${songs[curSelected].diffs[curDifficulty].toUpperCase()}    $combo';
+
+		modButton.colorTransform.redOffset = 0;
+		modButton.colorTransform.greenOffset = 0;
+		modButton.colorTransform.blueOffset = 0;
+		modButton.alpha = 0.7;
+		var overlapsButton = (
+			FlxG.mouse.screenX >= modButton.x && FlxG.mouse.screenX <= modButton.x + modButton.width &&
+			FlxG.mouse.screenY >= modButton.y && FlxG.mouse.screenY <= modButton.y + modButton.height
+		);
+		if (overlapsButton) {
+			modButton.colorTransform.redOffset = modButton.colorTransform.greenOffset = modButton.colorTransform.blueOffset = (FlxG.mouse.pressed) ? -50 : 40;
+			modButton.alpha = 1;
+			if (FlxG.mouse.justReleased) {
+				persistentUpdate = false;
+				openSubState(new menus.ModSelectMenu());
+			}
+		}
 
 		if (controls.UP_P)
 			changeSelection(-1);
@@ -175,14 +191,12 @@ class FreeplayState extends base.MusicBeatState
 		}
 	}
 
-	function changeDiff(change:Int = 0)
-	{
+	function changeDiff(change:Int = 0) {
 		curDifficulty = (curDifficulty + songs[curSelected].diffs.length + change) % songs[curSelected].diffs.length;
 
 		// adjusting the highscore song name to be compatible (changeDiff)
 		var songHighscore = StringTools.replace(songs[curSelected].songName, " ", "-");
-		switch (songHighscore)
-		{
+		switch (songHighscore) {
 			case 'Dad-Battle':
 				songHighscore = 'Dadbattle';
 			case 'Philly-Nice':
@@ -195,8 +209,7 @@ class FreeplayState extends base.MusicBeatState
 		#end
 	}
 
-	function changeSelection(change:Int = 0)
-	{
+	function changeSelection(change:Int = 0) {
 		#if !switch
 		// NGio.logEvent('Fresh');
 		#end
@@ -212,21 +225,7 @@ class FreeplayState extends base.MusicBeatState
 		opIcon.changeIcon(songs[curSelected].songCharacter);
 		plIcon.changeIcon(songs[curSelected].songPlayer);
 
-		// selector.y = (70 * curSelected) + 30;
-
-		// adjusting the highscore song name to be compatible (changeSelection)
-		// would read original scores if we didn't change packages
-		var songHighscore = StringTools.replace(songs[curSelected].songName, " ", "-");
-		switch (songHighscore)
-		{
-			case 'Dad-Battle':
-				songHighscore = 'Dadbattle';
-			case 'Philly-Nice':
-				songHighscore = 'Philly';
-		}
-
-		for (bullShit => item in grpSongs.members)
-		{
+		for (bullShit => item in grpSongs.members) {
 			item.targetY = bullShit - curSelected;
 
 			// nah we dont got if statements

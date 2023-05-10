@@ -24,6 +24,7 @@ class MainMenuState extends base.MusicBeatState
 {
 	var curSelected:Int = 0;
 
+	var modButton:FlxSprite;
 	var menuItems:FlxTypedGroup<FlxSprite>;
 
 	#if !switch
@@ -34,8 +35,8 @@ class MainMenuState extends base.MusicBeatState
 
 	public static var firstStart:Bool = true;
 
-	public static var lastUpdate:Int = 1; //I wanna do versions diffently.
-	public static var updateName:String = "Rebrand Update";
+	public static var lastUpdate:Int = 2; //I wanna do versions diffently.
+	public static var updateName:String = "Mod Menu Update";
 	public static var gameVer:String = "0.2.7.1";
 
 	var magenta:FlxSprite;
@@ -84,8 +85,7 @@ class MainMenuState extends base.MusicBeatState
 
 		var tex = Paths.getSparrowAtlas('menu-side/FNF_main_menu_assets');
 
-		for (i in 0...optionShit.length)
-		{
+		for (i in 0...optionShit.length) {
 			var menuItem:FlxSprite = new FlxSprite(0, FlxG.height * 1.6);
 			menuItem.frames = tex;
 			menuItem.animation.addByPrefix('idle', optionShit[i] + " basic", 24);
@@ -97,14 +97,22 @@ class MainMenuState extends base.MusicBeatState
 			menuItem.scrollFactor.set();
 			menuItem.antialiasing = true;
 			if (firstStart)
-				FlxTween.tween(menuItem,{y: 60 + (i * 160)},1 + (i * 0.25) ,{ease: FlxEase.expoInOut, onComplete: function(flxTween:FlxTween) 
-					{ 
+				FlxTween.tween(menuItem,{y: 60 + (i * 160)},1 + (i * 0.25) ,{ease: FlxEase.expoInOut, onComplete: function(flxTween:FlxTween)  { 
 						finishedFunnyMove = true; 
 						changeItem();
 					}});
 			else
 				menuItem.y = 60 + (i * 160);
 		}
+
+		modButton = new FlxSprite(FlxG.width - 10, FlxG.height - 10, Paths.image("menu-side/KadeRefreshedModSwitch"));
+		modButton.scale.scale(0.4);
+		modButton.scrollFactor.set();
+		modButton.updateHitbox();
+		modButton.x -= modButton.width;
+		modButton.y -= modButton.height;
+		modButton.antialiasing = true;
+		add(modButton);
 
 		firstStart = false;
 
@@ -126,70 +134,65 @@ class MainMenuState extends base.MusicBeatState
 
 	var selectedSomethin:Bool = false;
 
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		if (FlxG.sound.music.volume < 0.8)
-		{
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
-		}
 
 		if (!selectedSomethin) {
-			if (controls.UP_P)
-			{
+			modButton.colorTransform.redOffset = 0;
+			modButton.colorTransform.greenOffset = 0;
+			modButton.colorTransform.blueOffset = 0;
+			var overlapsButton = (
+				FlxG.mouse.screenX >= modButton.x && FlxG.mouse.screenX <= modButton.x + modButton.width &&
+				FlxG.mouse.screenY >= modButton.y && FlxG.mouse.screenY <= modButton.y + modButton.height
+			);
+			if (overlapsButton) {
+				modButton.colorTransform.redOffset = modButton.colorTransform.greenOffset = modButton.colorTransform.blueOffset = (FlxG.mouse.pressed) ? -50 : 40;
+				if (FlxG.mouse.justReleased) {
+					persistentUpdate = false;
+					openSubState(new menus.ModSelectMenu());
+				}
+			}
+
+			if (controls.UP_P) {
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(-1);
 			}
 
-			if (controls.DOWN_P)
-			{
+			if (controls.DOWN_P) {
 				FlxG.sound.play(Paths.sound('scrollMenu'));
 				changeItem(1);
 			}
 
 			if (controls.BACK)
-			{
 				FlxG.switchState(new menus.TitleState());
-			}
 
-			if (controls.ACCEPT)
-			{
-				if (optionShit[curSelected] == 'donate')
-				{
+			if (controls.ACCEPT) {
+				if (optionShit[curSelected] == 'donate') {
 					fancyOpenURL("https://www.kickstarter.com/projects/funkin/friday-night-funkin-the-full-ass-game");
-				}
-				else
-				{
+				} else {
 					selectedSomethin = true;
 					FlxG.sound.play(Paths.sound('confirmMenu'));
 					
 					if (FlxG.save.data.flashing)
 						FlxFlicker.flicker(magenta, 1.1, 0.15, false);
 
-					menuItems.forEach(function(spr:FlxSprite)
-					{
-						if (curSelected != spr.ID)
-						{
+					menuItems.forEach(function(spr:FlxSprite) {
+						if (curSelected != spr.ID) {
 							FlxTween.tween(spr, {alpha: 0}, 1.3, {
 								ease: FlxEase.quadOut,
-								onComplete: function(twn:FlxTween)
-								{
+								onComplete: function(twn:FlxTween) {
 									spr.kill();
 								}
 							});
-						}
-						else
-						{
-							if (FlxG.save.data.flashing)
-							{
+						} else {
+							if (FlxG.save.data.flashing) {
 								FlxFlicker.flicker(spr, 1, 0.06, false, false, function(flick:FlxFlicker)
 								{
 									goToState();
 								});
-							}
-							else
-							{
-								new FlxTimer().start(1, function(tmr:FlxTimer)
-								{
+							} else {
+								new FlxTimer().start(1, function(tmr:FlxTimer) {
 									goToState();
 								});
 							}
@@ -201,18 +204,15 @@ class MainMenuState extends base.MusicBeatState
 
 		super.update(elapsed);
 
-		menuItems.forEach(function(spr:FlxSprite)
-		{
+		menuItems.forEach(function(spr:FlxSprite) {
 			spr.screenCenter(X);
 		});
 	}
 	
-	function goToState()
-	{
+	function goToState() {
 		var daChoice:String = optionShit[curSelected];
 
-		switch (daChoice)
-		{
+		switch (daChoice) {
 			case 'story mode':
 				FlxG.switchState(new menus.StoryMenuState());
 				trace("Story Menu Selected");
@@ -226,23 +226,14 @@ class MainMenuState extends base.MusicBeatState
 		}
 	}
 
-	function changeItem(huh:Int = 0)
-	{
+	function changeItem(huh:Int = 0) {
 		if (finishedFunnyMove)
-		{
-			curSelected += huh;
+			curSelected = (curSelected + menuItems.length + huh) % menuItems.length;
 
-			if (curSelected >= menuItems.length)
-				curSelected = 0;
-			if (curSelected < 0)
-				curSelected = menuItems.length - 1;
-		}
-		menuItems.forEach(function(spr:FlxSprite)
-		{
+		menuItems.forEach(function(spr:FlxSprite) {
 			spr.animation.play('idle');
 
-			if (spr.ID == curSelected && finishedFunnyMove)
-			{
+			if (spr.ID == curSelected && finishedFunnyMove) {
 				spr.animation.play('selected');
 				camFollow.setPosition(spr.getGraphicMidpoint().x, spr.getGraphicMidpoint().y);
 			}

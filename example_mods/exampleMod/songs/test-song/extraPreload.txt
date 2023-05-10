@@ -1,0 +1,3 @@
+// This is just here to mention that you can add song specific assets to the preloader!
+// It works the same way as the stage specific asset preloader.
+// Check "mods/exampleMod/data/stageCache/stage-desat.txt" to see how that works.
