@@ -708,23 +708,32 @@ class PlayState extends MusicBeatState
 	}
 
 	var startTimer:FlxTimer;
+	var startedCountdown:Bool = false;
+	var skipCountdown:Bool = false;
+	var countdownReady:FlxSprite; //Would of liked to do just one sprite. but psych does it like this.
+	var countdownSet:FlxSprite;
+	var countdownGo:FlxSprite;
 	var perfectMode:Bool = false;
 
 	function startCountdown():Void {
 		inCutscene = false;
 
+		var stopCountdown = scripts_call('countdownStart') == false;
+		startedCountdown = !stopCountdown;
+		
+		if (skipCountdown) {
+			Conductor.songPosition = 0;
+			generateStaticArrows();
+			return;
+		} else if (stopCountdown)
+			return;
+
 		generateStaticArrows();
-
-		scripts_call('countdownStart');
-
-		startedCountdown = true;
 		Conductor.songPosition = Conductor.crochet * -5;
 
 		var swagCounter:Int = 0;
 
 		startTimer = new FlxTimer().start(Conductor.crochet / 1000, function(tmr:FlxTimer) {
-			scripts_call("countdownTick", [swagCounter]);
-
 			dad.dance();
 			gf.dance();
 			boyfriend.dance();
@@ -733,50 +742,51 @@ class PlayState extends MusicBeatState
 				case 0:
 					FlxG.sound.play(preloadedAssets.get("countdownSound3"), 0.6);
 				case 1:
-					var ready:FlxSprite = new FlxSprite().loadGraphic(preloadedAssets.get("countdownImage0"));
-					ready.scrollFactor.set();
-					ready.setGraphicSize(550);
-					ready.updateHitbox();
-					ready.screenCenter();
-					add(ready);
-					FlxTween.tween(ready, {y: ready.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+					countdownReady = new FlxSprite().loadGraphic(preloadedAssets.get("countdownImage0"));
+					countdownReady.scrollFactor.set();
+					countdownReady.setGraphicSize(550);
+					countdownReady.updateHitbox();
+					countdownReady.screenCenter();
+					add(countdownReady);
+					FlxTween.tween(countdownReady, {y: countdownReady.y += 100, alpha: 0}, Conductor.crochet / 1000, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween) {
-							ready.destroy();
+							countdownReady.destroy();
 						}
 					});
 					FlxG.sound.play(preloadedAssets.get("countdownSound2"), 0.6);
 				case 2:
-					var set:FlxSprite = new FlxSprite().loadGraphic(preloadedAssets.get("countdownImage1"));
-					set.scrollFactor.set();
-					set.setGraphicSize(550);
-					set.updateHitbox();
-					set.screenCenter();
-					add(set);
-					FlxTween.tween(set, {y: set.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+					countdownSet = new FlxSprite().loadGraphic(preloadedAssets.get("countdownImage1"));
+					countdownSet.scrollFactor.set();
+					countdownSet.setGraphicSize(550);
+					countdownSet.updateHitbox();
+					countdownSet.screenCenter();
+					add(countdownSet);
+					FlxTween.tween(countdownSet, {y: countdownSet.y += 100, alpha: 0}, Conductor.crochet / 1000, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween) {
-							set.destroy();
+							countdownSet.destroy();
 						}
 					});
 					FlxG.sound.play(preloadedAssets.get("countdownSound1"), 0.6);
 				case 3:
-					var go:FlxSprite = new FlxSprite().loadGraphic(preloadedAssets.get("countdownImage2"));
-					go.scrollFactor.set();
-					go.setGraphicSize(550);
-					go.updateHitbox();
-					go.screenCenter();
-					add(go);
-					FlxTween.tween(go, {y: go.y += 100, alpha: 0}, Conductor.crochet / 1000, {
+					countdownGo = new FlxSprite().loadGraphic(preloadedAssets.get("countdownImage2"));
+					countdownGo.scrollFactor.set();
+					countdownGo.setGraphicSize(550);
+					countdownGo.updateHitbox();
+					countdownGo.screenCenter();
+					add(countdownGo);
+					FlxTween.tween(countdownGo, {y: countdownGo.y += 100, alpha: 0}, Conductor.crochet / 1000, {
 						ease: FlxEase.cubeInOut,
 						onComplete: function(twn:FlxTween) {
-							go.destroy();
+							countdownGo.destroy();
 						}
 					});
 					FlxG.sound.play(preloadedAssets.get("countdownSound0"), 0.6);
 				case 4:
 			}
 
+			scripts_call("countdownTick", [swagCounter]);
 			swagCounter += 1;
 			// generateSong('fresh');
 		}, 5);
@@ -845,7 +855,7 @@ class PlayState extends MusicBeatState
 		for (i in 0...4) {
 			cpuStrums[i].y = strumLine.y;
 			playerStrums[3 - i].y = strumLine.y;
-			if (!isStoryMode) {
+			if (!isStoryMode && !skipCountdown) {
 				var babyArrow = cpuStrums[i];
 				babyArrow.y -= 10;
 				babyArrow.alpha = 0;
@@ -874,7 +884,7 @@ class PlayState extends MusicBeatState
 			var discordText2:String = 'Acc: ${HelperFunctions.truncateFloat(accuracy, 2)}% | Score: $songScore | Misses: $misses';
 			DiscordClient.changePresence(discordText, discordText2, iconRPC);
 			#end
-			if (!startTimer.finished)
+			if (startTimer != null && !startTimer.finished)
 				startTimer.active = false;
 		}
 
@@ -886,12 +896,12 @@ class PlayState extends MusicBeatState
 			if (FlxG.sound.music != null && !startingSong)
 				resyncVocals();
 
-			if (!startTimer.finished)
+			if (startTimer != null && !startTimer.finished)
 				startTimer.active = true;
 			paused = false;
 
 			#if windows
-			if (startTimer.finished) {
+			if (startTimer == null || startTimer.finished) {
 				var discordText:String = ' ${SONG.song} ($storyDifficultyText) ${Ratings.GenerateLetterRank(accuracy)}';
 				var discordText2:String = 'Acc: ${HelperFunctions.truncateFloat(accuracy, 2)}% | Score: $songScore | Misses: $misses';
 				DiscordClient.changePresence(detailsText + discordText, discordText2, iconRPC, true, songLength - Conductor.songPosition);
@@ -919,7 +929,6 @@ class PlayState extends MusicBeatState
 	}
 
 	private var paused:Bool = false;
-	var startedCountdown:Bool = false;
 	var canPause:Bool = true;
 	var nps:Int = 0;
 	var maxNPS:Int = 0;
@@ -1094,28 +1103,6 @@ class PlayState extends MusicBeatState
 			}
 
 			// Conductor.lastSongPos = FlxG.sound.music.time;
-		}
-
-		if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection) {
-			var dadMidpoint = dad.getMidpoint();
-
-			camFollow.setPosition(
-				dadMidpoint.x + 150 + camOffsets.dadCamX + dad.data.offsets.camX,
-				dadMidpoint.y - 100 + camOffsets.dadCamY + dad.data.offsets.camY
-			);
-
-			@:privateAccess if (vocals != null && vocals._transform != null)
-				vocals.volume = 1;
-			dadMidpoint.put();
-		} else {
-			var bfMidpoint = boyfriend.getMidpoint();
-
-			camFollow.setPosition(
-				bfMidpoint.x - 100 + camOffsets.bfCamX + boyfriend.data.offsets.camX,
-				bfMidpoint.y - 100 + camOffsets.bfCamY + boyfriend.data.offsets.camY
-			);
-
-			bfMidpoint.put();
 		}
 
 		if (camZooming) {
@@ -1962,7 +1949,7 @@ class PlayState extends MusicBeatState
 		DiscordClient.changePresence(detailsText + discordText, discordText2, iconRPC, true, songLength - Conductor.songPosition);
 		#end
 
-		scripts_call("stepHit");
+		scripts_call("stepHit", [curStep]);
 	}
 
 	override function beatHit()
@@ -2020,13 +2007,40 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		scripts_call("beatHit");
+		if (generatedMusic && PlayState.SONG.notes[Std.int(curStep / 16)] != null && !PlayState.SONG.notes[Std.int(curStep / 16)].mustHitSection) {
+			var dadMidpoint = dad.getMidpoint();
+
+			camFollow.setPosition(
+				dadMidpoint.x + 150 + camOffsets.dadCamX + dad.data.offsets.camX,
+				dadMidpoint.y - 100 + camOffsets.dadCamY + dad.data.offsets.camY
+			);
+
+			@:privateAccess if (vocals != null && vocals._transform != null)
+				vocals.volume = 1;
+			dadMidpoint.put();
+		} else {
+			var bfMidpoint = boyfriend.getMidpoint();
+
+			camFollow.setPosition(
+				bfMidpoint.x - 100 + camOffsets.bfCamX + boyfriend.data.offsets.camX,
+				bfMidpoint.y - 100 + camOffsets.bfCamY + boyfriend.data.offsets.camY
+			);
+
+			bfMidpoint.put();
+		}
+
+		scripts_call("beatHit", [curBeat]);
 	}
 
 	var curLight:Int = 0;
 
-	function scripts_call(name:String, ?params:Array<Dynamic>) {
-		for (s in scripts)
-			s.callFunc(name, params);
+	function scripts_call(name:String, ?params:Array<Dynamic>):Dynamic {
+		var toReturn:Dynamic = null;
+		for (s in scripts) {
+			var scriptReturn = s.callFunc(name, params);
+			toReturn = (scriptReturn != null) ? scriptReturn : toReturn;
+		}
+
+		return toReturn;
 	}
 }

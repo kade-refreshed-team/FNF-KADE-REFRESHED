@@ -5,8 +5,9 @@ import cpp.Callable;
 import llua.Lua;
 import llua.LuaL;
 import llua.State;
-import llua.Convert;
 import llua.Macro.*;
+
+using StringTools;
 
 /**
  * The class used for making lua scripts.
@@ -18,13 +19,15 @@ import llua.Macro.*;
  * Most Code Written By Srt (https://github.com/SrtHero278)
  */
 class LuaScript extends scripts.BaseScript {
+	public static var filePrefixes:Array<Array<String>> = []; //Make customizeable prefixes. why not.
 	static var currentLua:LuaScript = null;
 	static var workaroundCallable:Callable<llua.State.StatePointer->Int> = Callable.fromStaticFunction(instanceWorkAround);
 
     var luaState:State;
 	var script:Dynamic = {"parent": null};
+	var toParse:String;
 
-    public function new(path:String, ?isPsych:Bool = false) {
+    public function new(path:String, ?prefix:String = "") {
         super(path);
 
         luaState = LuaL.newstate();
@@ -85,6 +88,18 @@ class LuaScript extends scripts.BaseScript {
 
 		LuaL.getmetatable(luaState, "__scriptMetatable");
 		Lua.setmetatable(luaState, scriptTableIndex);
+
+		toParse = prefix + openfl.Assets.getText(filePath) + '\nsetmetatable(_G, {
+			__newindex = function (notUsed, name, value)
+				__scriptMetatable.__newindex(script.parent, name, value)
+			end,
+			__index = function (notUsed, name)
+				return __scriptMetatable.__index(script.parent, name)
+			end
+		})';
+
+		for (filePrefix in filePrefixes) 
+			toParse = toParse.replace(filePrefix[0], filePrefix[1]);
     }
 
     override public function execute() {
@@ -99,20 +114,7 @@ class LuaScript extends scripts.BaseScript {
 		specialVars[0] = script;
 
 		//Adding a suffix to the end of the lua file to attach a metatable to the global vars. (So you cant have to do `script.parent.this`)
-		var suffix =
-		'\nsetmetatable(_G, {
-			__call = function(notUsed, func, ...)
-				print("called call")
-				return __scriptMetatable.__call(script.parent, func, ...)
-			end,
-			__newindex = function (notUsed, name, value)
-				__scriptMetatable.__newindex(script.parent, name, value)
-		  	end,
-		  	__index = function (notUsed, name)
-			  	return __scriptMetatable.__index(script.parent, name)
-		  	end
-		})';
-        if (LuaL.dostring(luaState, openfl.Assets.getText(filePath) + suffix) != 0)
+        if (LuaL.dostring(luaState, toParse) != 0)
             lime.app.Application.current.window.alert('Lua file "$filePath" could not be ran.\n${Lua.tostring(luaState, -1)}\nThe game will not utilize this script.', "Lua Running Fail");
 
 		currentLua = lastLua;
@@ -123,11 +125,28 @@ class LuaScript extends scripts.BaseScript {
 		return 0;
 	}
 
+	override public function getVar(name:String):Dynamic {
+		var toReturn:Dynamic = null;
+
+		var lastLua:LuaScript = currentLua;
+        currentLua = this;
+
+		Lua.getglobal(luaState, name);
+        toReturn = fromLua(-1);
+		Lua.pop(luaState, 1);
+
+		currentLua = lastLua;
+
+		return toReturn;
+	}
+
     override public function setVar(name:String, newValue:Dynamic) {
 		var lastLua:LuaScript = currentLua;
         currentLua = this;
+
         toLua(newValue);
 		Lua.setglobal(luaState, name);
+		
 		currentLua = lastLua;
     }
 
@@ -205,7 +224,7 @@ class LuaScript extends scripts.BaseScript {
 		try {
            	returned = functions[funcNum](params[0], params[1], params[2]);
         } catch(e) {
-            trace("Lua Error: " + e.details());
+            trace("Lua Metatable Error: " + e.details());
         }
 		Lua.settop(state, 0);
 
@@ -269,7 +288,7 @@ class LuaScript extends scripts.BaseScript {
      * @param stackPos The position of the lua variable.
 	 * @param inTable Default to false. This var is included because functions break in tables.
      */
-    public function fromLua(stackPos:Int, ?inTable:Bool = false):Dynamic {
+    public function fromLua(stackPos:Int):Dynamic {
 		var ret:Any = null;
 
         switch(Lua.type(luaState, stackPos)) {
@@ -287,12 +306,8 @@ class LuaScript extends scripts.BaseScript {
 				//TAKEN FROM FLASHINTV'S PULL REQUEST. (https://github.com/flashintv/linc_luajit)
 
 				if (Lua.tocfunction(luaState, stackPos) != workaroundCallable) {
+					Lua.pushvalue(luaState, stackPos);
 					var ref = LuaL.ref(luaState, Lua.LUA_REGISTRYINDEX);
-
-					if (inTable) {
-						trace("FUNCTIONS MAY NOT BE USED IN TABLES AS THEY CRASH THE GAME.\nIf you're trying to add `onComplete` to a tween, (most common use for local funcs)\ndo `tween.onComplete = func` instead please.");
-						return null;
-					}
 
 					function callLocalLuaFunc(params:Array<Dynamic>) {
 						var lastLua:LuaScript = currentLua;
@@ -447,15 +462,15 @@ class LuaScript extends scripts.BaseScript {
 			var v = [];
 			loopTable(luaState, i, {
 				var index = Std.int(Lua.tonumber(luaState, -2)) - 1;
-				v[index] = fromLua(-1, true);
+				v[index] = fromLua(-1);
 			});
 			cast v;
 		} else {
 			var v:haxe.DynamicAccess<Any> = {};
 			loopTable(luaState, i, {
 				switch Lua.type(luaState, -2) {
-					case t if(t == Lua.LUA_TSTRING): v.set(Lua.tostring(luaState, -2), fromLua(-1, true));
-					case t if(t == Lua.LUA_TNUMBER): v.set(Std.string(Lua.tonumber(luaState, -2)), fromLua(-1, true));
+					case t if(t == Lua.LUA_TSTRING): v.set(Lua.tostring(luaState, -2), fromLua(-1));
+					case t if(t == Lua.LUA_TNUMBER): v.set(Std.string(Lua.tonumber(luaState, -2)), fromLua(-1));
 				}
 			});
 			cast v;

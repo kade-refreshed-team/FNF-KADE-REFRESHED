@@ -1,5 +1,6 @@
 package scripts;
 
+import openfl.display.BlendMode;
 import openfl.Assets;
 import haxe.io.Path;
 
@@ -111,8 +112,27 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
             "FlxText" => flixel.text.FlxText,
             "FlxTrail" => flixel.addons.effects.FlxTrail,
             "FlxBackdrop" => flixel.addons.display.FlxBackdrop,
+
+            "BlendMode" => {
+                ADD: BlendMode.ADD,
+                ALPHA: BlendMode.ALPHA,
+                DARKEN: BlendMode.DARKEN,
+                DIFFERENCE: BlendMode.DIFFERENCE,
+                ERASE: BlendMode.ERASE,
+                HARDLIGHT: BlendMode.HARDLIGHT,
+                INVERT: BlendMode.INVERT,
+                LAYER: BlendMode.LAYER,
+                LIGHTEN: BlendMode.LIGHTEN,
+                MULTIPLY: BlendMode.MULTIPLY,
+                NORMAL: BlendMode.NORMAL,
+                OVERLAY: BlendMode.OVERLAY,
+                SCREEN: BlendMode.SCREEN,
+                SHADER: BlendMode.SHADER,
+                SUBTRACT: BlendMode.SUBTRACT
+            },
     
             "Paths" => utils.Paths,
+            "CoolUtil" => utils.CoolUtil,
             "Conductor" => base.Conductor,
             "PlayState" => funkin.PlayState,
             "Character" => funkin.Character,
@@ -121,12 +141,12 @@ class BaseScript implements flixel.util.FlxDestroyUtil.IFlxDestroyable {
             "Assets" => Assets
         ];
     }
-
     /**
     * All the types of scripts it can create.
     */
     public static var scriptTypes:Array<ScriptType> = [
-        {exts: ["lua"], scriptClass: scripts.LuaScript, extraParams: [false]},
+        {exts: ["lua"], scriptClass: scripts.LuaScript, extraParams: [""]},
+        {exts: ["plua"], scriptClass: scripts.LuaScript, extraParams: ["-- ADD PSYCH PREFIX --"]},
         {exts: ["hx", "hscript", "hxs"], scriptClass: scripts.HaxeScript, extraParams: []}
     ];
 

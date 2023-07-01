@@ -22,7 +22,7 @@ class AnimationDebug extends FlxState
 	var char:Character;
 	var shadow:Character;
 	var textAnim:FlxText;
-	var dumbTexts:FlxTypedGroup<FlxText>;
+	var offsetList:FlxText;
 	var animList:Array<String> = [];
 	var curAnim:Int = 0;
 	var daAnim:String = 'spooky';
@@ -38,9 +38,8 @@ class AnimationDebug extends FlxState
 	{
 		FlxG.sound.music.stop();
 
-		var gridBG:FlxSprite = FlxGridOverlay.create(10, 10);
-		gridBG.scrollFactor.set(0, 0);
-		gridBG.color = 0x2e2c2c;
+		var gridBG:FlxSprite = FlxGridOverlay.create(25, 25, FlxG.width, FlxG.height, true, 0xFF404344, 0xFF303334);
+		gridBG.scrollFactor.set();
 		add(gridBG);
 		
 		var bfCharData:funkin.Character.CharJson = haxe.Json.parse(openfl.Assets.getText('assets/data/characters/bf.json'));
@@ -66,8 +65,9 @@ class AnimationDebug extends FlxState
 		char.debugMode = true;
 		add(char);
 
-		dumbTexts = new FlxTypedGroup<FlxText>();
-		add(dumbTexts);
+		offsetList = new FlxText(5, 5, 0, "", 15);
+		offsetList.scrollFactor.set();
+		add(offsetList);
 
 		textAnim = new FlxText(300, 16);
 		textAnim.size = 26;
@@ -85,35 +85,18 @@ class AnimationDebug extends FlxState
 		super.create();
 	}
 
-	function genBoyOffsets(pushList:Bool = true):Void
-	{
-		var daLoop:Int = 0;
+	function genBoyOffsets(pushList:Bool = true):Void {
+		offsetList.text = "";
 
-		for (anim => offsets in char.animOffsets)
-		{
-			var text:FlxText = new FlxText(10, 20 + (18 * daLoop), 0, anim + ": " + offsets, 15);
-			text.scrollFactor.set();
-			text.color = FlxColor.BLUE;
-			dumbTexts.add(text);
+		for (anim => offsets in char.animOffsets){
+			offsetList.text += '$anim: $offsets\n';
 
 			if (pushList)
 				animList.push(anim);
-
-			daLoop++;
 		}
 	}
 
-	function updateTexts():Void
-	{
-		dumbTexts.forEach(function(text:FlxText)
-		{
-			text.kill();
-			dumbTexts.remove(text, true);
-		});
-	}
-
-	override function update(elapsed:Float)
-	{
+	override function update(elapsed:Float) {
 		textAnim.text = char.animation.curAnim.name;
 
 		if (FlxG.keys.justPressed.E)
@@ -124,8 +107,7 @@ class AnimationDebug extends FlxState
 		if (FlxG.keys.justPressed.ESCAPE)
 			openSubState(new funkin.PreloadingSubState());
 
-		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L)
-		{
+		if (FlxG.keys.pressed.I || FlxG.keys.pressed.J || FlxG.keys.pressed.K || FlxG.keys.pressed.L) {
 			if (FlxG.keys.pressed.I)
 				camFollow.velocity.y = -90;
 			else if (FlxG.keys.pressed.K)
@@ -145,53 +127,36 @@ class AnimationDebug extends FlxState
 			camFollow.velocity.set();
 		}
 
-		if (FlxG.keys.justPressed.W)
-		{
-			curAnim -= 1;
-		}
+		if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.S)
+			curAnim += (FlxG.keys.justPressed.W) ? -1 : 1;
 
-		if (FlxG.keys.justPressed.S)
-		{
-			curAnim += 1;
-		}
+		curAnim = (curAnim + animList.length) % animList.length;
 
-		if (curAnim < 0)
-			curAnim = animList.length - 1;
-
-		if (curAnim >= animList.length)
-			curAnim = 0;
-
-		if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE)
-		{
+		if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.W || FlxG.keys.justPressed.SPACE) {
 			char.playAnim(animList[curAnim]);
 
-			updateTexts();
 			genBoyOffsets(false);
 		}
 
-		var upP = FlxG.keys.anyJustPressed([UP]);
-		var rightP = FlxG.keys.anyJustPressed([RIGHT]);
-		var downP = FlxG.keys.anyJustPressed([DOWN]);
-		var leftP = FlxG.keys.anyJustPressed([LEFT]);
+		var upP = FlxG.keys.justPressed.UP;
+		var rightP = FlxG.keys.justPressed.RIGHT;
+		var downP = FlxG.keys.justPressed.DOWN;
+		var leftP = FlxG.keys.justPressed.LEFT;
 
 		var holdShift = FlxG.keys.pressed.SHIFT;
 		var multiplier = 1;
 		if (holdShift)
 			multiplier = 10;
 
-		if (upP || rightP || downP || leftP)
-		{
-			updateTexts();
-			if (upP)
-				char.animOffsets.get(animList[curAnim])[1] += 1 * multiplier;
-			if (downP)
-				char.animOffsets.get(animList[curAnim])[1] -= 1 * multiplier;
-			if (leftP)
-				char.animOffsets.get(animList[curAnim])[0] += 1 * multiplier;
-			if (rightP)
-				char.animOffsets.get(animList[curAnim])[0] -= 1 * multiplier;
+		if (upP || rightP || downP || leftP) {
+			for (i => pressed in [upP, downP, leftP, rightP]) {
+				if (pressed) {
+					var mult = 1 - 2 * (i % 2);
+					var index = Math.floor(i * 0.5);
+					char.animOffsets[animList[curAnim]][index] += 1 * multiplier * mult;
+				}
+			}
 
-			updateTexts();
 			genBoyOffsets(false);
 			char.playAnim(animList[curAnim]);
 		}

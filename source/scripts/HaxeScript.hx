@@ -47,7 +47,7 @@ class HaxeScript extends scripts.BaseScript {
         interp.execute(expr);
     }
 
-    override public function getVar(name:String) {
+    override public function getVar(name:String):Dynamic {
         if (interp == null) return null;
         return interp.variables.get(name);
     }
@@ -57,7 +57,7 @@ class HaxeScript extends scripts.BaseScript {
             interp.variables.set(name, newValue);
     }
 
-    override public function callFunc(name:String, ?params:Array<Dynamic>) {
+    override public function callFunc(name:String, ?params:Array<Dynamic>):Dynamic {
         if (interp == null || parser == null) return null;
 
         var functionVar = interp.variables.get(name);

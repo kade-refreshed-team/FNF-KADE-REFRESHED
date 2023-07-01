@@ -35,8 +35,8 @@ class MainMenuState extends base.MusicBeatState
 
 	public static var firstStart:Bool = true;
 
-	public static var lastUpdate:Int = 2; //I wanna do versions diffently.
-	public static var updateName:String = "Mod Menu Update";
+	public static var lastUpdate:Int = 3; //I wanna do versions diffently.
+	public static var updateName:String = "Tweaked Scripting Update (WIP)";
 	public static var gameVer:String = "0.2.7.1";
 
 	var magenta:FlxSprite;

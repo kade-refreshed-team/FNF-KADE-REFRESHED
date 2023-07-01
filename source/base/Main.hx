@@ -64,6 +64,7 @@ class Main extends Sprite
 	private function setupGame():Void
 	{
 		scripts.HaxeScript.initParser(); // Init the parser for hscript before creating the game because TitleState.
+		scripts.LuaScript.filePrefixes.push(["-- ADD PSYCH PREFIX --", openfl.Assets.getText("assets/data/PSYCH_HANDLER.lua")]);
 
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;

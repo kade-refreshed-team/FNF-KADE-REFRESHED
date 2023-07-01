@@ -1,7 +1,6 @@
 package funkin;
 
 import openfl.display.BitmapData;
-import flixel.addons.effects.FlxSkewedSprite;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
