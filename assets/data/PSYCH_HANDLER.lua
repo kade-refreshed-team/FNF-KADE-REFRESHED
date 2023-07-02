@@ -1941,6 +1941,17 @@ function countdownStart()
     return true
 end
 
+function positionCamera(onOpponent) -- This is not in the table bc of how it works.
+    if rawget(_G, "onMoveCamera") ~= nil then
+        local target = "boyfriend"
+        if onOpponent then
+            target = "dad"
+        end
+
+        rawget(_G, "onMoveCamera")(target)
+    end
+end
+
 function enemySing(note) -- This is not in the table bc of how it works.
     if rawget(_G, "opponentNoteHit") ~= nil then
         rawget(_G, "opponentNoteHit")(parent.notes.members.indexOf(note), note.noteData, note.noteType, note.isSustainNote)

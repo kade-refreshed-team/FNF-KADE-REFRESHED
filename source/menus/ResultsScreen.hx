@@ -58,7 +58,7 @@ class ResultsScreen extends FlxSubState
         background.scrollFactor.set();
         add(background);
 
-        music = new FlxSound().loadEmbedded(Paths.music('breakfast'), true, true);
+        music = new FlxSound().loadEmbedded(PlayState.instance.preloadedAssets.get("inst"), true, true);
 		music.volume = 0;
 		music.play(false, FlxG.random.int(0, Std.int(music.length / 2)));
 
