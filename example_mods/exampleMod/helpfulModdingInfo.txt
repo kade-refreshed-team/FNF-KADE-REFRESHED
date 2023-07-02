@@ -1,6 +1,6 @@
 if you want the base songs & weeks to go with your weeks & songs,
-put your data files in [MOD-FOLDER]/_append/data!
-otherwise put it in [MOD-FOLDER]/data.
+put "freeplaySonglist" and "weekList in [MOD-FOLDER]/_append/data!
+otherwise put them in [MOD-FOLDER]/data.
 
 
 FOR LUA SCRIPTING:
@@ -8,10 +8,6 @@ you import non included classes through `script:import("CLASS-PATH", "OPTIONAL-C
 you can access the script's "parent" through `script.parent` or just `parent`.
 
 IF YOU ARE CALLING A HAXE FUNCTION THROUGH LUA, YOU HAVE TO:
-  1 (RECOMMENDED) - Call it with ":" (Ex: object:func(params))
-  2 - Include the object as a parameter. (Ex: object.func(object, params))
+  1 (RECOMMENDED) - Call it with ":" (Ex: object:func(param1, param2))
+  2 - Include the object as a parameter. (Ex: object.func(object, param1, param2))
 im currently working on making it so you dont have to do those work arounds, so please stay patient.
-
-AND FUNCTIONS ARE CURRENTLY NOT ALLOWED IN TABLES.
-if you are trying to set a tweens complete function,
-please do `tween.onComplete = func` instead.

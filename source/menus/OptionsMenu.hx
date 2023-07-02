@@ -300,7 +300,7 @@ class OptionsMenu extends base.MusicBeatState {
                 makeBoolOption("CPU Strum Glow", "Makes the opponent's arrows glow when they're hit.", "cpuStrums"),
                 {
                     name: "Watermarks",
-                    desc: "Toggles visiblity of watermarks that say that this is Kade Freshed.",
+                    desc: "Toggles visiblity of watermarks that say that this is Kade Refreshed.",
                     onLeft: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
                     onRight: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},
                     onEnter: () -> {base.Main.watermarks = !base.Main.watermarks; FlxG.save.data.watermark = base.Main.watermarks;},

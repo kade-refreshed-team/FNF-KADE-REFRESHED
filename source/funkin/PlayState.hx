@@ -107,11 +107,17 @@ class PlayState extends MusicBeatState
 
 	private var gfSpeed:Int = 1;
 
+	public var healthBarBG(get, never):FlxSprite;
+
 	public var healthBar:GraphicBar;
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
 	var scoreTxt:FlxText;
 	public var health:Float = 1;
+
+	public var timeBarBG(get, never):FlxSprite;
+	public var timeBar(get, never):FlxSprite;
+	public var timeTxt(get, never):FlxText;
 
 	public var songPosBar:GraphicBar;
 	var songName:FlxText;
@@ -302,6 +308,7 @@ class PlayState extends MusicBeatState
 				scripts.push(BaseScript.makeScript('assets/$fileWithoutExt'));
 			}
 		}
+		
 		#if sys
 		var exts = [];
 		for (type in BaseScript.scriptTypes)
@@ -353,13 +360,11 @@ class PlayState extends MusicBeatState
 
 		Conductor.songPosition = -5000;
 
-		strumLine = new FlxSprite(0, 50).makeGraphic(FlxG.width, 10);
-		strumLine.scrollFactor.set();
-
-		if (PlayStateChangeables.useDownscroll)
-			strumLine.y = FlxG.height - 165;
+		strumLine = new FlxSprite(0, (PlayStateChangeables.useDownscroll) ? 50 : FlxG.height - 165);
+		strumLine.makeGraphic(FlxG.width, 10);
 
 		strumLineNotes = preloadedAssets.get("strumLineNotes");
+		strumLineNotes.visible = false;
 		add(strumLineNotes);
 
 		playerStrums = preloadedAssets.get("playerStrums");
@@ -852,6 +857,7 @@ class PlayState extends MusicBeatState
 
 	//Not really "generateStaticArrows" anymore. It's more used to reposition the strum y and tween it.
 	private function generateStaticArrows():Void {
+		strumLineNotes.visible = true;
 		for (i in 0...4) {
 			cpuStrums[i].y = strumLine.y;
 			playerStrums[3 - i].y = strumLine.y;
@@ -888,6 +894,7 @@ class PlayState extends MusicBeatState
 				startTimer.active = false;
 		}
 
+		persistentUpdate = false;
 		super.openSubState(SubState);
 	}
 
@@ -998,8 +1005,6 @@ class PlayState extends MusicBeatState
 			scoreTxt.text = Ratings.CalculateRanking(songScore, songScoreDef, nps, maxNPS, accuracy);
 
 		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause) {
-			persistentUpdate = false;
-			persistentDraw = true;
 			paused = true;
 
 			// 1 / 1000 chance for Gitaroo Man easter egg
@@ -1143,8 +1148,6 @@ class PlayState extends MusicBeatState
 		if (health <= 0 || (FlxG.save.data.resetButton && controls.RESET)) {
 			boyfriend.stunned = true;
 
-			persistentUpdate = false;
-			persistentDraw = true;
 			paused = true;
 
 			vocals.stop();
@@ -1179,9 +1182,7 @@ class PlayState extends MusicBeatState
 				//Big if statements lol
 				var opponentCanHit = daNote.strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 1.5) && daNote.strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5);
 				var wasHit = (daNote.wasGoodHit || (daNote.prevNote.wasGoodHit && !daNote.canBeHit)) || (daNote.hitByBot || (daNote.prevNote.hitByBot && !opponentCanHit));
-				var canClip = (daNote.isSustainNote
-					&& daNote.y + daNote.offset.y <= strumLine.y + Note.swagWidth / 2
-					&& wasHit);
+				var canClip = (daNote.isSustainNote && daNote.y + daNote.offset.y <= strum.y + Note.swagWidth / 2 && wasHit);
 
 				if (PlayStateChangeables.useDownscroll) {
 					daNote.y = (strum.y + distance);
@@ -1712,8 +1713,7 @@ class PlayState extends MusicBeatState
 		if (PlayStateChangeables.botPlay) {
 			notes.forEachAlive(function(daNote:Note) {
 				// Force good note hit regardless if it's too late to hit it or not as a fail safe
-				if (!(PlayStateChangeables.useDownscroll && daNote.y > strumLine.y || !PlayStateChangeables.useDownscroll && daNote.y < strumLine.y)
-					|| !(daNote.canBeHit && daNote.mustPress || daNote.tooLate && daNote.mustPress)) return;
+				if (!(daNote.strumTime - Conductor.songPosition < 0) || !(daNote.canBeHit && daNote.mustPress || daNote.tooLate && daNote.mustPress)) return;
 
 				if (loadRep) {
 					// trace('ReplayNote ' + tmpRepNote.strumtime + ' | ' + tmpRepNote.direction);
@@ -1755,8 +1755,6 @@ class PlayState extends MusicBeatState
 	public function focusOut() {
 		if (paused)
 			return;
-		persistentUpdate = false;
-		persistentDraw = true;
 		paused = true;
 
 		if (FlxG.sound.music != null) {
@@ -2032,8 +2030,6 @@ class PlayState extends MusicBeatState
 		scripts_call("beatHit", [curBeat]);
 	}
 
-	var curLight:Int = 0;
-
 	function scripts_call(name:String, ?params:Array<Dynamic>):Dynamic {
 		var toReturn:Dynamic = null;
 		for (s in scripts) {
@@ -2043,4 +2039,15 @@ class PlayState extends MusicBeatState
 
 		return toReturn;
 	}
+
+	function get_healthBarBG()
+		return healthBar;
+
+	function get_timeBarBG()
+		return songPosBar;
+	function get_timeBar()
+		return songPosBar;
+
+	function get_timeTxt()
+		return songName;
 }
